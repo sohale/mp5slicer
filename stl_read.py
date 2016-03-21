@@ -2,11 +2,7 @@ from stl import mesh
 import numpy as np
 
 
-test_file = 'testcube_05mm.stl'
-test_file = 'StanfordBunny_jmil_HIGH_RES_Smoothed.stl'
 
-
-stl_mesh = mesh.Mesh.from_file(test_file)
 
 def remove_badtriangles(triangles, normals):
 	# Remove ill-defined triangles (and corresponding normals)
@@ -41,37 +37,64 @@ def sort_by_z(triangles, normals):
 
 def remove_duplicates(triangles, normals):
 	# Remove any duplicate faces and their normals.
-	
-	# no two triangles can have the same centroid.	
+
+	# no two triangles can have the same centroid.
 	centroids = triangles.sum(axis=1)
-        
+
 	# sort the list of centroids
 	indices = np.lexsort(centroids.T)
-        
+
 	# find any duplicates (this returns the indices where the ANY of the points are different)
 	diff = np.any(centroids[indices[1:]] != centroids[indices[:-1]], axis=1)
 
 	mask = np.sort(indices[np.concatenate(([True], diff))])
-	# return the unique triangles. The True will return at least the input list, 
+	# return the unique triangles. The True will return at least the input list,
 	# the sort returns the triangles in the order they were entered.
-	
+
 	return triangles[mask], normals[mask]
 
+def remove_duplicates_from_mesh(mesh):
+	triangles = mesh.vectors
+	normals = mesh.normals
+	# Remove any duplicate faces and their normals.
+
+	# no two triangles can have the same centroid.
+	centroids = triangles.sum(axis=1)
+
+	# sort the list of centroids
+	indices = np.lexsort(centroids.T)
+
+	# find any duplicates (this returns the indices where the ANY of the points are different)
+	diff = np.any(centroids[indices[1:]] != centroids[indices[:-1]], axis=1)
+
+	mask = np.sort(indices[np.concatenate(([True], diff))])
+	# return the unique triangles. The True will return at least the input list,
+	# the sort returns the triangles in the order they were entered.
+
+	mesh.triangles = triangles[mask]
+	mesh.normals = normals[mask]
+
+	return mesh
+
+if __name__ == '__main__':
+	test_file = 'testcube_05mm.stl'
+	test_file = 'StanfordBunny_jmil_HIGH_RES_Smoothed.stl'
 
 
-import time
-start_time = time.time()
-remove_badtriangles(stl_mesh.vectors, stl_mesh.normals)
+	stl_mesh = mesh.Mesh.from_file(test_file)
+	import time
+	start_time = time.time()
+	remove_badtriangles(stl_mesh.vectors, stl_mesh.normals)
 
-print("--- %s seconds ---" % (time.time() - start_time))
+	print("--- %s seconds ---" % (time.time() - start_time))
 
-start_time = time.time()
-sort_by_z(stl_mesh.vectors, stl_mesh.normals)
+	start_time = time.time()
+	sort_by_z(stl_mesh.vectors, stl_mesh.normals)
 
-print("--- %s seconds ---" % (time.time() - start_time))
+	print("--- %s seconds ---" % (time.time() - start_time))
 
-start_time = time.time()
-remove_duplicates(stl_mesh.vectors, stl_mesh.normals)
+	start_time = time.time()
+	remove_duplicates(stl_mesh.vectors, stl_mesh.normals)
 
-print("--- %s seconds ---" % (time.time() - start_time))
+	print("--- %s seconds ---" % (time.time() - start_time))
 
