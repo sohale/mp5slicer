@@ -127,4 +127,4 @@ if __name__ == '__main__':
     start = datetime.datetime.now()
     slice_layers = slicer('FLATFOOT_StanfordBunny_jmil_HIGH_RES_Smoothed.stl', slice_height_from=0, slice_height_to=100, slice_step=1)
     print(datetime.datetime.now() - start)
-    # visualization_3d(slice_layers)
+    visualization_2d(slice_layers)
