@@ -1,14 +1,11 @@
-def dot_building_direction(mesh, building_direction):
+def dot_building_direction(mesh):
+
+    # this function assuming the building_direction = [[0],[0],[1]] since it save a lot of time
+    # the dot product 
     from numpy import linalg as LA
-    # building_direction is a 3 by 1 numpy array 
-    result = []
-    for normal in mesh.normals:
-        cos_angle = (np.dot(normal, np.array([[0],[0],[1]])))/LA.norm(normal)
-        if np.isclose(cos_angle, 1):
-            result.append(0)
-        else:
-            result.append(cos_angle[0])
-    return np.array(result)
+    norms = np.apply_along_axis(LA.norm, 1, mesh.normals)
+    dot_product = mesh.normals[:,2] # faster than np.apply_along_axis(np.dot, 1, normals, [[0],[0],[1]])
+    return dot_product/norms
 
 def revert_sort_by_z(mesh):
     # z : are a list of z values from trangles
@@ -19,20 +16,61 @@ def revert_sort_by_z(mesh):
     min_z_order = min_z_order[::-1]
     return min_z_order
 
-def ray_triangle_intersection(ray_near, ray_dir, triangle):
+def ray_triangle_intersection(ray_near, triangle):
     """
     Taken from Printrun
     Möller–Trumbore intersection algorithm in pure python
     Based on http://en.wikipedia.org/wiki/M%C3%B6ller%E2%80%93Trumbore_intersection_algorithm
     
-    ray_dir is ray direction.
+    ray_dir is set as [[0],[0],[-1]] for optimizing running speed
     ray_near should be the origin of this ray.
     """
     
     v1 = triangle[0]
     v2 = triangle[1]
     v3 = triangle[2]
-    ray_dir = ray_dir.T[0] # column vector to row vector
+    ray_dir = np.asarray([0,0,-1]) # column vector to row vector
+    
+    eps = 0.000001
+    edge1 = v2 - v1
+    edge2 = v3 - v1
+    pvec = [edge2[1],-edge2[0],0] # pvec = np.cross(ray_dir, edge2)
+    det = edge1[0]*pvec[0]+ edge1[1]*pvec[1] # det = edge1.dot(pvec)
+    if abs(det) < eps:
+        return False, None
+    inv_det = 1. / det
+    tvec = ray_near - v1
+    u = (tvec[0]*pvec[0]+tvec[1]*pvec[1]) * inv_det # u = tvec.dot(pvec) * inv_det
+    if u < 0. or u > 1.:
+        return False, None
+    qvec = np.cross(tvec, edge1)
+    v = ray_dir.dot(qvec) * inv_det
+    if v < 0. or u + v > 1.:
+        return False, None
+    t = edge2.dot(qvec) * inv_det
+    if t < eps:
+        return False, None
+
+    # point = ray_near + ray_dir*t
+    # z_value = point[2]
+    z_value = ray_near[2] - t
+
+    return True, z_value
+
+def ray_triangle_intersection_old(ray_near, triangle):
+    """
+    Taken from Printrun
+    Möller–Trumbore intersection algorithm in pure python
+    Based on http://en.wikipedia.org/wiki/M%C3%B6ller%E2%80%93Trumbore_intersection_algorithm
+    
+    ray_dir is set as [[0],[0],[-1]] for optimizing running speed
+    ray_near should be the origin of this ray.
+    """
+    
+    v1 = triangle[0]
+    v2 = triangle[1]
+    v3 = triangle[2]
+    ray_dir = np.asarray([0,0,-1]) # column vector to row vector
     
     eps = 0.000001
     edge1 = v2 - v1
@@ -50,7 +88,6 @@ def ray_triangle_intersection(ray_near, ray_dir, triangle):
     v = ray_dir.dot(qvec) * inv_det
     if v < 0. or u + v > 1.:
         return False, None
-
     t = edge2.dot(qvec) * inv_det
     if t < eps:
         return False, None
@@ -79,12 +116,12 @@ def min_y(mesh):
 def max_y(mesh):
     return np.max(mesh.y, axis=1)
 
-def boolist_for_support_requiring_facet(mesh, building_direction, cos_angle_threshold):
+def boolist_for_support_requiring_facet(mesh, cos_angle_threshold):
     # threshold is cos(theta) value
     # if building_direction is vector [[0], [0], [1]]
     # if threshold is cos(-135 degree) = sqrt(2)/2 = -0.70710678118, means if angle is between 135 and 225 degree then these facet requres support
 
-    normal_cos_theta = dot_building_direction(mesh, building_direction)
+    normal_cos_theta = dot_building_direction(mesh)
     boolist_support_required = (normal_cos_theta<cos_angle_threshold) # boolean list indicating which triangle requires support 
 
     return boolist_support_required # returns a boolen list indicated which triangles require support
@@ -133,7 +170,7 @@ def boolist_for_selfsupporting_facet(mesh, boolist_support_required):
             triangle = mesh.vectors[tri_index]
             if boolist_triangle_selfsupport[tri_index] is True: # this facet already needs for self-support
                 break
-            res = ray_triangle_intersection(center, ray_direction_vector, triangle)
+            res = ray_triangle_intersection(center, triangle)
             if res[0]:
                 boolist_triangle_selfsupport[tri_index] = True
                 z_triangle_selfsupport[tri_index] = res[1]
@@ -179,7 +216,7 @@ def areas_and_volumn_concerning_support(mesh):
 
     # make sure the mesh is updated if you rotate the mesh
 
-    boolist_support_required = boolist_for_support_requiring_facet(mesh, building_direction, cos_angle_threshold)
+    boolist_support_required = boolist_for_support_requiring_facet(mesh, cos_angle_threshold)
     boolist_triangle_selfsupport, z_triangle_selfsupport = boolist_for_selfsupporting_facet(mesh, boolist_support_required)
 
     # area for support
@@ -218,12 +255,12 @@ if __name__ == '__main__':
     from stl import mesh
     import numpy as np
     import datetime
-    stl_filepath = 'raytracingtest.stl'
+    stl_filepath = 'FLATFOOT_StanfordBunny_jmil_HIGH_RES_Smoothed.stl'
 
     building_direction = np.array([[0],[0],[1]])
     cos_angle_threshold = -0.70710678118 
 
-    random_rotation = [i*np.pi/10 for i in range(10)]
+    random_rotation = [i*np.pi/10 for i in range(1)]
 
     for rotation in random_rotation:
         print('-----------------')
@@ -244,11 +281,6 @@ if __name__ == '__main__':
 
         print('--------time----------')
         print(datetime.datetime.now()-start_time)
-
-        boolist_support_required = boolist_for_support_requiring_facet(your_mesh, building_direction, cos_angle_threshold)
-        boolist_triangle_selfsupport, z_triangle_selfsupport = boolist_for_selfsupporting_facet(your_mesh, boolist_support_required)
-        visulisation_selfsupport_facet(your_mesh, boolist_triangle_selfsupport, boolist_support_required)
-
 
 # uncomment the following and comment the above code up to "if __name__ == '__main__'" for a visulisation example
 # if __name__ == '__main__':
