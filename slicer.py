@@ -52,33 +52,20 @@ def slicer(stl_filepath, slice_height_from=0, slice_height_to=100, slice_step=1)
     from stl import mesh
 
     your_mesh = mesh.Mesh.from_file(stl_filepath)
+
+    return slicer_from_mesh(your_mesh, 
+                            slice_height_from=slice_height_from, 
+                            slice_height_to=slice_height_to, 
+                            slice_step=slice_step)
+
+def slicer_from_mesh(mesh, slice_height_from=0, slice_height_to=100, slice_step=1):
+
     normal = np.array([[0.],[0.],[1.]])
 
     sliceplanes_height = np.arange(slice_height_from, slice_height_to, slice_step)
     slice_layers = [[] for i in range(len(sliceplanes_height))]
 
-    for triangle in your_mesh.vectors:
-        tri_min, tri_max = min_max_z(triangle)
-        intersect_planes_heights = sliceplanes_height[(tri_min<sliceplanes_height)&(sliceplanes_height<tri_max)]
-        plane_index = np.where((tri_min<sliceplanes_height)&(sliceplanes_height<tri_max))[0]
-
-        planes = [Plane(normal=normal, z=height) for height in intersect_planes_heights]
-        for index, plane in zip(plane_index, planes):
-            line = plane.intersection_with_triangle(triangle)
-            slice_layers[index].append([list(i) for i in line])
-
-    return slice_layers
-
-def slicer_from_mesh(_mesh, slice_height_from=0, slice_height_to=100, slice_step=1):
-    from stl import mesh
-
-    your_mesh = _mesh
-    normal = np.array([[0.],[0.],[1.]])
-
-    sliceplanes_height = np.arange(slice_height_from, slice_height_to, slice_step)
-    slice_layers = [[] for i in range(len(sliceplanes_height))]
-
-    for triangle in your_mesh.vectors:
+    for triangle in mesh.vectors:
         tri_min, tri_max = min_max_z(triangle)
         intersect_planes_heights = sliceplanes_height[(tri_min<sliceplanes_height)&(sliceplanes_height<tri_max)]
         plane_index = np.where((tri_min<sliceplanes_height)&(sliceplanes_height<tri_max))[0]
@@ -111,6 +98,7 @@ def visualization_2d(slice_layers):
     number_layers = len(slice_layers)
     number_row = int(np.ceil(np.sqrt(number_layers)))
     fig, axarr = plt.subplots(number_row, number_row, sharey=True)
+
 
     count = 0
     for each_layer in slice_layers:

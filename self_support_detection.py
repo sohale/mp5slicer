@@ -57,45 +57,44 @@ def ray_triangle_intersection(ray_near, triangle):
 
     return True, z_value
 
-def ray_triangle_intersection_old(ray_near, triangle):
-    """
-    Taken from Printrun
-    Möller–Trumbore intersection algorithm in pure python
-    Based on http://en.wikipedia.org/wiki/M%C3%B6ller%E2%80%93Trumbore_intersection_algorithm
+# def ray_triangle_intersection_old(ray_near, ray_dir, triangle):
+#     """
+#     Taken from Printrun
+#     Möller–Trumbore intersection algorithm in pure python
+#     Based on http://en.wikipedia.org/wiki/M%C3%B6ller%E2%80%93Trumbore_intersection_algorithm
     
-    ray_dir is set as [[0],[0],[-1]] for optimizing running speed
-    ray_near should be the origin of this ray.
-    """
+#     ray_near should be the origin of this ray.
+#     """
     
-    v1 = triangle[0]
-    v2 = triangle[1]
-    v3 = triangle[2]
-    ray_dir = np.asarray([0,0,-1]) # column vector to row vector
+#     v1 = triangle[0]
+#     v2 = triangle[1]
+#     v3 = triangle[2]
+#     ray_dir = np.asarray([0,0,-1]) # column vector to row vector
     
-    eps = 0.000001
-    edge1 = v2 - v1
-    edge2 = v3 - v1
-    pvec = np.cross(ray_dir, edge2)
-    det = edge1.dot(pvec)
-    if abs(det) < eps:
-        return False, None
-    inv_det = 1. / det
-    tvec = ray_near - v1
-    u = tvec.dot(pvec) * inv_det
-    if u < 0. or u > 1.:
-        return False, None
-    qvec = np.cross(tvec, edge1)
-    v = ray_dir.dot(qvec) * inv_det
-    if v < 0. or u + v > 1.:
-        return False, None
-    t = edge2.dot(qvec) * inv_det
-    if t < eps:
-        return False, None
+#     eps = 0.000001
+#     edge1 = v2 - v1
+#     edge2 = v3 - v1
+#     pvec = np.cross(ray_dir, edge2)
+#     det = edge1.dot(pvec)
+#     if abs(det) < eps:
+#         return False, None
+#     inv_det = 1. / det
+#     tvec = ray_near - v1
+#     u = tvec.dot(pvec) * inv_det
+#     if u < 0. or u > 1.:
+#         return False, None
+#     qvec = np.cross(tvec, edge1)
+#     v = ray_dir.dot(qvec) * inv_det
+#     if v < 0. or u + v > 1.:
+#         return False, None
+#     t = edge2.dot(qvec) * inv_det
+#     if t < eps:
+#         return False, None
 
-    point = ray_near + ray_dir*t
-    z_value = point[2]
+#     point = ray_near + ray_dir*t
+#     z_value = point[2]
 
-    return True, z_value
+#     return True, z_value
 
 def triangle_center(stl_mesh):
     centers = (stl_mesh.v0 + stl_mesh.v1 + stl_mesh.v2)/3
@@ -166,7 +165,7 @@ def boolist_for_selfsupporting_facet(mesh, boolist_support_required):
         mask_y = np.logical_not(np.logical_or(max_y_list<min_y_value, min_y_list>max_y_value))
         mask_z = (min_z_list<min_z_value)
         
-        for tri_index in np.where(mask_x&mask_y&mask_z)[0]:
+        for tri_index in np.where(mask_z&mask_x&mask_y)[0]:
             triangle = mesh.vectors[tri_index]
             if boolist_triangle_selfsupport[tri_index] is True: # this facet already needs for self-support
                 break
@@ -260,13 +259,13 @@ if __name__ == '__main__':
     building_direction = np.array([[0],[0],[1]])
     cos_angle_threshold = -0.70710678118 
 
-    random_rotation = [i*np.pi/10 for i in range(1)]
+    random_rotation = [i*np.pi/10 for i in range(10)]
 
     for rotation in random_rotation:
         print('-----------------')
         print(rotation)
         start_time = datetime.datetime.now()
-        your_mesh = mesh.Mesh.from_file(stl_filepath)
+        your_mesh = mesh.Mesh.from_file(stl_filepath, remove_empty_areas=True)
         your_mesh.rotate([0.5, 0.5, 0.5], rotation) # rotate update vectors
         your_mesh = update_mesh_by_desending_z(your_mesh)
 
