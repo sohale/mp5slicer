@@ -1,9 +1,9 @@
 from stl_read import *
 from  slicer import *
 import pyclipper
+from raytracer import *
 
 def polygonize_layers(slice_layers):
-
     newslices = []
     for layer in slice_layers:
         newlayer = []
@@ -83,16 +83,44 @@ def vizz_2d(layer):
 
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    patch = patches.PathPatch(path, facecolor='orange', lw=2)
+    patch = patches.PathPatch(path, facecolor=np.random.random(3), lw=2)
     ax.add_patch(patch)
     plt.autoscale(enable=True, axis='both', tight=None)
     plt.show()
 
-def XOR_layers(_clip, _subj):
-    subj = pyclipper.scale_to_clipper((_subj,))
-    pyclipper.SimplifyPolygon(subj)
+def vizz_2d_multi(layers):
+    import matplotlib.pyplot as plt
+    from matplotlib.path import Path
+    import matplotlib.patches as patches
+
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    for layer in layers:
+
+        verts = layer
+
+
+        codes = []
+        codes.append(Path.MOVETO)
+        for i in range((len(layer)-2)):
+            codes.append(Path.LINETO)
+        codes.append(Path.CLOSEPOLY)
+
+        path = Path(verts, codes)
+
+
+
+        patch = patches.PathPatch(path, facecolor=np.random.random(3), lw=2)
+        ax.add_patch(patch)
+    plt.autoscale(enable=True, axis='both', tight=None)
+    plt.show()
+
+def diff_layers( _subj,_clip):
+    subj = pyclipper.scale_to_clipper(_subj)
+    # pyclipper.SimplifyPolygon(subj)
     clip = pyclipper.scale_to_clipper(_clip)
-    pyclipper.SimplifyPolygon(clip)
+    # pyclipper.SimplifyPolygon(clip)
     # vizz_2d(subj)
     # vizz_2d(clip)
 
@@ -100,16 +128,215 @@ def XOR_layers(_clip, _subj):
     pc.AddPath(clip, pyclipper.PT_CLIP, True)
     pc.AddPaths(subj, pyclipper.PT_SUBJECT, True)
 
-    solution = pc.Execute(pyclipper.CT_XOR, pyclipper.PFT_EVENODD, pyclipper.PFT_EVENODD)
+    solution = pc.Execute(pyclipper.CT_DIFFERENCE, pyclipper.PFT_EVENODD, pyclipper.PFT_EVENODD)
 
     return solution
 
+def inter_layers( _subj,_clip):
+    subj = pyclipper.scale_to_clipper(_subj)
+    # pyclipper.SimplifyPolygon(subj)
+    clip = pyclipper.scale_to_clipper(_clip)
+    # pyclipper.SimplifyPolygon(clip)
+    # vizz_2d(subj)
+    # vizz_2d(clip)
+
+    pc = pyclipper.Pyclipper()
+    pc.AddPath(clip, pyclipper.PT_CLIP, True)
+    pc.AddPaths(subj, pyclipper.PT_SUBJECT, True)
+
+    solution = pc.Execute(pyclipper.CT_INTERSECTION, pyclipper.PFT_EVENODD, pyclipper.PFT_EVENODD)
+
+    return solution
+
+def intersect_layers(botLay, topLay, upskins,downskins):
+    if len(botLay) == 0:
+        return
+    if len(topLay) == 0:
+        return
+    up_layer = []
+    upskins.append(up_layer)
+    down_layer = []
+    downskins.append(down_layer)
+
+
+    for pol_dex in range(len(topLay)):
+        if pol_dex == 0:#is ouline
+            cliped = diff_layers(botLay,topLay[pol_dex])
+            for poly in cliped:
+                up_layer.append(poly)
+        if pol_dex >0:#is hole
+            cliped = inter_layers(botLay,topLay[pol_dex])
+            for poly in cliped:
+                up_layer.append(poly)
+
+    for pol_dex in range(len(botLay)):
+        if pol_dex == 0:#is ouline
+            cliped = diff_layers(topLay,botLay[pol_dex])
+            for poly in cliped:
+                down_layer.append(poly)
+        if pol_dex >0:#is hole
+            cliped = inter_layers(topLay,botLay[pol_dex])
+            for poly in cliped:
+                down_layer.append(poly)
+
+def intersect_layers_debug(botLay, topLay, upskins,downskins):
+    if len(botLay) == 0:
+        return
+    if len(topLay) == 0:
+        return
+    up_layer = []
+    upskins.append(up_layer)
+    down_layer = []
+    downskins.append(down_layer)
+
+    vizz_2d_multi(botLay)
+    vizz_2d_multi(topLay)
+    for pol_dex in range(len(topLay)):
+        if pol_dex == 0:#is ouline
+            cliped = diff_layers(botLay,topLay[pol_dex])
+            for poly in cliped:
+                up_layer.append(poly)
+        if pol_dex >0:#is hole
+            cliped = inter_layers(botLay,topLay[pol_dex])
+            for poly in cliped:
+                up_layer.append(poly)
+    vizz_2d_multi(up_layer)
+
+    for pol_dex in range(len(botLay)):
+        if pol_dex == 0:#is ouline
+            cliped = diff_layers(topLay,botLay[pol_dex])
+            for poly in cliped:
+                down_layer.append(poly)
+        if pol_dex >0:#is hole
+            cliped = inter_layers(topLay,botLay[pol_dex])
+            for poly in cliped:
+                down_layer.append(poly)
+
+    # if (len(topLay) > 0 and len(botLay) > 0):
+    #     cliped = XOR_layers(topLay[0],botLay[0])
+    #     for poly in cliped:
+    #         down_layer.append(poly)
+    #     cliped = XOR_layers(botLay[0],topLay[0])
+    #     for poly in cliped:
+    #         up_layer.append(poly)
+    #
+    #     top_holes = topLay.remove(topLay[0])
+    #     for pol in top_holes:
+    #         cliped = XOR_layers(pol,botLay[0])
+    #         for poly in cliped:
+    #             down_layer.append(poly)
+    #
+    #     cliped = XOR_layers(botLay[1],topLay[0])
+    #     for poly in cliped:
+    #         down_layer.append(poly)
+    #
+    #
+    #     cliped = XOR_layers(botLay[0],topLay[1])
+    #     for poly in cliped:
+    #         up_layer.append(poly)
+    #     cliped = XOR_layers(topLay[0],botLay[1])
+    #     for poly in cliped:
+    #         up_layer.append(poly)
+
+def intersect_all_layers(layers):
+
+    downskins = []
+    upskins = []
+    for i in range(len(layers)-1):
+        if i == 13:
+            intersect_layers_debug(layers[i],layers[i+1],upskins,downskins)
+        else:
+            intersect_layers(layers[i],layers[i+1],upskins,downskins)
+
+    for layer in downskins:
+        vizz_2d_multi(layer)
+    for layer in upskins:
+        vizz_2d_multi(layer)
+
+
+
+
+
+
+
+
+# def get_poly_struct(layer):
+#     poly_struct = []
+#     node = pyclipper.PyPolyNode()
+#
+#
+#
+#
+#     for poly in layer:
+#         for poly_node in poly_struct:
+#             if poly1_in_poly2(poly,poly_node.contour):
+#                 for child in poly_node.child:
+
+
+def poly1_in_poly2(poly1,poly2):
+    point = poly1[0]
+    if pyclipper.PointInPolygon(point,poly2):
+        return True
+    else:
+        return False
+
+def reord_layers ( layers):
+    for layer in layers:
+        if len(layer)>1:
+            for poly1_index in range(len(layer)-1):
+                if poly1_in_poly2(layer[poly1_index+1], layer[poly1_index]):
+                    layer.insert(0,layer.pop(poly1_index))
+            if poly1_in_poly2(layer[0], layer[len(layer)-1]):
+                layer.insert(0,layer.pop(len(layer)-1))
+    for layer in layers:
+        for poly_dex in range(len(layer)):
+            if poly_dex == 0:
+                if not pyclipper.Orientation(layer[poly_dex]) :
+                    pyclipper.ReversePath(layer[poly_dex])
+            else:
+                if pyclipper.Orientation(layer[poly_dex]) :
+                    pyclipper.ReversePath(layer[poly_dex])
+    return layers
+
+
 if __name__ == '__main__':
-    mesh = mesh.Mesh.from_file("halfsphere.stl")
+    import time
+
+    start_time = time.time()
+    print("--- %s seconds ---" % (time.time() - start_time))
+    mesh = mesh.Mesh.from_file("cyl_cyl.stl")
+    print("--- %s seconds ---" % (time.time() - start_time))
     mesh = remove_duplicates_from_mesh(mesh)
+    print("--- %s seconds ---" % (time.time() - start_time))
     slice_layers = slicer_from_mesh(mesh, slice_height_from=0, slice_height_to=100, slice_step=1)
+    print("--- %s seconds ---" % (time.time() - start_time))
     layers_as_polygons = polygonize_layers(slice_layers)
-    cliped_layers = XOR_layers(layers_as_polygons[1][0],layers_as_polygons[10][0])
-    for i in range(len(cliped_layers)):
-        vizz_2d(cliped_layers[i])
+    for layer in layers_as_polygons:
+        pyclipper.SimplifyPolygons(layer)
+        pyclipper.CleanPolygons(layer)
+    # vizz_2d_multi(layers_as_polygons[8])
+    # vizz_2d_multi(layers_as_polygons[9])
+    # for i in range(len(layers_as_polygons[4])):
+    #     vizz_2d(layers_as_polygons[7][i])
+    # for i in range(len(layers_as_polygons[9])):
+    #     vizz_2d(layers_as_polygons[16][i])
+    print("--- %s seconds ---" % (time.time() - start_time))
+    # reord = [layers_as_polygons[8][1],layers_as_polygons[8][0]]
+    # vizz_2d_multi(reord)
+    layers_as_polygons = reord_layers(layers_as_polygons)
+    intersect_all_layers(layers_as_polygons)
+    # cliped_layers = XOR_layers(layers_as_polygons[9][0],layers_as_polygons[8][1])
+    # cliped_layers2 = XOR_layers(layers_as_polygons[8][0],layers_as_polygons[9][1])
+    # vizz_2d_multi(cliped_layers)
+    # vizz_2d_multi(cliped_layers2)
+    # vizz_2d_multi([cliped_layers2[0],cliped_layers[0]])
+    # for i in range(len(cliped_layers)):
+    #     vizz_2d(cliped_layers[i])
+    # point = pyclipper.scale_to_clipper(layers_as_polygons[10][0][5])
+    # poly = pyclipper.scale_to_clipper(layers_as_polygons[2][0])
+    # print("--- %s seconds ---" % (time.time() - start_time))
+    # isIn = pyclipper.PointInPolygon(point, poly)
+    print("--- %s seconds ---" % (time.time() - start_time))
+    print("dtc")
+
 
