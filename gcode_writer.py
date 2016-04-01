@@ -6,6 +6,8 @@ import math
 import matplotlib.pyplot as plt
 import numpy as np
 import clipper
+import pipeline_test
+import pyclipper
 
 slowDownTime = 0.03
 slowDownFactor = 1
@@ -287,39 +289,29 @@ class GCodeEnvironment:
 ############################ functions for infill ############################
 # this is written by Tiger or the pre-assignment of intervel for myminifactory back in Dec/2015
 # this infill code has not been optimised
-# todo: a more generalised infill calculation, for example: allow hole in polygon
-# The following will help you understand the infill.
+# The following will help you understand the infill codes.
 '''
 Title: Write a 2D slicer.
 A 2D slicer receives a planar shape (for example a polygon on the 2D
 plane) and generates the region of the shape using horizontal lines.
 
-Write a program in Python that reads a Json file that describes a
-convex or non-convex polygon in form of a set of 2D coordinates. The input file also
-contains the angle of rotation of the polygonbefor being sliced. The
-physical unit of numbers is in millimeters and the angle is in degrees
-(rotation is around point [0,0]; we want to slice the the rotated object
-only).
+Write a program for convex or non-convex polygon in form of a set of 2D coordinates.  
+The physical unit of numbers is in millimeters.
 
-The input contains two numbers y0 and dy. The slice layers are at:
-y=y0+k*dy, where k is an integer (k can be negative). The output should
-be a Json file that describes the output in the form of: a list of
-"slice"s, each slice is a y value followed by multiple pairs of x
-values. Each slice is like:
-[y1, [start_x, end_x], [start_x, end_x], ... ]
-
-Note that if the start_x and end_x in a pair can be equal (i.e. the
-intersection with a slice can be a single point). For example for the
-following input, the output should be a json representation of a list
-with five "slice" elements, each of them of the above format.
+The input contains two numbers dy. The slice layers are at:
+y=some_start_value_for_y+k*dy, where k is an integer (k can be negative). The output should 
+describe the output in the form of: a list of
+"slice"s, each slice is a y value followed by intersecting x values. 
+Each slice is like:
+[ [y1, [intersection_0, intersection_1, ... ] ] , [y2, ...], ...]
 
 Example input (note the number of significant digits): The coordinates
 are in Cartesian system.
-{"dy": -0.3333333, "y0": 25, "polygon": [[-1, 1], [1, -1], [0,
-0.3333333]],"angle":90}
+{"dy": -0.3333333,  "polygon": [[-1, 1], [1, -1], [0,
+0.3333333]]}
 
 Output format (Approximately):
-[ [y1, [start_x, end_x], [start_x, end_x], ... ] , [y2, ...], ...]
+[ [y1, [intersection_0, intersection_1, ... ] ] , [y2, ...], ...]
 '''
 
 def between_y_value(row,number):
@@ -340,6 +332,20 @@ def slope_is_inf(row):
     else:
         return False
 
+def scaled_offset(polygon_vertices, offset_value):
+    #this function works for offset_value could be 0.1*n or -0.1*n, n = 0 to 10
+    scaleup_polygon_vertices = [[i[0]*10,i[1]*10] for i in polygon_vertices]
+    pco = pyclipper.PyclipperOffset()
+    pco.AddPath(scaleup_polygon_vertices, pyclipper.JT_ROUND, pyclipper.ET_CLOSEDPOLYGON)
+    solution = pco.Execute(offset_value*10)
+
+    if solution != []:# polygon too small, offset to empty
+        scaledown_polygon_vertices = [[i[0]/10,i[1]/10] for i in solution[0]]
+    else:
+        return polygon_vertices
+
+    return scaledown_polygon_vertices
+
 def ray_trace_polygon(polygon, dy, horizontal_or_vertical, slice_min, slice_max, boundary_or_hole, does_visualise=False):
 
     '''
@@ -349,19 +355,16 @@ def ray_trace_polygon(polygon, dy, horizontal_or_vertical, slice_min, slice_max,
     Output format : [ [y1, [intersect_x_0, intersect_x_1, ...] ] , [y2, ...], ...]
     '''
 
-    polygon_for_clipper = [[]]# formatting for making polygon by clipper
-    for i in polygon:
-        polygon_for_clipper[0].append(clipper.Point(i[0],i[1]))
-
     if boundary_or_hole == 'boundary': # offsetting polygon to make it smaller for infill
-        res = clipper.OffsetPolygons(polygon_for_clipper,-1) # make the polygon 1 unit smaller # careful polygon only take integer value
+        res = scaled_offset(polygon,-0.5) # make the polygon 0.5 unit smaller # careful polygon only take integer value
     elif boundary_or_hole == 'hole':
-        res = clipper.OffsetPolygons(polygon_for_clipper,+1) # make the polygon 1 unit larger # careful polygon only take integer value
-    else:
-        raise NotImplementedError
+        res = scaled_offset(polygon,0.6) # make the polygon 0.6 unit larger # careful polygon only take integer value
+
+    else: # there should not be another type of polygon
+        raise NotImplementedError('parameter boundary_or_hole can only be \'boundary\' or \'hole\'')
 
     if res != []: # this is the case the polygon is too small and offset to none
-        offset_polygon = list(zip([i.x for i in res[0]],[i.y for i in res[0]]))
+        offset_polygon = res
     else:
         offset_polygon = polygon
 
@@ -378,6 +381,9 @@ def ray_trace_polygon(polygon, dy, horizontal_or_vertical, slice_min, slice_max,
     elif horizontal_or_vertical == 'vertical': # a hack to calculate the vertical infill by flipping the x and y value
         x_range, y_range = y_range, x_range
         polygon_matrix = np.fliplr(polygon_matrix)
+    else: # there should not be another type of infill lines
+        raise NotImplementedError('parameter horizontal_or_vertical can only be horizontal or vertical')
+
     # delete function when tangent = 0
     slope_not_zero_boolean = np.apply_along_axis(k2_minus_k1_not_zero, 1, y_range)
     x_range = x_range[slope_not_zero_boolean]
@@ -414,7 +420,7 @@ def ray_trace_polygon(polygon, dy, horizontal_or_vertical, slice_min, slice_max,
             # deal with inf slope
             in_range_is_inf_boolean = np.logical_and(is_inf_boolean,
                                                      in_range_boolean)
-            # observed that if slope inf corresponding x value is just domain value 
+            # if slope is inf corresponding x value is just domain value 
             result_x_inf = x_range[:,1][in_range_is_inf_boolean] 
             
             # combine the result
@@ -422,37 +428,53 @@ def ray_trace_polygon(polygon, dy, horizontal_or_vertical, slice_min, slice_max,
                                 
         # formatting for output format
         result_x = [i[0] for i in result_x.tolist()]
-        
         result_list = [y,[]]
-        for i in result_x:
-            result_list[1].append(i)
-                        
+        for intersection_point in result_x:
+            result_list[1].append(intersection_point)
         result_for_json.append(result_list)
-        
-    # if does_visualise:
-    #     import matplotlib.pyplot as plt
-    #     for each_slice in result_for_json:
-    #         y = each_slice[0]
-    #         for pair_x in each_slice[1:]:
-    #             if horizontal_or_vertical == 'horizontal':
-    #                 plt.plot(pair_x,[y for i in pair_x],'-')
-    #             else:
-    #                 plt.plot([y for i in pair_x],pair_x,'-')
-
-    #     plt.show()
+    
+    ############# visulisation ##############
+    if does_visualise:
+        for each_slice in result_for_json:
+            y = each_slice[0]
+            for pair_x in each_slice[1:]:
+                if horizontal_or_vertical == 'horizontal':
+                    plt.plot(pair_x,[y for i in pair_x],'-')
+                else:
+                    plt.plot([y for i in pair_x],pair_x,'-')
+        plt.show()
+    ############# visulisation ##############
 
     return result_for_json
 
-def polylist_slicer(data, dy, horizontal_or_vertical, slice_min, slice_max,does_visualise=False):
+
+def poly_layer_infill_line_segment(poly_layer, dy, horizontal_or_vertical, slice_min, slice_max, does_visualise=False):
     def merge_result_by_first_argument(result_all):
+
+        '''
+        this function is for combining the individual ray trace result for each polygon
+
+        this function returns result_format_acsending_y.
+
+        result_format_acsending_y is a list of 
+        "slice"s, each slice is a y value followed by multiple pairs of x
+        values. Each slice is like:
+        [y1, [start_x_0, end_x_0], [start_x_1, end_x_1], ... ]
+        the interpretation of this slice is there are line segment 
+        [(start_x_0, y1), (end_x_0, y1)], [(start_x_1, y1), (end_x_1, y1)] ...
+
+        so result_format_acsending_y looks like
+        [ [y1, [start_x, end_x], [start_x, end_x], ... ] , [y2, ...], ...]
+        '''
+
         final_result = {}
-        for i in result_all[0]:
+        for i in result_all[0]: # initialise final_result
             if len(i)>1:
                 final_result[i[0]] = i[1]
             else:
                 final_result[i[0]] = []
 
-        for result in result_all[1:]:
+        for result in result_all[1:]: # loop through the rest 
             result = {i[0]:i[1] for i in result if len(i)>1}
             intersect_y = list(set(final_result.keys()) & set(result.keys()))
             difference_y = list(set(result.keys()) - set(final_result.keys()))
@@ -471,38 +493,32 @@ def polylist_slicer(data, dy, horizontal_or_vertical, slice_min, slice_max,does_
             result_format_acsending_y.append(result_x)
             result_format_acsending_y[-1].insert(0, key)
 
-        # if does_visualise:
-        #     for each_slice in result_format_acsending_y:
-        #         y = each_slice[0]
-        #         for pair_x in each_slice[1:]:
-        #             if horizontal_or_vertical == 'horizontal':
-        #                 plt.plot(pair_x,[y for i in pair_x],'-')
-        #             else:
-        #                 plt.plot([y for i in pair_x],pair_x,'-')
-        #     plt.show()
+        if does_visualise:
+            for each_slice in result_format_acsending_y:
+                y = each_slice[0]
+                for pair_x in each_slice[1:]:
+                    if horizontal_or_vertical == 'horizontal':
+                        plt.plot(pair_x,[y for i in pair_x],'-')
+                    else:
+                        plt.plot([y for i in pair_x],pair_x,'-')
+            plt.show()
 
         return result_format_acsending_y
 
-    # polygon_list is in the format [polygon_0,polygon_1..]
-    # for each item in polygon_list, for exmaple polygon_0, polygon_1,  
+    ray_trace_for_whole_layer = []
+    # poly_layer is in the format [polygon_0,polygon_1..]
+    # for each item in poly_layer, for exmaple polygon_0, polygon_1,  
     # the first thing in item is the boundary of polygon, 
     # polygon_0 = [boundary_polygon, hole_polygon, hole_polygon...]
-    polygon_list = [
-                                [
-                                    [[0+50,7*3+50],[5*3+50,7*3+50],[5*3+50,5*3+50],[7*3+50,5*3+50],[7*3+50,0+50],[2*3+50,0+50],[2*3+50,2*3+50],[0+50,2*3+50]],
-                                    [[1*3+50,3*3+50],[1*3+50,6*3+50],[4*3+50,6*3+50],[4*3+50,5*3+50],[2*3+50,5*3+50],[2*3+50,3*3+50]],
-                                    [[4*3+50,3*3+50],[3*3+50,3*3+50],[3*3+50,4*3+50],[4*3+50,4*3+50]],
-                                    [[3*3+50,1*3+50],[3*3+50,2*3+50],[5*3+50,2*3+50],[5*3+50,4*3+50],[6*3+50,4*3+50],[6*3+50,1*3+50]]
-                                ]
-                            ]
-
-    result_all = []
-    for polygon in polygon_list:
-        result_all.append(ray_trace_polygon(polygon[0], dy, 'horizontal', slice_min, slice_max, 'boundary', does_visualise=False))
-        
+    for polygon in poly_layer:
+        boundary_polygon = polygon[0] # polygon[0] is the boundary of the polygon
+        if len(boundary_polygon) > 2: # a polygon with length 2 is ill defined
+            ray_trace_for_whole_layer.append(ray_trace_polygon(boundary_polygon, dy, horizontal_or_vertical, slice_min, slice_max, 'boundary', does_visualise=False))
         for hole_polygon in polygon[1:]:
-            result_all.append(ray_trace_polygon(hole_polygon, dy, 'horizontal', slice_min, slice_max, 'hole', does_visualise=False))
-    merged_result = merge_result_by_first_argument(result_all)
+            ray_trace_for_whole_layer.append(ray_trace_polygon(hole_polygon, dy, horizontal_or_vertical, slice_min, slice_max, 'hole', does_visualise=False))
+
+    merged_result = merge_result_by_first_argument(ray_trace_for_whole_layer)
+
     return merged_result
 ############################### function for slice_layers code taken from flavien's code on 30/MAR/16 ###############################
 # this threshold for 0.00001 is change to 0.1 for 3d-printing purpose
@@ -569,8 +585,30 @@ def polygonize_layers(slice_layers):
 
     return slicesAsPolygons
 
+def get_slice_min_max(polygon_list, horizontal_or_vertical):
+
+    min_all_polygon = []
+    max_all_polygon = []
+    for polygon in polygon_list:
+        boundary = polygon[0]
+        
+        if horizontal_or_vertical == 'vertical':
+            values = [i[0] for i in boundary]
+        elif horizontal_or_vertical == 'horizontal':
+            values = [i[1] for i in boundary]
+        else: # there should be anyother type of infill line
+            raise NotImplementedError('parameter horizontal_or_vertical can only be horizontal or vertical')
+        
+        min_this_polygon = min(values)
+        max_this_polygon = max(values)
+
+        min_all_polygon.append(min_this_polygon)
+        max_all_polygon.append(max_this_polygon)
+            
+    return min(min_all_polygon), max(max_all_polygon)
+
 ############################### function for writing gcode ###############################
-def writeGCode(slice_layers, filename):
+def writeGCode(slice_layers, filename, wtf_hack_for_polylayers = False):
     printSettings = PrintSettings({})
     gcodeEnvironment = GCodeEnvironment(printSettings)
     # create the gcodefile
@@ -584,41 +622,104 @@ def writeGCode(slice_layers, filename):
     gcodeFile.write(gcodeEnvironment.drawToNextPoint(Point2D(180,5)))
     gcodeFile.write(gcodeEnvironment.drawToNextPoint(Point2D(0,5)))
 
-    #############################add stuff################################        
-    polylayers = polygonize_layers(slice_layers)
+    ############################# gcode for layers ################################  
+    polylayers = polygonize_layers(slice_layers)  
+
+    if wtf_hack_for_polylayers:  # a hack to change polylayers to suit the following formal, the side effect is to make all polygon into a boundary polygo
+        polylayers_new = []
+        for layer in polylayers:
+            polylayers_new.append([])
+            for polygon in layer:
+                polylayers_new[-1].append([polygon])
+        polylayers = polylayers_new
+    else: # make sure the polylayers is in the following format
+        pass
+    # todo : make a function to seperate the polygon into boundaries and holes
+    '''
+    polylayers describes all the polygon in one layer. 
+    polylayers is in the following format, 
+    polylayers = [
+        [ # first layer
+            [ # first polygon, in this list the first polygon is the boundary of this polygon, the rest are the holes in the polygon
+                [], # boundary
+                [], # first hole
+                ... # holes
+            ],
+            [ # second polygon
+            ],
+            ... # other polygon
+        ],
+        [] # second layer,
+        ... # other layers
+    ]
+
+    example:   
+    [
+        [ # first layer 
+            [ # first polygon
+                [ # boundary
+                    [0+50,7*3+50],[5*3+50,7*3+50],[5*3+50,5*3+50],[7*3+50,5*3+50],[7*3+50,0+50],[2*3+50,0+50],[2*3+50,2*3+50],[0+50,2*3+50]
+                ],
+                [ # hole
+                    [1*3+50,3*3+50],[1*3+50,6*3+50],[4*3+50,6*3+50],[4*3+50,5*3+50],[2*3+50,5*3+50],[2*3+50,3*3+50]
+                ],
+                [ # hole
+                    [4*3+50,3*3+50],[3*3+50,3*3+50],[3*3+50,4*3+50],[4*3+50,4*3+50]
+                ],
+                [ # hole
+                    [3*3+50,1*3+50],[3*3+50,2*3+50],[5*3+50,2*3+50],[5*3+50,4*3+50],[6*3+50,4*3+50],[6*3+50,1*3+50]
+                ],
+                [],... # holes
+            ],
+            [ # second polygon
+                ...
+            ]
+        ],
+
+        [ # seconds layer
+        ],
+
+        .., # other layers
+    ]
+    '''
     total_number_layers = len(polylayers)
     layer_counter = 1
-    horizontal_or_vertical = 'horizontal'
-    for point_list_layer in polylayers: # point_list_layer is a list of polygon in one layer
+    for each_polylayer in polylayers: # each_polylayer is a list of polygon in one layer
+
+        ######### boundary #########
+        for polygon_list in each_polylayer: # multiple polygon in one layer
+            for polygon in polygon_list: # each polygon
+                start_point = polygon[0] # frist vertex of the polygon
+                start_point = Point2D(start_point[0],start_point[1])
+                gcodeFile.write(gcodeEnvironment.goToNextPoint(start_point))
+                for point in polygon[1:]: # the rest of the vertices
+                    point = Point2D(point[0],point[1])
+                    gcodeFile.write(gcodeEnvironment.drawToNextPoint(point))
+                # goes back to the start point since the polygon does not repeat the start (end) vertice twice
+                gcodeFile.write(gcodeEnvironment.drawToNextPoint(start_point))
+        ######### boundary end #########
+
+        ######### infill #############  
+
         # start of a layer
         if layer_counter%2:
             horizontal_or_vertical = 'vertical'
         else:
             horizontal_or_vertical = 'horizontal'
 
-        ######### boundary #########
-        for point_list in point_list_layer: # multiple polygon in one layer
-            start_point = point_list[0]
-            start_point = Point2D(start_point[0],start_point[1])
-            gcodeFile.write(gcodeEnvironment.goToNextPoint(start_point))
-            for point in point_list[1:]:
-                point = Point2D(point[0],point[1])
-                gcodeFile.write(gcodeEnvironment.drawToNextPoint(point))
-            gcodeFile.write(gcodeEnvironment.drawToNextPoint(start_point)) # the printer ends at the start point
-        ######### boundary end #########
-
-        ######### infill #############  
+        slice_min, slice_max = get_slice_min_max(each_polylayer, horizontal_or_vertical)
         # first two layers and last two layers are set to be fully filled
         if layer_counter == 1 or layer_counter == 2 or layer_counter == total_number_layers - 1 or layer_counter == total_number_layers:
-            infill_line_segment = polylist_slicer(point_list_layer, 0.3, horizontal_or_vertical, 0, 250)
+            infill_line_segment = poly_layer_infill_line_segment(each_polylayer, 0.3, horizontal_or_vertical, slice_min, slice_max)
         else: # low infill density
-            infill_line_segment = polylist_slicer(point_list_layer, 2, horizontal_or_vertical, 0, 250)
+            infill_line_segment = poly_layer_infill_line_segment(each_polylayer, 2, horizontal_or_vertical, slice_min, slice_max)
 
         for each_infill_lines in infill_line_segment: 
             try: 
                 each_infill_lines[1][0] # to avoid no infill line required for this layer
-            except IndexError:
-                print('no infill require this layer')
+            except IndexError: # no infill required for line
+                # print('no infill required for line')
+                pass
             else: # if there is no error occurs
                 if horizontal_or_vertical == 'horizontal':
                     y = each_infill_lines[0]
@@ -636,8 +737,9 @@ def writeGCode(slice_layers, filename):
                         line_segment_end = Point2D(x,y[1]) 
                         gcodeFile.write(gcodeEnvironment.goToNextPoint(line_segment_start))
                         gcodeFile.write(gcodeEnvironment.drawToNextPoint(line_segment_end))
-
-        ######### infill end #############  
+                else:
+                    raise NotImplementedError('parameter horizontal_or_vertical can only be \'horizontal\' or \'vertical\'')
+        # ######### infill end #############  
 
         gcodeEnvironment.Z += printSettings.layerThickness
         layer_counter += 1
@@ -652,7 +754,7 @@ def writeGCode(slice_layers, filename):
 if __name__ == '__main__':
     from stl import mesh
     import slicer
-    stl_mesh = mesh.Mesh.from_file('on_the_base.stl')
+    stl_mesh = mesh.Mesh.from_file('elephant.stl')
     # assume the center of the mesh are at (0,0)
     # translate x by 70 
     stl_mesh.vectors[:,:,0]+=70
@@ -662,17 +764,21 @@ if __name__ == '__main__':
                             slice_height_from=0.3, 
                             slice_height_to=stl_mesh.max_[2], 
                             slice_step=0.3)
-
     # slicer.visualization_2d(slice_layers)
-    writeGCode(slice_layers,'on_the_base.gcode')
+    writeGCode(slice_layers,'elephant.gcode', wtf_hack_for_polylayers=True)
 
-
-
-    # polygon_list =  [[[0+50,7*3+50],[5*3+50,7*3+50],[5*3+50,5*3+50],[7*3+50,5*3+50],[7*3+50,0+50],[2*3+50,0+50],[2*3+50,2*3+50],[0+50,2*3+50]],
-    #                             [[1*3+50,3*3+50],[1*3+50,6*3+50],[4*3+50,6*3+50],[4*3+50,5*3+50],[2*3+50,5*3+50],[2*3+50,3*3+50]],
-    #                             [[4*3+50,3*3+50],[3*3+50,3*3+50],[3*3+50,4*3+50],[4*3+50,4*3+50]],
-    #                             [[3*3+50,1*3+50],[3*3+50,2*3+50],[5*3+50,2*3+50],[5*3+50,4*3+50],[6*3+50,4*3+50],[6*3+50,1*3+50]]]
-    # slice_layers = [[i,polygon_list] for i in range(10)]
-    # writeGCode(slice_layers,'on_the_base.gcode')
-    # res = polylist_slicer(data, 'vertical', slice_min=0,slice_max=14,does_visualise=True)
+    # visualise raytrace for a layer
+    # each_polylayer = [
+    #                         [ # first polygon
+    #                             [ # boundary
+    #                                 [-25,-25],[25,-25],[25,25],[-25,25]
+    #                             ],
+    #                         ],
+    #                         [
+    #                             [ # boundary
+    #                                 [-50+100,-50],[50+100,-50],[50+100,50],[-50+100,50]
+    #                             ],
+    #                         ]
+    #                     ]
+    # polylist_slicer(each_polylayer, 1, 'horizontal', -100, +100, does_visualise=True)
 
