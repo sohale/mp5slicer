@@ -6,7 +6,6 @@ import math
 import matplotlib.pyplot as plt
 import numpy as np
 import clipper
-import pipeline_test
 import pyclipper
 
 slowDownTime = 0.03
@@ -737,7 +736,7 @@ def writeGCode(slice_layers, filename, wtf_hack_for_polylayers = False):
                         else:
                             gcodeFile.write(gcodeEnvironment.goToNextPoint(line_segment_end))
                             gcodeFile.write(gcodeEnvironment.drawToNextPoint(line_segment_start))
-                            
+
                 elif horizontal_or_vertical == 'vertical':
                     x = each_infill_lines[0]
                     segment_y_list = each_infill_lines[1:] 
