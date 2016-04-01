@@ -714,7 +714,10 @@ def writeGCode(slice_layers, filename, wtf_hack_for_polylayers = False):
         else: # low infill density
             infill_line_segment = poly_layer_infill_line_segment(each_polylayer, 2, horizontal_or_vertical, slice_min, slice_max)
 
+        zigzag_count = 0
         for each_infill_lines in infill_line_segment: 
+
+            zigzag_count += 1
             try: 
                 each_infill_lines[1][0] # to avoid no infill line required for this layer
             except IndexError: # no infill required for line
@@ -727,16 +730,27 @@ def writeGCode(slice_layers, filename, wtf_hack_for_polylayers = False):
                     for x in segment_x_list:
                         line_segment_start = Point2D(x[0],y) 
                         line_segment_end = Point2D(x[1],y) 
-                        gcodeFile.write(gcodeEnvironment.goToNextPoint(line_segment_start))
-                        gcodeFile.write(gcodeEnvironment.drawToNextPoint(line_segment_end))
+
+                        if zigzag_count % 2: # a toolpath optimization works only for one polygon, print 'zigzag'ly instead of line by line
+                            gcodeFile.write(gcodeEnvironment.goToNextPoint(line_segment_start))
+                            gcodeFile.write(gcodeEnvironment.drawToNextPoint(line_segment_end))
+                        else:
+                            gcodeFile.write(gcodeEnvironment.goToNextPoint(line_segment_end))
+                            gcodeFile.write(gcodeEnvironment.drawToNextPoint(line_segment_start))
+                            
                 elif horizontal_or_vertical == 'vertical':
                     x = each_infill_lines[0]
                     segment_y_list = each_infill_lines[1:] 
                     for y in segment_y_list:
                         line_segment_start = Point2D(x,y[0]) 
                         line_segment_end = Point2D(x,y[1]) 
-                        gcodeFile.write(gcodeEnvironment.goToNextPoint(line_segment_start))
-                        gcodeFile.write(gcodeEnvironment.drawToNextPoint(line_segment_end))
+
+                        if zigzag_count % 2: # a toolpath optimization works only for one polygon, print 'zigzag'ly instead of line by line
+                            gcodeFile.write(gcodeEnvironment.goToNextPoint(line_segment_start))
+                            gcodeFile.write(gcodeEnvironment.drawToNextPoint(line_segment_end))
+                        else:
+                            gcodeFile.write(gcodeEnvironment.goToNextPoint(line_segment_end))
+                            gcodeFile.write(gcodeEnvironment.drawToNextPoint(line_segment_start))
                 else:
                     raise NotImplementedError('parameter horizontal_or_vertical can only be \'horizontal\' or \'vertical\'')
         # ######### infill end #############  
