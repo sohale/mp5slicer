@@ -290,7 +290,7 @@ def poly1_in_poly2(poly1,poly2):
     else:
         return False
 
-def reord_layers ( layers):
+def reord_layers_multi_islands ( layers):
     for layer in layers:
         if len(layer)>1:
             for island in layer:
