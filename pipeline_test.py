@@ -171,6 +171,9 @@ def intersect_layers(botLay, topLay, upskins,downskins):
 
     for pol_dex in range(len(botLay)):
         if pol_dex == 0:#is ouline
+            # po = pyclipper.PyclipperOffset()
+            # po.AddPaths(topLay,pyclipper.JT_SQUARE,pyclipper.ET_CLOSEDPOLYGON)
+            # topLay_of = po.Execute(100000000)
             cliped = diff_layers(topLay,botLay[pol_dex])
             for poly in cliped:
                 down_layer.append(poly)
@@ -189,8 +192,7 @@ def intersect_layers_debug(botLay, topLay, upskins,downskins):
     down_layer = []
     downskins.append(down_layer)
 
-    vizz_2d_multi(botLay)
-    vizz_2d_multi(topLay)
+
     for pol_dex in range(len(topLay)):
         if pol_dex == 0:#is ouline
             cliped = diff_layers(botLay,topLay[pol_dex])
@@ -200,15 +202,22 @@ def intersect_layers_debug(botLay, topLay, upskins,downskins):
             cliped = inter_layers(botLay,topLay[pol_dex])
             for poly in cliped:
                 up_layer.append(poly)
-    vizz_2d_multi(up_layer)
+
 
     for pol_dex in range(len(botLay)):
         if pol_dex == 0:#is ouline
-            cliped = diff_layers(topLay,botLay[pol_dex])
+            po = pyclipper.PyclipperOffset()
+            po.AddPaths(topLay,pyclipper.JT_SQUARE,pyclipper.ET_CLOSEDPOLYGON)
+            tutu = pyclipper._check_scaling_factor(topLay)
+            topLay_of = po.Execute(100000000)
+            cliped = diff_layers(topLay_of,botLay[pol_dex])
             for poly in cliped:
                 down_layer.append(poly)
         if pol_dex >0:#is hole
-            cliped = inter_layers(topLay,botLay[pol_dex])
+            po = pyclipper.PyclipperOffset()
+            po.AddPaths(botLay,pyclipper.JT_SQUARE,pyclipper.ET_CLOSEDPOLYGON)
+            topLay_of = po.Execute(1000000)
+            cliped = inter_layers(topLay_of,botLay[pol_dex])
             for poly in cliped:
                 down_layer.append(poly)
 
@@ -243,15 +252,16 @@ def intersect_all_layers(layers):
     downskins = []
     upskins = []
     for i in range(len(layers)-1):
-        if i == 13:
+        if False:
             intersect_layers_debug(layers[i],layers[i+1],upskins,downskins)
         else:
             intersect_layers(layers[i],layers[i+1],upskins,downskins)
 
-    for layer in downskins:
-        vizz_2d_multi(layer)
-    for layer in upskins:
-        vizz_2d_multi(layer)
+    # for layer in downskins:
+    #     vizz_2d_multi(layer)
+    # for layer in upskins:
+    #     vizz_2d_multi(layer)
+    return downskins,upskins
 
 
 
@@ -283,6 +293,19 @@ def poly1_in_poly2(poly1,poly2):
 def reord_layers ( layers):
     for layer in layers:
         if len(layer)>1:
+            for island in layer:
+
+                for poly1_index in range(len(island)-1):
+                    if poly1_in_poly2(island[poly1_index+1], island[poly1_index]):
+                        island.insert(0,island.pop(poly1_index))
+                if poly1_in_poly2(island[0], island[len(island)-1]):
+                    island.insert(0,island.pop(len(island)-1))
+
+    return layers
+
+def reord_layers ( layers):
+    for layer in layers:
+        if len(layer)>1:
             for poly1_index in range(len(layer)-1):
                 if poly1_in_poly2(layer[poly1_index+1], layer[poly1_index]):
                     layer.insert(0,layer.pop(poly1_index))
@@ -297,6 +320,7 @@ def reord_layers ( layers):
                 if pyclipper.Orientation(layer[poly_dex]) :
                     pyclipper.ReversePath(layer[poly_dex])
     return layers
+
 
 
 if __name__ == '__main__':
@@ -314,6 +338,7 @@ if __name__ == '__main__':
     for layer in layers_as_polygons:
         pyclipper.SimplifyPolygons(layer)
         pyclipper.CleanPolygons(layer)
+    # tut = pyclipper.scale_to_clipper(10)
     # vizz_2d_multi(layers_as_polygons[8])
     # vizz_2d_multi(layers_as_polygons[9])
     # for i in range(len(layers_as_polygons[4])):
@@ -324,7 +349,16 @@ if __name__ == '__main__':
     # reord = [layers_as_polygons[8][1],layers_as_polygons[8][0]]
     # vizz_2d_multi(reord)
     layers_as_polygons = reord_layers(layers_as_polygons)
-    intersect_all_layers(layers_as_polygons)
+    skins = intersect_all_layers(layers_as_polygons)
+    downskins = skins[0]
+    upskins = skins[1]
+    for downskin in downskins:
+        po = pyclipper.PyclipperOffset()
+        po.AddPaths(downskin,pyclipper.JT_SQUARE,pyclipper.ET_CLOSEDPOLYGON)
+        offseted = po.Execute(pyclipper.scale_to_clipper(-0.2))
+        vizz_2d_multi(offseted)
+
+
     # cliped_layers = XOR_layers(layers_as_polygons[9][0],layers_as_polygons[8][1])
     # cliped_layers2 = XOR_layers(layers_as_polygons[8][0],layers_as_polygons[9][1])
     # vizz_2d_multi(cliped_layers)
