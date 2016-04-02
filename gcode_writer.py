@@ -5,7 +5,6 @@ Todo: slice polygon with hole
 import math
 import matplotlib.pyplot as plt
 import numpy as np
-import clipper
 import pyclipper
 
 slowDownTime = 0.03
@@ -355,10 +354,13 @@ def ray_trace_polygon(polygon, dy, horizontal_or_vertical, slice_min, slice_max,
     '''
 
     if boundary_or_hole == 'boundary': # offsetting polygon to make it smaller for infill
-        res = scaled_offset(polygon,-0.5) # make the polygon 0.5 unit smaller # careful polygon only take integer value
+        # TODO: fix the next line does not work on windows' computer
+        # res = scaled_offset(polygon,-0.5) # make the polygon 0.5 unit smaller # careful polygon only take integer value
+        res = polygon
     elif boundary_or_hole == 'hole':
-        res = scaled_offset(polygon,0.6) # make the polygon 0.6 unit larger # careful polygon only take integer value
-
+        # TODO: fix the next line does not work on windows' computer
+        # res = scaled_offset(polygon,0.6) # make the polygon 0.6 unit larger # careful polygon only take integer value
+        res = polygon
     else: # there should not be another type of polygon
         raise NotImplementedError('parameter boundary_or_hole can only be \'boundary\' or \'hole\'')
 
@@ -714,6 +716,7 @@ def writeGCode(slice_layers, filename, wtf_hack_for_polylayers = False):
             infill_line_segment = poly_layer_infill_line_segment(each_polylayer, 2, horizontal_or_vertical, slice_min, slice_max)
 
         zigzag_count = 0
+
         for each_infill_lines in infill_line_segment: 
 
             zigzag_count += 1
@@ -776,7 +779,7 @@ if __name__ == '__main__':
     slice_layers = slicer.slicer_from_mesh(stl_mesh, 
                             slice_height_from=0.3, 
                             slice_height_to=stl_mesh.max_[2], 
-                            slice_step=0.3)
+                            slice_step=0.2) # default layer thickness is 0.2
     # slicer.visualization_2d(slice_layers)
     writeGCode(slice_layers,'elephant.gcode', wtf_hack_for_polylayers=True)
 
