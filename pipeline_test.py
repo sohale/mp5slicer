@@ -1,7 +1,7 @@
-from stl_read import *
 from  slicer import *
-import pyclipper
-from raytracer import *
+from slicer.old.raytracer import *
+from stl_read import *
+
 
 def polygonize_layers(slice_layers):
     newslices = []
