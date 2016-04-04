@@ -1,6 +1,6 @@
 from  slicer import *
-from slicer.old.raytracer import *
 from stl_read import *
+import pyclipper
 
 
 def polygonize_layers(slice_layers):

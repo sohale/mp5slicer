@@ -14,13 +14,13 @@ class Outline:
             polyline.append(start_point)
             for point in polygon[1:]: # the rest of the vertices
                 point = Point2D(point[0],point[1])
-                polyline(point)
+                polyline.append(point)
             # goes back to the start point since the polygon does not repeat the start (end) vertice twice
             polyline.append(start_point)
         return polylines
 
-    def g_prtint(self):
-        return self.polyline
+    def g_print(self):
+        return self.polylines
 
 
 class Infill:

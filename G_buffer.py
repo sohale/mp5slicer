@@ -1,13 +1,13 @@
 from gcode_writer import *
 
 class G_buffer:
-    points = []
-    filename= "tppt.gc"
+    layer_list = []
+    filename= "tppt.gcode"
     def __init__(self):
         pass
 
-    def add_point_list(self,list):
-        self.points.append(list)
+    def add_layer(self,list):
+        self.layer_list.append(list)
 
 
     def print_Gcode(self):
@@ -24,7 +24,18 @@ class G_buffer:
         gcodeFile.write(gcodeEnvironment.drawToNextPoint(Point2D(180,5)))
         gcodeFile.write(gcodeEnvironment.drawToNextPoint(Point2D(0,5)))
 
-        ///print layes
+        for layer in self.layer_list:
+            if layer != None:
+                for line in layer:
+                    gcodeFile.write(gcodeEnvironment.goToNextPoint(line[0]))
+                    for point_index in range(1,len(line)):
+                        gcodeFile.write(gcodeEnvironment.drawToNextPoint(line[point_index]))
+                gcodeEnvironment.Z += printSettings.layerThickness
+
+
+
+
+
 
         gcodeFile.write(gcodeEnvironment.retractFilament(printSettings.retractionLength))
         gcodeFile.write(gcodeEnvironment.endcode())
