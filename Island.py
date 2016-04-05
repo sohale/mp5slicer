@@ -5,11 +5,16 @@ class Island():
     def __init__(self,layer, layers,polygons,skin_polygons,layer_index,BBox ):
         self.layer = layer
         self.type = None # object/support/enclosure/ raft
-        self.parts = []
+        self.outline = []
         self.layer_index = layer_index
         self.layers = layers
         self.BBox = BBox
         self.get_parts(polygons,skin_polygons)
+
+    def process_shells(self):
+        self.outline.add_shells()
+
+
 
 
     def g_print(self):
@@ -22,19 +27,19 @@ class Island():
         outline = Outline(polygons)
         return outline
 
-    def make_skins(self,polygons,top_layer):
-        pass
-
-    def make_infill_with_skins(self,polygons,skins):
-        infill = Infill(self.layers,polygons,self.layer_index,True,self.BBox)
-        return infill
-
-    def make_infill(self,polygons):
-        infill = Infill(polygons,self.layer_index,False)
-        return infill
+    # def make_skins(self,polygons,top_layer):
+    #     pass
+    #
+    # def make_infill_with_skins(self,polygons,skins):
+    #     infill = Infill(self.layers,polygons,self.layer_index,True,self.BBox)
+    #     return infill
+    #
+    # def make_infill(self,polygons):
+    #     infill = Infill(polygons,self.layer_index,False)
+    #     return infill
 
     def get_parts(self, polygons,skin_polygons):
-        self.parts.append(self.make_outline(polygons))
+        self.outline.append(self.make_outline(polygons))
 
         # if len(skin_polygons) != 0:
         #     # skins = self.make_skins(skin_polygons)

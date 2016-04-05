@@ -15,11 +15,12 @@ def get_skins(polygon_layers):
 def get_layer_list(polygon_layers,BBox):
 
     layer_list = []
-    skins = get_skins(polygon_layers)
+    # skins = get_skins(shells)
     print("--- %s seconds ---" % (time.time() - start_time))
     for layer_index in range(len(polygon_layers)):
         layer = Layer(layer_index,polygon_layers,BBox)
         layer_list.append(layer)
+        layer.process_shells()
         layer.add_island(polygon_layers[layer_index],skins[layer_index])
         # for poly in layer_as_polygons:
         #     layer.add_island(poly)
@@ -51,8 +52,8 @@ def get_polygon_layers():
     BBox = bounding_box(stl_mesh)
 
     stl_mesh = remove_duplicates_from_mesh(stl_mesh)
-    slice_layers = slicer_from_mesh(stl_mesh, slice_height_from=BBox[4], slice_height_to=BBox[5], slice_step=0.2)
-    layers_as_polygons = polygonize_layers(slice_layers)
+    slice_layers = slicer_from_mesh_as_dict(stl_mesh, slice_height_from=BBox[4], slice_height_to=BBox[5], slice_step=0.2)
+    layers_as_polygons = polygonize_layers_from_trimed_dict(slice_layers)
     layers_as_polygons = reord_layers(layers_as_polygons)
 
     return layers_as_polygons,BBox

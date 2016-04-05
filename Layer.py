@@ -12,6 +12,10 @@ class Layer():
         for island in self.islands:
             return island.g_print()
 
+    def process_shells(self):
+        for island in self.islands:
+            island.process_shells()
+
     def add_island(self,polygons,skins):
         if len(polygons) != 0:
             island =Island(self.layers,polygons,skins,self.index,self.BBox)
