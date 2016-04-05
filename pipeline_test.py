@@ -3,6 +3,49 @@ from stl_read import *
 import pyclipper
 from Skins import *
 
+def polygonize_layers_from_trimed_dict(slice_layers):
+
+
+
+
+    slicesAsPolygons = []
+    for slicee in slice_layers:
+        polygons = []
+        slicesAsPolygons.append(polygons)
+        slicekeys = set(slicee.keys())
+
+        while True:
+            try:
+                start = slicekeys.pop()
+            except KeyError:
+                break
+
+            end = slicee[start][0]
+
+            newPolygon = []
+            first_point = start
+            polygons.append(newPolygon)
+
+            newPolygon.append(start)
+            newPolygon.append(end)
+            continuePolygon = True
+            # Is there a new line i the polygon
+            while continuePolygon:
+                continuePolygon = True
+                previous_neighbour = start
+
+                start = end
+                slicekeys.remove(end)
+                end = slicee[start][0]
+                if end == previous_neighbour:
+                    end = slicee[start][1]
+                if end == first_point:
+                    continuePolygon = False
+                newPolygon.append(end)
+
+    return slicesAsPolygons
+
+
 def polygonize_layers(slice_layers):
     newslices = []
     for layer in slice_layers:
@@ -166,12 +209,12 @@ if __name__ == '__main__':
     print("--- %s seconds ---" % (time.time() - start_time))
     mesh = remove_duplicates_from_mesh(mesh)
     print("--- %s seconds ---" % (time.time() - start_time))
-    slice_layers = slicer_from_mesh(mesh, slice_height_from=0, slice_height_to=100, slice_step=1)
+    slice_layers = slicer_from_mesh_as_dict(mesh, slice_height_from=0, slice_height_to=100, slice_step=1)
     print("--- %s seconds ---" % (time.time() - start_time))
-    layers_as_polygons = polygonize_layers(slice_layers)
+    layers_as_polygons = polygonize_layers_from_trimed_dict(slice_layers)
+    print("--- %s seconds ---" % (time.time() - start_time))
     for layer in layers_as_polygons:
-        pyclipper.SimplifyPolygons(layer)
-        pyclipper.CleanPolygons(layer)
+        vizz_2d_multi(layer)
     # tut = pyclipper.scale_to_clipper(10)
     # vizz_2d_multi(layers_as_polygons[8])
     # vizz_2d_multi(layers_as_polygons[9])
