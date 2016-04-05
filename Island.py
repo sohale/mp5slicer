@@ -2,10 +2,15 @@ from pipeline_test import *
 from Parts import *
 
 class Island():
-    def __init__(self,polygons ):
+    def __init__(self,layer, layers,polygons,skin_polygons,layer_index,BBox ):
+        self.layer = layer
         self.type = None # object/support/enclosure/ raft
         self.parts = []
-        self.get_parts(polygons)
+        self.layer_index = layer_index
+        self.layers = layers
+        self.BBox = BBox
+        self.get_parts(polygons,skin_polygons)
+
 
     def g_print(self):
         printable_parts = []
@@ -21,17 +26,20 @@ class Island():
         pass
 
     def make_infill_with_skins(self,polygons,skins):
-        pass
+        infill = Infill(self.layers,polygons,self.layer_index,True,self.BBox)
+        return infill
 
     def make_infill(self,polygons):
-        pass
+        infill = Infill(polygons,self.layer_index,False)
+        return infill
 
-    def get_parts(self, polygons):
+    def get_parts(self, polygons,skin_polygons):
         self.parts.append(self.make_outline(polygons))
-        # skins = self.make_skins(polygons)
-        # if skins != None:
-        #     self.parts.append(skins)
-        #     infill = self.make_infill_with_skins(polygons,skins)
+
+        # if len(skin_polygons) != 0:
+        #     # skins = self.make_skins(skin_polygons)
+        #     # self.parts.append(skins)
+        #     infill = self.make_infill_with_skins(polygons,skin_polygons)
         #     self.parts.append(infill)
         # else:
         #     infill = self.make_infill(polygons)

@@ -515,8 +515,9 @@ def poly_layer_infill_line_segment(poly_layer, dy, horizontal_or_vertical, slice
         boundary_polygon = polygon[0] # polygon[0] is the boundary of the polygon
         if len(boundary_polygon) > 2: # a polygon with length 2 is ill defined
             ray_trace_for_whole_layer.append(ray_trace_polygon(boundary_polygon, dy, horizontal_or_vertical, slice_min, slice_max, 'boundary', does_visualise=False))
-        for hole_polygon in polygon[1:]:
-            ray_trace_for_whole_layer.append(ray_trace_polygon(hole_polygon, dy, horizontal_or_vertical, slice_min, slice_max, 'hole', does_visualise=False))
+        if len(polygon[1:]) != 0:
+            for hole_polygon in polygon[1:]:
+                ray_trace_for_whole_layer.append(ray_trace_polygon(hole_polygon, dy, horizontal_or_vertical, slice_min, slice_max, 'hole', does_visualise=False))
 
     merged_result = merge_result_by_first_argument(ray_trace_for_whole_layer)
 
