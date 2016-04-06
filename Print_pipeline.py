@@ -19,7 +19,7 @@ def get_layer_list(polygon_layers,BBox):
     # skins = get_skins(shells)
     print("--- %s seconds ---" % (time.time() - start_time))
     for layer_index in range(len(polygon_layers)):
-        layer = Layer(layer_index,polygon_layers,BBox)
+        layer = Layer(polygon_layers,layer_index,BBox)
         layer_list.append(layer)
         layer.process_shells()
         # layer.add_island(polygon_layers[layer_index])
@@ -55,6 +55,8 @@ def get_polygon_layers():
 
     slice_layers = slicer_from_mesh_as_dict(mesh, slice_height_from=0, slice_height_to=40, slice_step=0.3)
     layers_as_polygons = polygonize_layers_from_trimed_dict(slice_layers)
+    # for layer in layers_as_polygons:
+    #     vizz_2d_multi(layer)
     layers_as_polygons = reord_layers(layers_as_polygons)
 
     return layers_as_polygons,BBox

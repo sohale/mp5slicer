@@ -8,25 +8,41 @@ class Outline:
 
         self.island = island
         self.polygons = polygons
-        self.polylines = self.make_polyline(polygons)
-        self.boundary
+        self.boundary = self.Boundary(polygons[0])
         self.holes  = []
+        for poly_index in range(1, len(polygons)):
+            self.holes.append(self.Hole(polygons[poly_index]))
+        print("xef")
 
     class Hole():
         def __init__(self,polygon):
-            self.polyon = polygon
+            self.polygon = polygon
             self.shells = []
+            self.polylines = []
 
         def make_shells(self):
-            self.shells.append(Outline.process_shell(self.polyon,0.3))
+            self.shells.append(Outline.process_shell(self.polygon,0.3))
+
+        def g_print(self):
+            self.polylines.append(Outline.process_polyline(self.polygon))
+            for shell in self.shells:
+                self.polylines.append(Outline.process_polyline(shell))
+            return self.polylines
 
     class Boundary():
         def __init__(self,polygon):
-            self.polyon = polygon
+            self.polygon = polygon
             self.shells = []
+            self.polylines = []
 
         def make_shells(self):
-            self.shells.append(Outline.process_shell(self.polyon,-0.3))
+            self.shells.append(Outline.process_shell(self.polygon,-0.3))
+
+        def g_print(self):
+            self.polylines.append(Outline.process_polyline(self.polygon))
+            for shell in self.shells:
+                self.polylines.append(Outline.process_polyline(shell))
+            return self.polylines
 
 
 
@@ -36,13 +52,22 @@ class Outline:
         self.boundary.make_shells()
 
     # todo: replace with a pyclipper wrap
-    def process_shell(self,polygon,offset):
+    @staticmethod
+    def process_shell(polygon,offset):
         clipper_polygon = pyclipper.scale_to_clipper(polygon)
         po = pyclipper.PyclipperOffset()
-        po.AddPaths(clipper_polygon,pyclipper.JT_SQUARE,pyclipper.ET_CLOSEDPOLYGON)
-        return pyclipper.scale_from_clipper(po.Execute(pyclipper.scale_to_clipper(offset)))
+        po.AddPath(clipper_polygon,pyclipper.JT_SQUARE,pyclipper.ET_CLOSEDPOLYGON)
+        clipper_offset = pyclipper.scale_to_clipper(offset)
+        offset_poly = pyclipper.scale_from_clipper(po.Execute(clipper_offset))
+        if len(offset_poly) >0:
+            return  offset_poly[0]
+        else:
+            return []
 
-    def get_polyline(self,polygon):
+    @staticmethod
+    def process_polyline(polygon):
+        if len(polygon) == 0:
+            return []
         polyline = []
         start_point = polygon[0] # frist vertex of the polygon
         start_point = Point2D(start_point[0],start_point[1])
@@ -54,21 +79,22 @@ class Outline:
         polyline.append(start_point)
         return polyline
 
-    def make_boundary(self):
-        self.get_polyline()
 
-    def make_polyline(self,polygons):
-        polylines = []
-        for polygon in polygons:
-            polylines.append(self.get_polyline(polygon))
-            innershell = self.get_innershell(polygon)
-            polylines.append(self.get_polyline(innershell))
-            innershell = self.get_innershell(innershell)
-            polylines.append(self.get_polyline(innershell))
-        return polylines
+
+    # @staticmethod
+    # def make_polyline(polygon):
+    #     polylines = []
+    #     for polygon in polygons:
+    #         polylines.append(self.get_polyline(polygon))
+    #     return polylines
 
     def g_print(self):
-        return self.polylines
+        polylines = []
+        for hole in self.holes:
+            polylines += hole.g_print()
+        polylines += self.boundary.g_print()
+
+        return polylines
 
 
 # class Infill:

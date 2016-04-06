@@ -27,14 +27,11 @@ class G_buffer:
         for layer in self.layer_list:
             if layer != None:
                 for line in layer:
-                    gcodeFile.write(gcodeEnvironment.goToNextPoint(line[0]))
-                    for point_index in range(1,len(line)):
-                        gcodeFile.write(gcodeEnvironment.drawToNextPoint(line[point_index]))
+                    if len(line) > 0:
+                        gcodeFile.write(gcodeEnvironment.goToNextPoint(line[0]))
+                        for point_index in range(1,len(line)):
+                            gcodeFile.write(gcodeEnvironment.drawToNextPoint(line[point_index]))
                 gcodeEnvironment.Z += printSettings.layerThickness
-
-
-
-
 
 
         gcodeFile.write(gcodeEnvironment.retractFilament(printSettings.retractionLength))

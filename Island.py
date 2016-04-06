@@ -2,29 +2,29 @@ from pipeline_test import *
 from Parts import *
 
 class Island():
-    def __init__(self,layer, layers,polygons,layer_index,BBox ):
-        self.layer = layer
+    def __init__(self, layers,layer_index,BBox ):
         self.type = None # object/support/enclosure/ raft
         self.outlines = []
         self.layer_index = layer_index
         self.layers = layers
         self.BBox = BBox
-        self.process_outlines(polygons)
+        self.process_outlines(self.layers[layer_index])
 
     def process_shells(self):
-        self.outline.make_shells()
+        for outline in self.outlines:
+            outline.make_shells()
 
 
 
 
     def g_print(self):
         printable_parts = []
-        for part in self.parts:
-            printable_parts += part.g_print()
+        for outline in self.outlines:
+            printable_parts += outline.g_print()
         return  printable_parts
 
     def make_outline(self,polygons):
-        outline = Outline(polygons)
+        outline = Outline(self, polygons)
         return outline
 
     # def make_skins(self,polygons,top_layer):
@@ -39,7 +39,7 @@ class Island():
     #     return infill
 
     def process_outlines(self, polygons):
-        self.outline.append(self.make_outline(self,polygons))
+        self.outlines.append(self.make_outline(polygons))
 
         # if len(skin_polygons) != 0:
         #     # skins = self.make_skins(skin_polygons)
