@@ -3,6 +3,7 @@ from G_buffer import G_buffer
 from pipeline_test import *
 from Skins import *
 import time
+from mesh_operations import mesh as MPmesh
 
 global start_time
 
@@ -21,7 +22,7 @@ def get_layer_list(polygon_layers,BBox):
         layer = Layer(layer_index,polygon_layers,BBox)
         layer_list.append(layer)
         layer.process_shells()
-        layer.add_island(polygon_layers[layer_index],skins[layer_index])
+        # layer.add_island(polygon_layers[layer_index])
         # for poly in layer_as_polygons:
         #     layer.add_island(poly)
     print("--- %s seconds ---" % (time.time() - start_time))
@@ -42,17 +43,17 @@ def bounding_box(stl_mesh):
 
 def get_polygon_layers():
     from stl import mesh
-    stl_mesh = mesh.Mesh.from_file("elephant.stl")
+    stl_mesh = mesh.Mesh.from_file("cyl_cyl.stl")
+    mesh = MPmesh(stl_mesh.vectors, fix_mesh= True)
     # assume the center of the mesh are at (0,0)
     # translate x by 70
-    stl_mesh.vectors[:,:,0]+=70
-    # translate y by 70
-    stl_mesh.vectors[:,:,1]+=70
+    # mesh.triangles[:,:,0]+=70
+    # # translate y by 70
+    # mesh.triangles[:,:,1]+=70
 
     BBox = bounding_box(stl_mesh)
 
-    stl_mesh = remove_duplicates_from_mesh(stl_mesh)
-    slice_layers = slicer_from_mesh_as_dict(stl_mesh, slice_height_from=BBox[4], slice_height_to=BBox[5], slice_step=0.2)
+    slice_layers = slicer_from_mesh_as_dict(mesh, slice_height_from=0, slice_height_to=40, slice_step=0.3)
     layers_as_polygons = polygonize_layers_from_trimed_dict(slice_layers)
     layers_as_polygons = reord_layers(layers_as_polygons)
 

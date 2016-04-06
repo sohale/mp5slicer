@@ -7,6 +7,7 @@ class Layer():
         self.islands = []
         self.index = index
         self.BBox = BBox
+        self.add_island()
 
     def G_print(self):
         for island in self.islands:
@@ -16,8 +17,8 @@ class Layer():
         for island in self.islands:
             island.process_shells()
 
-    def add_island(self,polygons,skins):
-        if len(polygons) != 0:
-            island =Island(self.layers,polygons,skins,self.index,self.BBox)
+    def add_island(self):
+        if len(self.layers[self.index]) != 0:
+            island =Island(self.layers,self.index,self.BBox)
             self.islands.append(island)
 

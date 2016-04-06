@@ -19,13 +19,19 @@ class Plane:
         if dist_0*dist_1 > 0:
             return None
         else:
-            t = dist_0 / (dist_0 - dist_1)
+            t =  dist_0 /  (dist_0 - dist_1)
             outP = vertice_0 + t * (vertice_1 - vertice_0)
             return outP
 
     def intersection_with_triangle(self, triangle):
         # triangle is a 3*3 matrix
         assert isinstance(triangle, np.ndarray)
+        if(np.array_equal(triangle[0],triangle[1])):
+            return []
+        if(np.array_equal(triangle[0],triangle[2])):
+            return []
+        if(np.array_equal(triangle[2],triangle[1])):
+            return []
         vertice_0 = triangle[0]
         vertice_1 = triangle[1]
         vertice_2 = triangle[2]
@@ -77,7 +83,16 @@ def slicer_from_mesh(mesh, slice_height_from=0, slice_height_to=100, slice_step=
 
     return slice_layers
 
+def truncate(f, n):
+    '''Truncates/pads a float f to n decimal places without rounding'''
+    s = '{}'.format(f)
+    if 'e' in s or 'E' in s:
+        return '{0:.{1}f}'.format(f, n)
+    i, p, d = s.partition('.')
+    return '.'.join([i, (d+'0'*n)[:n]])
+
 def slicer_from_mesh_as_dict(mesh, slice_height_from=0, slice_height_to=100, slice_step=1):
+    import decimal
 
     normal = np.array([[0.],[0.],[1.]])
 
@@ -85,7 +100,7 @@ def slicer_from_mesh_as_dict(mesh, slice_height_from=0, slice_height_to=100, sli
     sliceplanes_height = np.arange(slice_height_from, slice_height_to, slice_step)
     slice_layers = [{} for i in range(len(sliceplanes_height))]
 
-    for triangle in mesh.vectors:
+    for triangle in mesh.triangles:
         tri_min, tri_max = min_max_z(triangle)
         intersect_planes_heights = sliceplanes_height[(tri_min<sliceplanes_height)&(sliceplanes_height<tri_max)]
         plane_index = np.where((tri_min<sliceplanes_height)&(sliceplanes_height<tri_max))[0]
@@ -95,8 +110,11 @@ def slicer_from_mesh_as_dict(mesh, slice_height_from=0, slice_height_to=100, sli
             line = plane.intersection_with_triangle(triangle)
             line[0] =line[0][:2]
             for point_index in range(len(line)):
+                # for val_index in range(len(line[point_index])):
+                #     line[point_index][val_index] = round(line[point_index][val_index],2)
+                # line[point_index] = line[point_index].tolist()
                 for val_index in range(len(line[point_index])):
-                    line[point_index][val_index] = round(line[point_index][val_index],4)
+                    line[point_index][val_index] = truncate(line[point_index][val_index],4)
 
             point1 = tuple(line[0])
             line[1] =line[1][:2]

@@ -5,7 +5,9 @@ import numpy as np
 
 class Outline:
     def __init__(self,island,polygons):
+
         self.island = island
+        self.polygons = polygons
         self.polylines = self.make_polyline(polygons)
         self.boundary
         self.holes  = []

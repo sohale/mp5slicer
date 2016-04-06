@@ -19,6 +19,8 @@ class mesh():
 		else:
 			self.areas   = np.asarray(input_areas)
 
+		# self.scale_to_int()
+		self.rm_zero_vol()
 		if fix_mesh:
 			self.remove_badtriangles()
 			self.remove_duplicates()
@@ -26,7 +28,7 @@ class mesh():
 	
 		self.normalise_normals()
 		self.sort_by_z()
-		self.scale_to_int()
+
 
 
 	def compute_normals(self):
@@ -104,6 +106,15 @@ class mesh():
 		self.normals   = self.normals[mask]
 		self.areas     = self.areas[mask]
 
+	def rm_zero_vol(self):
+
+		mask = np.ones(len(self.triangles), dtype=bool)
+		for trianlge_index in range(len(self.triangles)):
+			if np.linalg.det(self.triangles[trianlge_index]) == 0:
+				mask[trianlge_index] = False
+		self.triangles = self.triangles[mask]
+
+
 	def scale_to_int(self):
 
 	        # This function returns the points and normals as ints, throwing away some
@@ -111,7 +122,7 @@ class mesh():
 		# both are rounded to different tolerances, changing their units. 
 		# the areas are unaltered, meaning that they are no longer in the same units are the triangles.
 		# this doesn't seem very important at the moment.
-       		self.triangles = (self.triangles / 10**(np.floor(np.log10(np.abs(np.max(self.triangles))))-4 )).astype(int)
+       		self.triangles = (self.triangles / 10**(np.floor(np.log10(np.abs(np.max(self.triangles))))-8 )).astype(int)
 		self.normals   = (self.normals   / 10**(np.floor(np.log10(np.abs(np.max(self.normals))))-3 )).astype(int)
 	
 

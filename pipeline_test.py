@@ -31,17 +31,24 @@ def polygonize_layers_from_trimed_dict(slice_layers):
             continuePolygon = True
             # Is there a new line i the polygon
             while continuePolygon:
-                continuePolygon = True
                 previous_neighbour = start
 
                 start = end
-                slicekeys.remove(end)
+                try:
+                    slicekeys.remove(end)
+                except:
+                    print("yefy")
+
                 end = slicee[start][0]
                 if end == previous_neighbour:
+
                     end = slicee[start][1]
+
+
                 if end == first_point:
                     continuePolygon = False
-                newPolygon.append(end)
+                else:
+                    newPolygon.append(end)
 
     return slicesAsPolygons
 

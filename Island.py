@@ -2,17 +2,17 @@ from pipeline_test import *
 from Parts import *
 
 class Island():
-    def __init__(self,layer, layers,polygons,skin_polygons,layer_index,BBox ):
+    def __init__(self,layer, layers,polygons,layer_index,BBox ):
         self.layer = layer
         self.type = None # object/support/enclosure/ raft
-        self.outline = []
+        self.outlines = []
         self.layer_index = layer_index
         self.layers = layers
         self.BBox = BBox
-        self.get_parts(polygons,skin_polygons)
+        self.process_outlines(polygons)
 
     def process_shells(self):
-        self.outline.add_shells()
+        self.outline.make_shells()
 
 
 
@@ -38,8 +38,8 @@ class Island():
     #     infill = Infill(polygons,self.layer_index,False)
     #     return infill
 
-    def get_parts(self, polygons,skin_polygons):
-        self.outline.append(self.make_outline(polygons))
+    def process_outlines(self, polygons):
+        self.outline.append(self.make_outline(self,polygons))
 
         # if len(skin_polygons) != 0:
         #     # skins = self.make_skins(skin_polygons)
