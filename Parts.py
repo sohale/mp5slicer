@@ -1,5 +1,7 @@
 from gcode_writer import *
 import pyclipper
+from infill_paterns import *
+from Skins import *
 
 import numpy as np
 
@@ -12,7 +14,6 @@ class Outline:
         self.holes  = []
         for poly_index in range(1, len(polygons)):
             self.holes.append(self.Hole(polygons[poly_index]))
-        print("xef")
 
     class Hole():
         def __init__(self,polygon):
@@ -79,6 +80,16 @@ class Outline:
         polyline.append(start_point)
         return polyline
 
+    def get_innershells(self):
+        innershells = []
+
+        innershells.append(self.boundary.shells[len(self.boundary.shells)-1])
+        for hole in self.holes:
+            innershells.append(hole.shells[len(self.boundary.shells)-1])
+
+        return innershells
+
+
 
 
     # @staticmethod
@@ -97,40 +108,69 @@ class Outline:
         return polylines
 
 
-# class Infill:
-#     def __init__(self,island, layers,polygons,layer_index,dense,BBox):
-#         self.island = island
-#         self.dense = dense
-#         self.layers =layers
-#         self.BBox = BBox
-#         self.polyline = self.make_polyline(polygons, layer_index)
-#
-#
-#     def make_polyline(self,polygons,layer_index):
-#
-#         # start of a layer
-#         if layer_index%2:
-#             horizontal_or_vertical = 'vertical'
-#
-#         else:
-#             horizontal_or_vertical = 'horizontal'
-#
-#         slice_min = np.min(self.BBox)
-#         slice_max = np.max(self.BBox)
-#         # first two layers and last two layers are set to be fully filled
-#         if layer_index == 1 or layer_index == 2 or layer_index == len(self.layers) - 1 or layer_index == len(self.layers) or self.dense:
-#             infill_line_segment = poly_layer_infill_line_segment(polygons, 0.3, horizontal_or_vertical, slice_min, slice_max)
-#         else: # low infill density
-#             infill_line_segment = poly_layer_infill_line_segment(polygons, 2, horizontal_or_vertical, slice_min, slice_max)
-#
-#
-#         for each_infill_lines in infill_line_segment:
-#             pass
-#
-#
-#
-#     def g_prtint(self):
-#         return self.polyline
+class Infill:
+    def __init__(self, polygons,layers,layer_index,BBox):
+        self.layers =layers
+        self.polygons =polygons
+        self.BBox = BBox
+        self.XorY = layer_index%2
+        self.pattern = None
+
+        self.polylines = self.make_polyline(polygons, layer_index)
+
+
+    def make_polyline(self,polygons,layer_index):
+
+        polylines = []
+        # slice_min = np.min(self.BBox)
+        # slice_max = np.max(self.BBox)
+        # first two layers and last two layers are set to be fully filled
+        if layer_index == 1 or layer_index == 2 or layer_index == len(self.layers) - 1 or layer_index == len(self.layers):
+            self.pattern = linear_infill(0.2,self.XorY,self.BBox)
+        else: # low infill density
+            self.pattern = linear_infill(1,self.XorY,self.BBox)
+
+        innerlines =[]
+        if len(self.polygons[0]) == 0:
+            print("fdf")
+        innerlines_as_tree = inter_layers(self.pattern,self.polygons[0],False)
+        for interline in innerlines_as_tree.Childs:
+            innerlines.append(interline.Contour)
+        innerlines = pyclipper.scale_from_clipper(innerlines)
+
+        for hole_index in range(1, len(self.polygons)):
+            if len(self.polygons[hole_index]) == 0:
+                print("fdf")
+            innerlines_as_tree = diff_layers(innerlines,self.polygons[hole_index],False)
+            innerlines =[]
+
+            for interline in innerlines_as_tree.Childs:
+                innerlines.append(interline.Contour)
+            innerlines = pyclipper.scale_from_clipper(innerlines)
+
+        return innerlines
+
+
+    def process_polyline(self,polygon):
+        if len(polygon) == 0:
+            return []
+        polyline = []
+        start_point = polygon[0] # frist vertex of the polygon
+        start_point = Point2D(start_point[0],start_point[1])
+        polyline.append(start_point)
+        for point in polygon[1:]: # the rest of the vertices
+            point = Point2D(point[0],point[1])
+            polyline.append(point)
+        return polyline
+
+
+
+
+    def g_prtint(self):
+        polylines = []
+        for polyline in self.polylines:
+            polylines.append(self.process_polyline(polyline))
+        return polylines
 #
 # class Skin:
 #     def __init__(self,island,polyline):

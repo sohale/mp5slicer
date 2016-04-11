@@ -1,11 +1,13 @@
 import numpy as np
 from rotation import rotate as rotation
+import decimal
 
 class mesh():
 
 	def __init__(self, input_triangles=0, input_normals=0, input_areas=0, fix_mesh=False):
 		if type(input_triangles) == int:
 			return "Input mesh required"
+
 
 		self.triangles = np.asarray(input_triangles)
 
@@ -19,7 +21,7 @@ class mesh():
 		else:
 			self.areas   = np.asarray(input_areas)
 
-		# self.scale_to_int()
+		self.scale_to_int()
 		self.rm_zero_vol()
 		if fix_mesh:
 			self.remove_badtriangles()
@@ -122,7 +124,7 @@ class mesh():
 		# both are rounded to different tolerances, changing their units. 
 		# the areas are unaltered, meaning that they are no longer in the same units are the triangles.
 		# this doesn't seem very important at the moment.
-       		self.triangles = (self.triangles / 10**(np.floor(np.log10(np.abs(np.max(self.triangles))))-8 )).astype(int)
+		self.triangles = (self.triangles).astype(dtype= np.dtype(decimal.Decimal))
 		self.normals   = (self.normals   / 10**(np.floor(np.log10(np.abs(np.max(self.normals))))-3 )).astype(int)
 	
 

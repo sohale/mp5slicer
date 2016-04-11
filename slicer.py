@@ -1,5 +1,7 @@
 import numpy as np
 from collections import namedtuple
+from mpmath import fp
+import decimal
 
 class Plane:
     def __init__(self, normal, z):
@@ -8,7 +10,8 @@ class Plane:
 
     def distance_to_vertice(self, vertice):
         assert isinstance(vertice, np.ndarray)
-        distance = np.dot(vertice, self.normal) - self.z
+        dot = np.dot(vertice, self.normal)
+        distance = dot - self.z
         assert len(distance) == 1
         return distance[0]
 
@@ -19,9 +22,12 @@ class Plane:
         if dist_0*dist_1 > 0:
             return None
         else:
-            t =  dist_0 /  (dist_0 - dist_1)
+            t =  dist_0 /  float(dist_0 - dist_1)
             outP = vertice_0 + t * (vertice_1 - vertice_0)
+
             return outP
+
+
 
     def intersection_with_triangle(self, triangle):
         # triangle is a 3*3 matrix
@@ -66,12 +72,12 @@ def slicer(stl_filepath, slice_height_from=0, slice_height_to=100, slice_step=1)
 
 def slicer_from_mesh(mesh, slice_height_from=0, slice_height_to=100, slice_step=1):
 
-    normal = np.array([[0.],[0.],[1.]])
+    normal = np.array([[0.],[0.],[1.]], dtype=np.dtype(decimal.Decimal))
 
     sliceplanes_height = np.arange(slice_height_from, slice_height_to, slice_step)
     slice_layers = [[] for i in range(len(sliceplanes_height))]
 
-    for triangle in mesh.vectors:
+    for triangle in mesh.triangles:
         tri_min, tri_max = min_max_z(triangle)
         intersect_planes_heights = sliceplanes_height[(tri_min<sliceplanes_height)&(sliceplanes_height<tri_max)]
         plane_index = np.where((tri_min<sliceplanes_height)&(sliceplanes_height<tri_max))[0]
@@ -89,12 +95,13 @@ def truncate(f, n):
     if 'e' in s or 'E' in s:
         return '{0:.{1}f}'.format(f, n)
     i, p, d = s.partition('.')
-    return '.'.join([i, (d+'0'*n)[:n]])
+    return float('.'.join([i, (d+'0'*n)[:n]]))
 
 def slicer_from_mesh_as_dict(mesh, slice_height_from=0, slice_height_to=100, slice_step=1):
     import decimal
 
     normal = np.array([[0.],[0.],[1.]])
+    # ufunc = np.vectorize(lambda x: truncate(x,8))
 
 
     sliceplanes_height = np.arange(slice_height_from, slice_height_to, slice_step)
@@ -109,15 +116,23 @@ def slicer_from_mesh_as_dict(mesh, slice_height_from=0, slice_height_to=100, sli
         for index, plane in zip(plane_index, planes):
             line = plane.intersection_with_triangle(triangle)
             line[0] =line[0][:2]
+            # print(type(line[0][0]))
+            # ufunc(line[0])
+            line[1] =line[1][:2]
+            # ufunc(line[1])
+
+
+            line[0] = line[0].tolist()
+            line[1] = line[1].tolist()
             for point_index in range(len(line)):
-                # for val_index in range(len(line[point_index])):
-                #     line[point_index][val_index] = round(line[point_index][val_index],2)
-                # line[point_index] = line[point_index].tolist()
+            # #     # for val_index in range(len(line[point_index])):
+            # #     #     line[point_index][val_index] = round(line[point_index][val_index],2)
+            # #     # line[point_index] = line[point_index].tolist()
                 for val_index in range(len(line[point_index])):
-                    line[point_index][val_index] = truncate(line[point_index][val_index],4)
+                    line[point_index][val_index] = truncate(line[point_index][val_index],8)
 
             point1 = tuple(line[0])
-            line[1] =line[1][:2]
+
             point2= tuple(line[1])
             try:
                 slice_layers[index][point1].append(point2)

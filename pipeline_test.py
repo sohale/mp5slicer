@@ -5,6 +5,13 @@ from Skins import *
 
 def polygonize_layers_from_trimed_dict(slice_layers):
 
+    for slice in slice_layers:
+
+        for bipoint in slice:
+            if len(slice[bipoint]) != 2:
+                print(bipoint," : ",slice[bipoint])
+
+
 
 
 
@@ -37,6 +44,7 @@ def polygonize_layers_from_trimed_dict(slice_layers):
                 try:
                     slicekeys.remove(end)
                 except:
+                    # pass
                     print("yefy")
 
                 end = slicee[start][0]
