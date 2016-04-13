@@ -16,7 +16,7 @@ def arrange_path(lines):
 
     ordered_lines = []
     current_index = 0
-    end_point = True #the end point in the new referential is also an end point in the unordered referential
+    end_point = False #True if the line start by an end point
 
 
     while(len(ordered_lines)< len(lines)):
@@ -43,9 +43,10 @@ def arrange_path(lines):
 def get_next_point(init_point_index, end_point, start_points_list, end_points_list, already_used_points, end_offset):
     min_dist_tuple = (float("inf"),None,None)
     if end_point:
-        start_point = end_points_list[init_point_index]
-    else:
         start_point = start_points_list[init_point_index]
+
+    else:
+        start_point = end_points_list[init_point_index]
 
 
 
