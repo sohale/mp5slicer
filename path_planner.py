@@ -3,13 +3,14 @@ import bintrees
 
 def arrange_path(lines):
 
+
     start_points_list = [None]*len(lines)
     end_points_list = [None]*len(lines)
     for line_index in range(len(lines)):
         start_points_list[line_index] = lines[line_index][0]
         end_points_list[line_index] = lines[line_index][len(lines[line_index])-1]
 
-    end_offset = len(lines) -1
+    end_offset = len(lines)
 
     already_used_points = [False]*(len(lines)*2)
 
@@ -25,43 +26,46 @@ def arrange_path(lines):
             # reversed_list = lines[current_index]
             lines[current_index].reverse()
             ordered_lines.append(lines[current_index])
-            next_point_tuple = get_next_point(current_index,start_points_list, end_points_list, already_used_points, end_offset)
+
+
         else: #search with end point
             ordered_lines.append(lines[current_index])
-            next_point_tuple = get_next_point(current_index,start_points_list, end_points_list, already_used_points, end_offset)
 
-        current_index = next_point_tuple[1] % len(lines)
-        end_point = next_point_tuple[2]
+        if (len(ordered_lines)< len(lines)):
+            already_used_points[current_index] = True
+            already_used_points[current_index + end_offset] = True
+            next_point_tuple = get_next_point(current_index,end_point, start_points_list, end_points_list, already_used_points, end_offset)
+            current_index = next_point_tuple[1] % (len(lines))
+            end_point = next_point_tuple[2]
 
     return ordered_lines
 
-def get_next_point(start_point_index, start_points_list, end_points_list, already_used_points, end_offset):
-        min_dist_tuple = (float("inf"),None,None)
-
-        start_point = start_points_list[start_point_index]
-
-
-        for point_index in range(len(start_points_list)):
-            if start_point_index != point_index:
-                if not already_used_points[point_index]:
-                    distance = dist(start_point,start_points_list[point_index])
-                    if distance < min_dist_tuple[0] :
-                        min_dist_tuple = (distance,point_index, False)
-                        used_point_index1 = point_index
-                        used_point_index2 = point_index + end_offset
+def get_next_point(init_point_index, end_point, start_points_list, end_points_list, already_used_points, end_offset):
+    min_dist_tuple = (float("inf"),None,None)
+    if end_point:
+        start_point = end_points_list[init_point_index]
+    else:
+        start_point = start_points_list[init_point_index]
 
 
-        for point_index in range(len(end_points_list)):
-            if start_point_index != point_index:
-                if not already_used_points[point_index]:
-                    distance = dist(start_point,end_points_list[point_index])
-                    if distance < min_dist_tuple[0] :
-                        min_dist_tuple = (distance,point_index + end_offset, True)
-                        used_point_index1 = point_index
-                        used_point_index2 = point_index + end_offset
 
-        already_used_points[used_point_index1] = True
-        already_used_points[used_point_index2] = True
+    for point_index in range(len(start_points_list)):
+        if not already_used_points[point_index]:
+            distance = dist(start_point,start_points_list[point_index])
+            if distance < min_dist_tuple[0] :
+                min_dist_tuple = (distance,point_index, False)
+
+
+
+    for point_index in range(len(end_points_list)):
+        if not already_used_points[point_index]:
+            distance = dist(start_point,end_points_list[point_index])
+            if distance < min_dist_tuple[0] :
+                min_dist_tuple = (distance,point_index + end_offset, True)
+
+
+
+    return min_dist_tuple
 
 
 
