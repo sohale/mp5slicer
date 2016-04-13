@@ -2,6 +2,7 @@ from gcode_writer import *
 import pyclipper
 from infill_paterns import *
 from Skins import *
+from path_planner import *
 
 import numpy as np
 
@@ -22,7 +23,7 @@ class Outline:
             self.polylines = []
 
         def make_shells(self):
-            self.shells.append(Outline.process_shell(self.polygon,0.3))
+            self.shells.append(Outline.process_shell(self.polygon,0.8))
 
         def g_print(self):
             self.polylines.append(Outline.process_polyline(self.polygon))
@@ -37,7 +38,7 @@ class Outline:
             self.polylines = []
 
         def make_shells(self):
-            self.shells.append(Outline.process_shell(self.polygon,-0.3))
+            self.shells.append(Outline.process_shell(self.polygon,-0.8))
 
         def g_print(self):
             self.polylines.append(Outline.process_polyline(self.polygon))
@@ -109,26 +110,30 @@ class Outline:
 
 
 class Infill:
-    def __init__(self, polygons,layers,layer_index,BBox):
+    def __init__(self, polygons,skin, layers,layer_index,BBox):
         self.layers =layers
         self.polygons =polygons
         self.BBox = BBox
         self.XorY = layer_index%2
         self.pattern = None
+        if isinstance(skin, Skin):
+            skin_polygon = skin.polygons
+        else:
+            skin_polygon = []
 
-        self.polylines = self.make_polyline(polygons, layer_index)
+        self.polylines = self.make_polyline(polygons,skin_polygon, layer_index)
 
 
-    def make_polyline(self,polygons,layer_index):
+    def make_polyline(self,polygons,skin_polygons, layer_index):
 
         polylines = []
         # slice_min = np.min(self.BBox)
         # slice_max = np.max(self.BBox)
         # first two layers and last two layers are set to be fully filled
         if layer_index == 1 or layer_index == 2 or layer_index == len(self.layers) - 1 or layer_index == len(self.layers):
-            self.pattern = linear_infill(0.2,self.XorY,self.BBox)
+            self.pattern = linear_infill(0.8,self.XorY,self.BBox)
         else: # low infill density
-            self.pattern = linear_infill(1,self.XorY,self.BBox)
+            self.pattern = linear_infill(3,self.XorY,self.BBox)
 
         innerlines =[]
         if len(self.polygons[0]) == 0:
@@ -148,6 +153,16 @@ class Infill:
                 innerlines.append(interline.Contour)
             innerlines = pyclipper.scale_from_clipper(innerlines)
 
+
+        for skin_index in range(1, len(skin_polygons)):
+            if len(skin_polygons[skin_index]) != 0:
+                innerlines_as_tree = diff_layers(innerlines,pyclipper.scale_from_clipper(skin_polygons[skin_index]),False)
+                innerlines =[]
+
+                for interline in innerlines_as_tree.Childs:
+                    innerlines.append(interline.Contour)
+                innerlines = pyclipper.scale_from_clipper(innerlines)
+
         return innerlines
 
 
@@ -166,23 +181,56 @@ class Infill:
 
 
 
-    def g_prtint(self):
+    def g_print(self):
+        polylines = []
+        for polyline in self.polylines:
+            polylines.append(self.process_polyline(polyline))
+        polylines = arrange_path(polylines)
+        return polylines
+
+class Skin:
+    def __init__(self,polygons,layers,layer_index,BBox):
+        self.layers = layers
+        self.polygons =polygons
+        self.BBox = BBox
+        self.XorY = layer_index%2
+        self.pattern = None
+
+        self.polylines = self.make_polyline(polygons, layer_index)
+
+
+    def make_polyline(self,polygons,layer_index):
+
+        self.pattern = linear_infill(0.8,self.XorY,self.BBox)
+        innerlines =[]
+        for polygon in polygons:
+            if len(polygon) != 0:
+                innerlines += pyclipper.OpenPathsFromPolyTree(inter_layers(self.pattern,pyclipper.scale_from_clipper(polygon),False))
+                # print("gsgsgxg")
+                # pyclipper.PolyTreeToPaths()
+
+        innerlines = pyclipper.scale_from_clipper(innerlines)
+
+        return innerlines
+
+
+    def process_polyline(self,polygon):
+        if len(polygon) == 0:
+            return []
+        polyline = []
+        start_point = polygon[0] # frist vertex of the polygon
+        start_point = Point2D(start_point[0],start_point[1])
+        polyline.append(start_point)
+        for point in polygon[1:]: # the rest of the vertices
+            point = Point2D(point[0],point[1])
+            polyline.append(point)
+        return polyline
+
+
+
+
+    def g_print(self):
         polylines = []
         for polyline in self.polylines:
             polylines.append(self.process_polyline(polyline))
         return polylines
-#
-# class Skin:
-#     def __init__(self,island,polyline):
-#         self.island = island
-#         self.polyline = polyline
-#
-#     def g_prtint(self):
-#         return self.polyline
-#
-# class Printed_line:
-#     def __init__(self,polyline):
-#         self.polyline = polyline
-#
-#     def g_prtint(self):
-#         return self.polyline

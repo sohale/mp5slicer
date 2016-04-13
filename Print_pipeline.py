@@ -26,6 +26,11 @@ def get_layer_list(polygon_layers,BBox):
         #     layer.add_island(poly)
     print("--- %s seconds ---" % (time.time() - start_time))
 
+    # process skins
+    for layer in layer_list:
+        layer.process_skins()
+        layer.process_infill()
+
 
 
     return layer_list
@@ -42,17 +47,19 @@ def bounding_box(stl_mesh):
 
 def get_polygon_layers():
     from stl import mesh
-    stl_mesh = mesh.Mesh.from_file("bubu.stl")
+    stl_mesh = mesh.Mesh.from_file("cyl_cyl.stl")
     print("--- %s seconds ---" % (time.time() - start_time))
     mesh = MPmesh(stl_mesh.vectors, fix_mesh= True)
     print("--- %s seconds ---" % (time.time() - start_time))
     # assume the center of the mesh are at (0,0)
     # translate x by 70
-    # mesh.triangles[:,:,0]+= 70
+    mesh.triangles[:,:,0]+= 70
     # translate y by 70
-    # mesh.triangles[:,:,1]+= 70
+    mesh.triangles[:,:,1]+= 70
     print("--- %s seconds ---" % (time.time() - start_time))
     BBox = bounding_box(stl_mesh)
+    cut = BBox[4:].tolist()
+    BBox = [0,150,0,150] + cut
 
     slice_layers = slicer_from_mesh_as_dict(mesh, slice_height_from=BBox[4], slice_height_to=BBox[5], slice_step=0.3)
     print("--- %s seconds ---" % (time.time() - start_time))

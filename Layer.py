@@ -24,7 +24,11 @@ class Layer():
 
     def process_skins(self):
         for island in self.islands:
-            island.process_skins(self.print_tree, self.index)
+            island.process_skins()
+
+    def process_infill(self):
+        for island in self.islands:
+            island.process_infill()
 
     def poly1_in_poly2(self,poly1,poly2):
         point = poly1[0]

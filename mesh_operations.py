@@ -23,9 +23,9 @@ class mesh():
 
 		self.scale_to_int()
 		self.rm_zero_vol()
-		if fix_mesh:
-			self.remove_badtriangles()
-			self.remove_duplicates()
+		# if fix_mesh:
+		# 	self.remove_badtriangles()
+		# 	self.remove_duplicates()
 		
 	
 		self.normalise_normals()

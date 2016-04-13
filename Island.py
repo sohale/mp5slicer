@@ -8,6 +8,7 @@ class Island():
         self.print_tree = print_tree
         self.type = None # object/support/enclosure/ raft
         self.outlines = []
+        self.skins = None
         self.infill = None
         self.layer_index = layer_index
         self.layers = layers
@@ -21,7 +22,7 @@ class Island():
             self.polygons += [poly.contour for poly in polynode.childs]
         self.process_outlines(self.polygons)
         self.process_shells()
-        self.process_infill()
+        # self.process_infill()
 
     def process_outlines(self, polygons):
         self.outlines.append(Outline(self, polygons))
@@ -33,14 +34,31 @@ class Island():
     def process_infill(self):
         for outline in self.outlines:
             boundaries = outline.get_innershells()
-            self.infill = Infill(boundaries,self.layers, self.layer_index,self.BBox)
+            self.infill = Infill(boundaries,self.skins ,self.layers, self.layer_index,self.BBox)
 
-    def process_upskins(self,):
-        upislands = self.print_tree[self.index].islands
-        intersect_layers()
+    def get_innershells(self):
+        for outline in self.outlines:
+            innershells = outline.get_innershells()
+        return innershells
 
-    def process_skins(self, print_tree, layer_index):
-        self.process_upskins()
+    def process_skins(self):
+        if self.layer_index != 0 and self.layer_index != len(self.layers)-2 and self.layer_index != len(self.layers)-1:
+            up_islands = self.print_tree[self.layer_index+1].islands
+            down_islands = self.print_tree[self.layer_index-1].islands
+            up_shells = []
+
+            for island in up_islands:
+                up_shells += island.get_innershells()
+            down_shells = []
+            for island in down_islands:
+                down_shells += island.get_innershells()
+            this_shells = self.get_innershells()
+            skins = intersect_layers_PT(down_shells,this_shells,up_shells)
+            if len(skins) != 0:
+                self.skins = Skin(skins,self.layers, self.layer_index,self.BBox)
+
+            # print("zfsgsg")
+
 
 
 
@@ -50,7 +68,9 @@ class Island():
         printable_parts = []
         for outline in self.outlines:
             printable_parts += outline.g_print()
-        printable_parts += self.infill.g_prtint()
+        printable_parts += self.infill.g_print()
+        if self.skins != None:
+            printable_parts += self.skins.g_print()
         return  printable_parts
 
 
