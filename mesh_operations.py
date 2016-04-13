@@ -141,3 +141,20 @@ class mesh():
 		self.normals   = self.normals[indices]
 		self.areas     = self.areas[indices]
 
+	def bounding_box(self):
+		# Returns a tuple of (max, min) for each of (x,y,z)
+		
+		x_max_min = (np.max(self.triangles[:,:,0]),  np.min(self.triangles[:,:,0]))
+		y_max_min = (np.max(self.triangles[:,:,1]),  np.min(self.triangles[:,:,1]))
+		z_max_min = (np.max(self.triangles[:,:,2]),  np.min(self.triangles[:,:,2]))
+
+		return (x_max_min, y_max_min, z_max_min)
+
+	def translate(self, translation):
+		# Apply a given translation vector to the mesh
+	
+		self.triangles[:,:,0] += translation[0]
+		self.triangles[:,:,1] += translation[1]
+		self.triangles[:,:,2] += translation[2]
+
+
