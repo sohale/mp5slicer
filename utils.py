@@ -1,7 +1,7 @@
-from  slicer import *
-from stl_read import *
-import pyclipper
 from Skins import *
+from  slicer import *
+
+
 
 def polygonize_layers_from_trimed_dict(slice_layers):
 
@@ -10,10 +10,6 @@ def polygonize_layers_from_trimed_dict(slice_layers):
         for bipoint in slice:
             if len(slice[bipoint]) != 2:
                 print(bipoint," : ",slice[bipoint])
-
-
-
-
 
     slicesAsPolygons = []
     for slicee in slice_layers:

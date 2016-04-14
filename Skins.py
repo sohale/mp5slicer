@@ -2,17 +2,17 @@ import pyclipper
 
 
 def diff_layers( _subj,_clip,closed):
-    subj = pyclipper.scale_to_clipper(_subj)
+    # subj = pyclipper.scale_to_clipper(_subj)
     # pyclipper.SimplifyPolygon(subj)
-    clip = pyclipper.scale_to_clipper(_clip)
+    # clip = pyclipper.scale_to_clipper(_clip)
     # pyclipper.SimplifyPolygon(clip)
     # vizz_2d(subj)
     # vizz_2d(clip)
 
     pc = pyclipper.Pyclipper()
-    pc.AddPath(clip, pyclipper.PT_CLIP, True)
+    pc.AddPath(_clip, pyclipper.PT_CLIP, True)
     try:
-        pc.AddPaths(subj, pyclipper.PT_SUBJECT, closed)
+        pc.AddPaths(_subj, pyclipper.PT_SUBJECT, closed)
     except:
         print("sgs")
 
@@ -22,17 +22,17 @@ def diff_layers( _subj,_clip,closed):
 
 
 def diff_layers_as_path( _subj,_clip,closed):
-    subj = pyclipper.scale_to_clipper(_subj)
+    # subj = pyclipper.scale_to_clipper(_subj)
     # pyclipper.SimplifyPolygon(subj)
-    clip = pyclipper.scale_to_clipper(_clip)
+    # clip = pyclipper.scale_to_clipper(_clip)
     # pyclipper.SimplifyPolygon(clip)
     # vizz_2d(subj)
     # vizz_2d(clip)
 
     pc = pyclipper.Pyclipper()
-    pc.AddPath(clip, pyclipper.PT_CLIP, True)
+    pc.AddPath(_clip, pyclipper.PT_CLIP, True)
     try:
-        pc.AddPaths(subj, pyclipper.PT_SUBJECT, closed)
+        pc.AddPaths(_subj, pyclipper.PT_SUBJECT, closed)
     except:
         print("sgs")
 
@@ -41,40 +41,42 @@ def diff_layers_as_path( _subj,_clip,closed):
     return solution
 
 def inter_layers( _subj,_clip,closed):
-    subj = pyclipper.scale_to_clipper(_subj)
+    # subj = pyclipper.scale_to_clipper(_subj)
     # pyclipper.SimplifyPolygon(subj)
-    clip = pyclipper.scale_to_clipper(_clip)
+    # clip = pyclipper.scale_to_clipper(_clip)
     # pyclipper.SimplifyPolygon(clip)
     # vizz_2d(subj)
     # vizz_2d(clip)
 
     pc = pyclipper.Pyclipper()
     try:
-        pc.AddPath(clip, pyclipper.PT_CLIP, True)
+        pc.AddPath(_clip, pyclipper.PT_CLIP, True)
     except:
         print("dsgs")
 
-    pc.AddPaths(subj, pyclipper.PT_SUBJECT, closed)
+    pc.AddPaths(_subj, pyclipper.PT_SUBJECT, closed)
 
     solution = pc.Execute2(pyclipper.CT_INTERSECTION, pyclipper.PFT_EVENODD, pyclipper.PFT_EVENODD)
 
     return solution
 
 def inter_layers_as_path( _subj,_clip,closed):
-    subj = pyclipper.scale_to_clipper(_subj)
+    # subj = pyclipper.scale_to_clipper(_subj)
     # pyclipper.SimplifyPolygon(subj)
-    clip = pyclipper.scale_to_clipper(_clip)
+    # clip = pyclipper.scale_to_clipper(_clip)
     # pyclipper.SimplifyPolygon(clip)
     # vizz_2d(subj)
     # vizz_2d(clip)
 
     pc = pyclipper.Pyclipper()
     try:
-        pc.AddPath(clip, pyclipper.PT_CLIP, True)
+        pc.AddPath(_clip, pyclipper.PT_CLIP, True)
     except:
         print("dsgs")
-
-    pc.AddPaths(subj, pyclipper.PT_SUBJECT, closed)
+    try:
+        pc.AddPaths(_subj, pyclipper.PT_SUBJECT, closed)
+    except:
+        print("bubu")
 
     solution = pc.Execute(pyclipper.CT_INTERSECTION, pyclipper.PFT_EVENODD, pyclipper.PFT_EVENODD)
 
@@ -106,11 +108,11 @@ def intersect_layers(index, botLay, topLay, upskins,downskins):
                 up_layer.append(poly)
 
 def offset(path,val):
-    path = pyclipper.scale_to_clipper(path)
+    # path = pyclipper.scale_to_clipper(path)
     po = pyclipper.PyclipperOffset()
     po.AddPath(path,pyclipper.JT_SQUARE,pyclipper.ET_CLOSEDPOLYGON)
     offseted = po.Execute(pyclipper.scale_to_clipper(val))
-    return pyclipper.scale_from_clipper(offseted)
+    return offseted
 
 def intersect_layers_PT( botLay,thisLay, topLay):
     upskins = []
@@ -129,12 +131,18 @@ def intersect_layers_PT( botLay,thisLay, topLay):
     for pol_dex in range(len(topLay)):
         if pol_dex == 0:#is ouline
             clip = offset(topLay[pol_dex], 0.2)
+            # try:
             cliped = diff_layers_as_path(thisLay,clip[0],True)
+            # except:
+            #     print("dibivx")
             for poly in cliped:
                 upskins.append(poly)
         if pol_dex >0:#is hole
             clip = offset(topLay[pol_dex],-0.2)
-            cliped = inter_layers_as_path(thisLay,clip[0],True)
+            try:
+                cliped = inter_layers_as_path(thisLay,clip[0],True)
+            except:
+                print("igsugsi")
             for poly in cliped:
                 upskins.append(poly)
 

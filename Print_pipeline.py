@@ -1,6 +1,6 @@
 from Layer import Layer
 from G_buffer import G_buffer
-from pipeline_test import *
+from utils import *
 from Skins import *
 import time
 from mesh_operations import mesh as MPmesh
@@ -19,6 +19,7 @@ def get_layer_list(polygon_layers,BBox):
     # skins = get_skins(shells)
     print("--- %s seconds ---" % (time.time() - start_time))
     for layer_index in range(len(polygon_layers)):
+
         layer = Layer(layer_list,polygon_layers,layer_index,BBox)
         layer_list.append(layer)
         # layer.add_island(polygon_layers[layer_index])
@@ -47,7 +48,7 @@ def bounding_box(stl_mesh):
 
 def get_polygon_layers():
     from stl import mesh
-    stl_mesh = mesh.Mesh.from_file("cyl_cyl.stl")
+    stl_mesh = mesh.Mesh.from_file("stl/cyl_cyl.stl")
     print("--- %s seconds ---" % (time.time() - start_time))
     mesh = MPmesh(stl_mesh.vectors, fix_mesh= True)
     print("--- %s seconds ---" % (time.time() - start_time))
@@ -83,12 +84,12 @@ if __name__ == '__main__':
     start_time = time.time()
     g_buffer = G_buffer()
     polygon_layers,BBox = get_polygon_layers()
-    for layer in polygon_layers:
-        pyclipper.scale_to_clipper(layer)
-        pyclipper.SimplifyPolygons(layer)
-        pyclipper.CleanPolygons(layer)
+    for layer_index in range(len(polygon_layers)):
+        polygon_layers[layer_index] = pyclipper.scale_to_clipper(polygon_layers[layer_index])
+        polygon_layers[layer_index] = pyclipper.SimplifyPolygons(polygon_layers[layer_index])
+        polygon_layers[layer_index] = pyclipper.CleanPolygons(polygon_layers[layer_index])
     print("--- %s seconds ---" % (time.time() - start_time))
-    pyclipper.scale_to_clipper(polygon_layers)
+    # pyclipper.scale_to_clipper(polygon_layers)
     layer_list = get_layer_list(polygon_layers,BBox)
     for layer in layer_list:
         g_buffer.add_layer(layer.G_print())

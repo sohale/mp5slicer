@@ -782,7 +782,7 @@ if __name__ == '__main__':
                             slice_height_to=stl_mesh.max_[2], 
                             slice_step=0.2) # default layer thickness is 0.2
     # slicer.visualization_2d(slice_layers)
-    writeGCode(slice_layers,'elephant.gcode', wtf_hack_for_polylayers=True)
+    writeGCode(slice_layers,'lephant.gcode', wtf_hack_for_polylayers=True)
 
     # visualise raytrace for a layer
     # each_polylayer = [

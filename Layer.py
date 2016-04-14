@@ -1,6 +1,7 @@
 from Island import Island
 import pyclipper
 from Polynode import *
+from utils import *
 
 class Layer():
 
@@ -50,6 +51,7 @@ class Layer():
                 if islands.childs[node1_index] != islands.childs[node2_index]:
                     if islands.childs[node1_index] != None and islands.childs[node2_index] != None:
                         if self.poly1_in_poly2(islands.childs[node1_index].contour,islands.childs[node2_index].contour):
+                            # vizz_2d_multi([islands.childs[node1_index].contour,islands.childs[node2_index].contour])
                             islands.childs[node2_index].depth = max(islands.childs[node2_index].depth,islands.childs[node1_index].depth +1 )
                             islands.childs[node2_index].childs.append(islands.childs[node1_index])
                             islands.childs[node1_index] = None
