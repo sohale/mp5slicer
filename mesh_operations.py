@@ -21,16 +21,13 @@ class mesh():
 		else:
 			self.areas   = np.asarray(input_areas)
 
-		self.scale_to_int()
-		self.rm_zero_vol()
-		# if fix_mesh:
-		# 	self.remove_badtriangles()
-		# 	self.remove_duplicates()
-		
+		if fix_mesh:
+			self.remove_badtriangles()
+		 	self.remove_duplicates()
 	
 		self.normalise_normals()
 		self.sort_by_z()
-
+		self.scale_to_int()
 
 
 	def compute_normals(self):
@@ -52,29 +49,6 @@ class mesh():
 		normal_len = np.sqrt(self.normals[:,0]**2 + self.normals[:,1]**2 + self.normals[:,2]**2)
 		self.normals = self.normals / normal_len[:,None]
 
-
-	def remove_badtriangles(self):
-        	# Remove ill-defined triangles (and corresponding normals)
-        	# (triangles which don't have 3 distinct points).
-
-        	# shift the points of each triangle by one
-        	shifted_triangles = np.roll(self.triangles, 1, axis=1)
-
-        	# subtract them from the other
-        	diff_shifted_triangles = (self.triangles - shifted_triangles)
-        	# for triangle (A,B,C) => ((A-B), (B-C), (C-A))
-
-        	# where this is zero two lines are the same.
-        	# if ALL of (x,y,z) are zero, for ANY of the coords then it's a bad triangle
-        	# and this gives a True         
-        	mask = ((diff_shifted_triangles == 0).all(axis=2)).any(axis=1)
-
-        	# we want the triangles for whom the last line was False
-        	self.triangles = self.triangles[mask == False]
-		self.normals  = self.normals[mask == False]
-		self.areas    = self.areas[mask == False]
-
-
 	def sort_by_z(self):
         	# Sort the triangles (normals) in order of ascending z
         	# It may be the case that the triangles will already be sorted this way,
@@ -83,10 +57,7 @@ class mesh():
         	min_z_order = np.argsort(np.amin(self.triangles[:,:,2], axis=1))
     		# index of minimum z coord of each triangle
 
-        	self.triangles = self.triangles[min_z_order]
-		self.normals   = self.normals[min_z_order]
-		self.areas     = self.areas[min_z_order]
-
+		self.index_all(min_z_order)
 
 	def remove_duplicates(self):
         	# Remove any duplicate faces and their normals.
@@ -104,28 +75,37 @@ class mesh():
         	# return the unique triangles. The True will return at least the input list, 
         	# the sort returns the triangles in the order they were entered.
 
-        	self.triangles = self.triangles[mask]
-		self.normals   = self.normals[mask]
-		self.areas     = self.areas[mask]
+		self.index_all(mask)
 
-	def rm_zero_vol(self):
+	def remove_badtriangles(self):
+		# Remove triangles which span 0 area 
+		# (i.e. triangles with duplicate vertices or points 
+		# which are co-linear). Written out in long-hand to save
+		# looping through the triangles
+		
+		v = self.triangles[:,1] - self.triangles[:,0]
+		w = self.triangles[:,2] - self.triangles[:,0]
 
-		mask = np.ones(len(self.triangles), dtype=bool)
-		for trianlge_index in range(len(self.triangles)):
-			if np.linalg.det(self.triangles[trianlge_index]) == 0:
-				mask[trianlge_index] = False
-		self.triangles = self.triangles[mask]
+		areax2 = np.cross(v, w) 
+		# this is the area of the parrellelepiped spanned
+		# by two sides of the triangle, and therefore
+		# twice the area of the triangle
 
+		mask = [areax2 != 0]
+
+		self.index_all(mask)
+		
 
 	def scale_to_int(self):
 
-	        # This function returns the points and normals as ints, throwing away some
-        	# (irrelevant) precision to make checking equalities easier
+	        # This function returns the points and normals as ints with 5 digits of precision
+		# throwing away some (irrelevant) precision to make checking equalities easier
 		# both are rounded to different tolerances, changing their units. 
 		# the areas are unaltered, meaning that they are no longer in the same units are the triangles.
 		# this doesn't seem very important at the moment.
-		self.triangles = (self.triangles).astype(dtype= np.dtype(decimal.Decimal))
-		self.normals   = (self.normals   / 10**(np.floor(np.log10(np.abs(np.max(self.normals))))-3 )).astype(int)
+		self.triangles = (self.triangles / 10**(np.floor(np.log10(np.abs(np.max(self.triangles)))) - 5)).astype(int)
+	
+		self.normals   = (self.normals / 10**(np.floor(np.log10(np.abs(np.max(self.normals)))) - 5)).astype(int)
 	
 
 	def rotate(self, axis, theta):
