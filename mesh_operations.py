@@ -27,7 +27,7 @@ class mesh():
 	
 		self.normalise_normals()
 		self.sort_by_z()
-		self.scale_to_int()
+#		self.scale_to_int()
 
 
 	def compute_normals(self):
@@ -74,7 +74,7 @@ class mesh():
         	mask = np.sort(indices[np.concatenate(([True], diff))])
         	# return the unique triangles. The True will return at least the input list, 
         	# the sort returns the triangles in the order they were entered.
-
+		
 		self.index_all(mask)
 
 	def remove_badtriangles(self):
@@ -86,15 +86,14 @@ class mesh():
 		v = self.triangles[:,1] - self.triangles[:,0]
 		w = self.triangles[:,2] - self.triangles[:,0]
 
-		areax2 = np.cross(v, w) 
+		areax2 = np.linalg.norm(np.cross(v, w), axis=1) 
 		# this is the area of the parrellelepiped spanned
 		# by two sides of the triangle, and therefore
 		# twice the area of the triangle
 
 		mask = [areax2 != 0]
-
 		self.index_all(mask)
-		
+			
 
 	def scale_to_int(self):
 
@@ -136,5 +135,15 @@ class mesh():
 		self.triangles[:,:,0] += translation[0]
 		self.triangles[:,:,1] += translation[1]
 		self.triangles[:,:,2] += translation[2]
+
+if __name__ == '__main__':
+	
+	from stl import mesh as np_mesh
+	import mesh_operations
+	
+	stl_mesh = np_mesh.Mesh.from_file("elephant.stl")
+
+	our_mesh = mesh(stl_mesh.vectors, fix_mesh=True) 
+	
 
 
