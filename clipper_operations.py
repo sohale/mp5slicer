@@ -1,4 +1,6 @@
 import pyclipper
+import utils as util
+from Island_stack import *
 
 
 def diff_layers( _subj,_clip,closed):
@@ -8,6 +10,8 @@ def diff_layers( _subj,_clip,closed):
     # pyclipper.SimplifyPolygon(clip)
     # vizz_2d(subj)
     # vizz_2d(clip)
+
+
 
     pc = pyclipper.Pyclipper()
     pc.AddPath(_clip, pyclipper.PT_CLIP, True)
@@ -21,13 +25,18 @@ def diff_layers( _subj,_clip,closed):
     return solution
 
 
-def diff_layers_as_path( _subj,_clip,closed):
+def diff_layers_as_path( _subj,_clip,closed,multiple_paths):
     # subj = pyclipper.scale_to_clipper(_subj)
     # pyclipper.SimplifyPolygon(subj)
     # clip = pyclipper.scale_to_clipper(_clip)
     # pyclipper.SimplifyPolygon(clip)
     # vizz_2d(subj)
     # vizz_2d(clip)
+
+    # if len(_subj) == 0 or len( _clip) == 0:
+    #     return []
+    if not multiple_paths:
+        _subj = [_subj,]
 
     pc = pyclipper.Pyclipper()
     pc.AddPath(_clip, pyclipper.PT_CLIP, True)
@@ -114,13 +123,13 @@ def offset(path,val):
     offseted = po.Execute(pyclipper.scale_to_clipper(val))
     return offseted
 
-def intersect_layers_PT( botLay,thisLay, topLay):
+def intersect_layers_as_island_stack( botLay,thisLay, topLay):
     upskins = []
     downskins= []
-    if len(botLay) == 0:
-        return downskins,upskins
-    if len(topLay) == 0:
-        return downskins,upskins
+    # if len(botLay) == 0:
+    #     return downskins,upskins
+    # if len(topLay) == 0:
+    #     return downskins,upskins
 
 
 
@@ -132,31 +141,108 @@ def intersect_layers_PT( botLay,thisLay, topLay):
         if pol_dex == 0:#is ouline
             clip = offset(topLay[pol_dex], 0.2)
             # try:
-            cliped = diff_layers_as_path(thisLay,clip[0],True)
+            if len(clip) != 0:
+                cliped = diff_layers(thisLay,clip[0],True)
+
+            else:
+                cliped = pyclipper.PyPolyNode()
+
+            island_stack = Island_stack(cliped).islands
+            upskins += island_stack
+        if pol_dex >0:#is hole
+            clip = offset(topLay[pol_dex],-0.2)
+            # try:
+            if len(clip) != 0:
+                cliped = inter_layers(thisLay,clip[0],True)
+            else:
+                cliped = pyclipper.PyPolyNode()
+
+            island_stack = Island_stack(cliped).islands
+            upskins += island_stack
+
+    for pol_dex in range(len(botLay)):
+        if pol_dex == 0:#is ouline
+            clip = offset(botLay[pol_dex],0.2)
+            if len(clip) != 0:
+                cliped = diff_layers(thisLay,clip[0],True)
+            else:
+                cliped = pyclipper.PyPolyNode()
+
+            island_stack = Island_stack(cliped).islands
+            downskins += island_stack
+        if pol_dex >0:#is hole
+            clip = offset(botLay[pol_dex],-0.2)
+            if len(clip) != 0:
+                cliped = inter_layers(thisLay,clip[0], True)
+
+            else:
+                cliped = pyclipper.PyPolyNode()
+
+            island_stack = Island_stack(cliped).islands
+            downskins += island_stack
+
+    skins = downskins + upskins
+    return skins
+
+def intersect_layers_PT( botLay,thisLay, topLay):
+    upskins = []
+    downskins= []
+    # if len(botLay) == 0:
+    #     return downskins,upskins
+    # if len(topLay) == 0:
+    #     return downskins,upskins
+
+
+
+
+
+
+
+    for pol_dex in range(len(topLay)):
+        if pol_dex == 0:#is ouline
+            clip = offset(topLay[pol_dex], 0.2)
+            # try:
+            if len(clip) != 0:
+                cliped = diff_layers_as_path(thisLay,clip[0],True, True)
+            else:
+                cliped = []
             # except:
             #     print("dibivx")
             for poly in cliped:
                 upskins.append(poly)
         if pol_dex >0:#is hole
             clip = offset(topLay[pol_dex],-0.2)
-            try:
+            # try:
+            if len(clip) != 0:
                 cliped = inter_layers_as_path(thisLay,clip[0],True)
-            except:
-                print("igsugsi")
+            else:
+                cliped = []
+            # except:
+            #     print("igsugsi")
             for poly in cliped:
                 upskins.append(poly)
 
     for pol_dex in range(len(botLay)):
         if pol_dex == 0:#is ouline
             clip = offset(botLay[pol_dex],0.2)
-            cliped = diff_layers_as_path(thisLay,clip[0],True)
+            if len(clip) != 0:
+                cliped = diff_layers_as_path(thisLay,clip[0],True, True)
+            else:
+                cliped = []
+
             for poly in cliped:
                 downskins.append(poly)
         if pol_dex >0:#is hole
             clip = offset(botLay[pol_dex],-0.2)
-            cliped = inter_layers_as_path(thisLay,clip[0], True)
+            if len(clip) != 0:
+                cliped = inter_layers_as_path(thisLay,clip[0], True)
+
+            else:
+                cliped = []
             for poly in cliped:
                 downskins.append(poly)
+    util.vizz_2d_multi(downskins)
+
     skins = downskins + upskins
     return skins
 

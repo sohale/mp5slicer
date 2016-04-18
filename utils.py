@@ -1,4 +1,4 @@
-from Skins import *
+from clipper_operations import *
 from  slicer import *
 
 

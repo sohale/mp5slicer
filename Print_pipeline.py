@@ -1,7 +1,7 @@
 from Layer import Layer
 from G_buffer import G_buffer
 from utils import *
-from Skins import *
+from clipper_operations import *
 import time
 from mesh_operations import mesh as MPmesh
 

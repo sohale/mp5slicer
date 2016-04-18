@@ -1,8 +1,9 @@
 from gcode_writer import *
 import pyclipper
 from infill_paterns import *
-from Skins import *
+from clipper_operations import *
 from path_planner import *
+from utils import *
 
 import numpy as np
 
@@ -11,13 +12,14 @@ class Outline:
 
         self.island = island
         self.polygons = polygons
-        self.boundary = self.Boundary(polygons[0])
+        self.boundary = self.Boundary(self, polygons[0])
         self.holes  = []
         for poly_index in range(1, len(polygons)):
-            self.holes.append(self.Hole(polygons[poly_index]))
+            self.holes.append(self.Hole(self, polygons[poly_index]))
 
     class Hole():
-        def __init__(self,polygon):
+        def __init__(self,outline, polygon):
+            self.outline = outline
             self.polygon = polygon
             self.shells = []
             self.polylines = []
@@ -26,7 +28,17 @@ class Outline:
             # shell = Outline.process_shell(self.polygon,0.8)
             # if len(shell) != 0:
             #     self.shells.append(shell)
-            self.shells.append(Outline.process_shell(self.polygon,0.8))
+            shell = Outline.process_shell(self.polygon,0.8)
+            boundary_innershell = self.outline.boundary.get_innershell()
+            # self.shells.append(shell)
+
+            # if len(boundary_innershell) != 0:
+            # diff = diff_layers_as_path(shell,boundary_innershell,True )
+            # if len(diff_layers_as_path(shell,boundary_innershell,True )) != 0:
+            #     print("didid")
+            if len(diff_layers_as_path(shell,boundary_innershell,True, False )) == 0:
+                self.shells.append(shell)
+
 
         def g_print(self):
             self.polylines.append(Outline.process_polyline(self.polygon))
@@ -34,8 +46,15 @@ class Outline:
                 self.polylines.append(Outline.process_polyline(shell))
             return self.polylines
 
+        def get_innershell(self):
+            if len(self.shells) != 0:
+                return self.shells[len(self.shells)-1]
+            else:
+                return self.polygon
+
     class Boundary():
-        def __init__(self,polygon):
+        def __init__(self,outline, polygon):
+            self.outline = outline
             self.polygon = polygon
             self.shells = []
             self.polylines = []
@@ -44,7 +63,18 @@ class Outline:
             # shell = Outline.process_shell(self.polygon,-0.8)
             # if len(shell) != 0:
             #     self.shells.append(shell)
-            self.shells.append(Outline.process_shell(self.polygon,-0.8))
+            shell = Outline.process_shell(self.polygon,-0.8)
+            # self.shells.append(shell)
+
+            intersect_existing_shell = False
+            for hole in self.outline.holes:
+                hole_innershell = hole.get_innershell()
+                if len(hole_innershell) != 0:
+                    if (len(diff_layers_as_path(hole_innershell,shell,True,False )) != 0):
+                        intersect_existing_shell = True
+
+            if not intersect_existing_shell:
+                self.shells.append(shell)
 
         def g_print(self):
             self.polylines.append(Outline.process_polyline(self.polygon))
@@ -52,12 +82,29 @@ class Outline:
                 self.polylines.append(Outline.process_polyline(shell))
             return self.polylines
 
+        def get_innershell(self):
+            if len(self.shells) != 0:
+                return self.shells[len(self.shells)-1]
+            else:
+                return self.polygon
 
+
+    def get_innershells(self):
+        innershells = []
+
+        innershells.append(self.boundary.get_innershell())
+        for hole in self.holes:
+            innershells.append(hole.get_innershell())
+
+        return innershells
 
     def make_shells(self):
+        self.boundary.make_shells()
         for hole in self.holes:
             hole.make_shells()
-        self.boundary.make_shells()
+
+
+
 
     # todo: replace with a pyclipper wrap
     @staticmethod
@@ -89,14 +136,7 @@ class Outline:
         polyline.append(start_point)
         return polyline
 
-    def get_innershells(self):
-        innershells = []
-        if len(self.boundary.shells) != 0:
-            innershells.append(self.boundary.shells[len(self.boundary.shells)-1])
-        for hole in self.holes:
-            innershells.append(hole.shells[len(self.boundary.shells)-1])
 
-        return innershells
 
 
 
@@ -125,20 +165,20 @@ class Infill:
         self.XorY = layer_index%2
         self.pattern = None
         if isinstance(skin, Skin):
-            skin_polygon = skin.polygons
+            skin_islands = skin.skins_as_island_stack
         else:
-            skin_polygon = []
+            skin_islands = []
 
-        self.polylines = self.make_polyline(polygons,skin_polygon, layer_index)
+        self.polylines = self.make_polyline(polygons,skin_islands, layer_index)
 
 
-    def make_polyline(self,polygons,skin_polygons, layer_index):
+    def make_polyline(self,polygons,skin_islands, layer_index):
 
         polylines = []
         # slice_min = np.min(self.BBox)
         # slice_max = np.max(self.BBox)
         # first two layers and last two layers are set to be fully filled
-        if layer_index == 1 or layer_index == 2 or layer_index == len(self.layers) - 1 or layer_index == len(self.layers):
+        if layer_index == 1 or layer_index == 2 or layer_index == len(self.layers) - 2 or layer_index == len(self.layers)-1:
             self.pattern = pyclipper.scale_to_clipper(linear_infill(0.8,self.XorY,self.BBox))
         else: # low infill density
             self.pattern = pyclipper.scale_to_clipper(linear_infill(3,self.XorY,self.BBox))
@@ -153,20 +193,19 @@ class Infill:
 
 
         for hole_index in range(1, len(self.polygons)):
-            if len(self.polygons[hole_index]) == 0:
-                print("fdf")
-            innerlines_as_tree = diff_layers(innerlines,self.polygons[hole_index],False)
-            innerlines =[]
+            if len(self.polygons[hole_index]) != 0:
+                innerlines_as_tree = diff_layers(innerlines,self.polygons[hole_index],False)
+                innerlines =[]
 
-            for interline in innerlines_as_tree.Childs:
-                innerlines.append(interline.Contour)
-            # innerlines = pyclipper.scale_from_clipper(innerlines)
+                for interline in innerlines_as_tree.Childs:
+                    innerlines.append(interline.Contour)
+                # innerlines = pyclipper.scale_from_clipper(innerlines)
 
 
-        for skin_index in range(1, len(skin_polygons)):
-            if len(skin_polygons[skin_index]) != 0:
+        for skin_index in range(len(skin_islands)):
+            if  len(innerlines) != 0:
                 # innerlines_as_tree = diff_layers(innerlines,pyclipper.scale_from_clipper(skin_polygons[skin_index]),False)
-                innerlines_as_tree = diff_layers(innerlines,skin_polygons[skin_index],False)
+                innerlines_as_tree = diff_layers(innerlines,skin_islands[skin_index].Contour,False)
                 innerlines =[]
 
                 for interline in innerlines_as_tree.Childs:
@@ -199,26 +238,31 @@ class Infill:
         return polylines
 
 class Skin:
-    def __init__(self,polygons,layers,layer_index,BBox):
+    def __init__(self,skins_as_island_stack,layers,layer_index,BBox):
         self.layers = layers
-        self.polygons =polygons
+        self.skins_as_island_stack =skins_as_island_stack
         self.BBox = BBox
-        self.XorY = layer_index%2
+        self.XorY = (layer_index+1)%2
         self.pattern = None
 
-        self.polylines = self.make_polyline(polygons, layer_index)
+        self.polylines = self.make_polyline(skins_as_island_stack, layer_index)
 
 
-    def make_polyline(self,polygons,layer_index):
+    def make_polyline(self,skins_as_island_stack,layer_index):
 
         self.pattern = pyclipper.scale_to_clipper(linear_infill(0.8,self.XorY,self.BBox))
         innerlines =[]
-        for polygon in polygons:
-            if len(polygon) != 0:
-                # innerlines += pyclipper.OpenPathsFromPolyTree(inter_layers(self.pattern,pyclipper.scale_from_clipper(polygon),False))
-                innerlines += pyclipper.OpenPathsFromPolyTree(inter_layers(self.pattern,polygon,False))
-                # print("gsgsgxg")
-                # pyclipper.PolyTreeToPaths()
+        for island in skins_as_island_stack:
+            # vizz_2d(island.Contour)
+            innerlines += pyclipper.OpenPathsFromPolyTree(inter_layers(self.pattern,island.Contour,False))
+        for island in skins_as_island_stack:
+            for hole in island.Childs:
+                innerlines = pyclipper.OpenPathsFromPolyTree(diff_layers(innerlines,hole.Contour,False))
+            # if len(polygon) != 0:
+            #     # innerlines += pyclipper.OpenPathsFromPolyTree(inter_layers(self.pattern,pyclipper.scale_from_clipper(polygon),False))
+            #     innerlines += pyclipper.OpenPathsFromPolyTree(inter_layers(self.pattern,polygon,False))
+            #     # print("gsgsgxg")
+            #     # pyclipper.PolyTreeToPaths()
 
         innerlines = pyclipper.scale_from_clipper(innerlines)
 

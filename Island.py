@@ -1,7 +1,7 @@
 from utils import *
 from Parts import *
 from Polynode import *
-from Skins import *
+from clipper_operations import *
 
 class Island():
     def __init__(self,print_tree, polynode, layers,layer_index,BBox ):
@@ -15,11 +15,11 @@ class Island():
         self.BBox = BBox
         self.polygons = []
         try:
-            self.polygons.append(polynode.contour)
+            self.polygons.append(polynode.Contour)
         except:
             print("f")
-        if len(polynode.childs) != 0:
-            self.polygons += [poly.contour for poly in polynode.childs]
+        if len(polynode.Childs) != 0:
+            self.polygons += [poly.Contour for poly in polynode.Childs]
         self.process_outlines(self.polygons)
         self.process_shells()
         # self.process_infill()
@@ -53,8 +53,16 @@ class Island():
             for island in down_islands:
                 down_shells += island.get_innershells()
             this_shells = self.get_innershells()
-            skins = intersect_layers_PT(down_shells,this_shells,up_shells)
-            if len(skins) != 0:
+            # if self.layer_index == 8:
+            #     # vizz_2d_multi(down_shells)
+            #     # vizz_2d_multi(this_shells)
+            #     # vizz_2d_multi(up_shells)
+            skins = intersect_layers_as_island_stack(down_shells,this_shells,up_shells)
+
+            if len(skins) != 0 :
+
+                # vizz_2d_multi(skins)
+
                 self.skins = Skin(skins,self.layers, self.layer_index,self.BBox)
 
             # print("zfsgsg")

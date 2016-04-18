@@ -2,6 +2,7 @@ from Island import Island
 import pyclipper
 from Polynode import *
 from utils import *
+from Island_stack import *
 
 class Layer():
 
@@ -38,8 +39,16 @@ class Layer():
         else:
             return False
 
-
     def detect_islands(self):
+        base = pow(10,15)
+        poly = [[base,base],[base+1,base],[base+1,base+1],[base,base+1]]
+        polytree = diff_layers(self.layers[self.index], poly, True)
+        island_stack = Island_stack(polytree)
+        return island_stack.get_islands()
+
+
+
+    def detect_islands_old(self):
         islands = Polynode([])
         polygons = self.layers[self.index]
         # make a polynode for every polygon
@@ -73,7 +82,7 @@ class Layer():
     def process_islands(self):
         if len(self.layers[self.index]) != 0:
             islands = self.detect_islands()
-            for island in islands.childs:
+            for island in islands:
                 isle =Island(self.print_tree,island, self.layers,self.index,self.BBox)
                 self.islands.append(isle)
 
