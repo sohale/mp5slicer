@@ -288,4 +288,5 @@ class Skin:
         polylines = []
         for polyline in self.polylines:
             polylines.append(self.process_polyline(polyline))
+        polylines = arrange_path(polylines)
         return polylines
