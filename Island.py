@@ -2,6 +2,7 @@ from utils import *
 from Parts import *
 from Polynode import *
 from clipper_operations import *
+from Polygon_stack import *
 
 class Island():
     def __init__(self,print_tree, polynode, layers,layer_index,BBox ):
@@ -32,8 +33,9 @@ class Island():
             outline.make_shells()
 
     def process_infill(self):
+
         for outline in self.outlines:
-            boundaries = outline.get_innershells()
+            boundaries = Polygon_stack(outline.get_innershells())
             self.infill = Infill(boundaries,self.skins ,self.layers, self.layer_index,self.BBox)
 
     def get_innershells(self):
@@ -45,25 +47,36 @@ class Island():
         if self.layer_index != 0 and self.layer_index != len(self.layers)-2 and self.layer_index != len(self.layers)-1:
             up_islands = self.print_tree[self.layer_index+1].islands
             down_islands = self.print_tree[self.layer_index-1].islands
-            up_shells = []
 
+            up_shells = Polygon_stack()
             for island in up_islands:
-                up_shells += island.get_innershells()
-            down_shells = []
+                up_shells.add_polygons(island.get_innershells())
+
+            down_shells = Polygon_stack()
             for island in down_islands:
-                down_shells += island.get_innershells()
-            this_shells = self.get_innershells()
+                innershells = island.get_innershells()
+                down_shells.add_polygons(innershells)
+
+            this_shells = Polygon_stack(self.get_innershells())
+
+            downskins = this_shells.intersect_with(down_shells)
+            upskins = this_shells.intersect_with(up_shells)
+
+            skins = Polygon_stack()
+            skins.add_polygon_stack(downskins)
+            skins.add_polygon_stack(upskins)
+            self.skins = Skin(skins, self.layers, self.layer_index,self.BBox)
             # if self.layer_index == 8:
             #     # vizz_2d_multi(down_shells)
             #     # vizz_2d_multi(this_shells)
             #     # vizz_2d_multi(up_shells)
-            skins = intersect_layers_as_island_stack(down_shells,this_shells,up_shells)
+            # skins = intersect_layers_new(down_islands,self,up_islands)
 
-            if len(skins) != 0 :
-
-                # vizz_2d_multi(skins)
-
-                self.skins = Skin(skins,self.layers, self.layer_index,self.BBox)
+            # if len(skins) != 0 :
+            #
+            #     # vizz_2d_multi(skins)
+            #
+            #     self.skins = Skin(skins,self.layers, self.layer_index,self.BBox)
 
             # print("zfsgsg")
 
@@ -82,27 +95,7 @@ class Island():
         return  printable_parts
 
 
-    # def make_skins(self,polygons,top_layer):
-    #     pass
-    #
-    # def make_infill_with_skins(self,polygons,skins):
-    #     infill = Infill(self.layers,polygons,self.layer_index,True,self.BBox)
-    #     return infill
-    #
-    # def make_infill(self,polygons):
-    #     infill = Infill(polygons,self.layer_index,False)
-    #     return infill
 
-
-
-        # if len(skin_polygons) != 0:
-        #     # skins = self.make_skins(skin_polygons)
-        #     # self.parts.append(skins)
-        #     infill = self.make_infill_with_skins(polygons,skin_polygons)
-        #     self.parts.append(infill)
-        # else:
-        #     infill = self.make_infill(polygons)
-        #     self.parts.append(infill)
 
 
 

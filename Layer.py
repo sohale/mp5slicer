@@ -3,6 +3,7 @@ import pyclipper
 from Polynode import *
 from utils import *
 from Island_stack import *
+from Polygon_stack import *
 
 class Layer():
 
@@ -40,43 +41,42 @@ class Layer():
             return False
 
     def detect_islands(self):
-        base = pow(10,15)
-        poly = [[base,base],[base+1,base],[base+1,base+1],[base,base+1]]
-        polytree = diff_layers(self.layers[self.index], poly, True)
-        island_stack = Island_stack(polytree)
-        return island_stack.get_islands()
+
+        polygons = Polygon_stack(self.layers[self.index])
+
+        return polygons.split_in_islands()
 
 
 
-    def detect_islands_old(self):
-        islands = Polynode([])
-        polygons = self.layers[self.index]
-        # make a polynode for every polygon
-        for poly_index in range(len(polygons)):
-            islands.childs.append(Polynode(polygons[poly_index]))
-        # make the three of polynodes
-        for node1_index in range(len(islands.childs)):
-            for node2_index in range(len(islands.childs)):
-                if islands.childs[node1_index] != islands.childs[node2_index]:
-                    if islands.childs[node1_index] != None and islands.childs[node2_index] != None:
-                        if self.poly1_in_poly2(islands.childs[node1_index].contour,islands.childs[node2_index].contour):
-                            # vizz_2d_multi([islands.childs[node1_index].contour,islands.childs[node2_index].contour])
-                            islands.childs[node2_index].depth = max(islands.childs[node2_index].depth,islands.childs[node1_index].depth +1 )
-                            islands.childs[node2_index].childs.append(islands.childs[node1_index])
-                            islands.childs[node1_index] = None
-        # split polynodes containing an island in multiple islands
-        # for node_index in range(len(islands.childs)):
-        #     if islands.childs[node1_index].depth > 1:
-        #         #todo:split
-        #         pass
-        # remove every empty polynode
-        i = 0
-        while i < len( islands.childs):
-            if islands.childs[i] == None:
-                del islands.childs[i]
-            else:
-                i += 1
-        return islands
+    # def detect_islands_old(self):
+    #     islands = Polynode([])
+    #     polygons = self.layers[self.index]
+    #     # make a polynode for every polygon
+    #     for poly_index in range(len(polygons)):
+    #         islands.childs.append(Polynode(polygons[poly_index]))
+    #     # make the three of polynodes
+    #     for node1_index in range(len(islands.childs)):
+    #         for node2_index in range(len(islands.childs)):
+    #             if islands.childs[node1_index] != islands.childs[node2_index]:
+    #                 if islands.childs[node1_index] != None and islands.childs[node2_index] != None:
+    #                     if self.poly1_in_poly2(islands.childs[node1_index].contour,islands.childs[node2_index].contour):
+    #                         # vizz_2d_multi([islands.childs[node1_index].contour,islands.childs[node2_index].contour])
+    #                         islands.childs[node2_index].depth = max(islands.childs[node2_index].depth,islands.childs[node1_index].depth +1 )
+    #                         islands.childs[node2_index].childs.append(islands.childs[node1_index])
+    #                         islands.childs[node1_index] = None
+    #     # split polynodes containing an island in multiple islands
+    #     # for node_index in range(len(islands.childs)):
+    #     #     if islands.childs[node1_index].depth > 1:
+    #     #         #todo:split
+    #     #         pass
+    #     # remove every empty polynode
+    #     i = 0
+    #     while i < len( islands.childs):
+    #         if islands.childs[i] == None:
+    #             del islands.childs[i]
+    #         else:
+    #             i += 1
+    #     return islands
 
 
     def process_islands(self):

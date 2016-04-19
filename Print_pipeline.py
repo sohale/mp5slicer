@@ -7,9 +7,9 @@ from mesh_operations import mesh as MPmesh
 
 global start_time
 
-def get_skins(polygon_layers):
-    skins = intersect_all_layers(polygon_layers)
-    return skins
+# def get_skins(polygon_layers):
+#     skins = intersect_all_layers(polygon_layers)
+#     return skins
 
 
 
@@ -48,7 +48,7 @@ def bounding_box(stl_mesh):
 
 def get_polygon_layers():
     from stl import mesh
-    stl_mesh = mesh.Mesh.from_file("stl/cyl_cyl.stl")
+    stl_mesh = mesh.Mesh.from_file("stl/elephant.stl")
     print("--- %s seconds ---" % (time.time() - start_time))
     mesh = MPmesh(stl_mesh.vectors, fix_mesh= True)
     print("--- %s seconds ---" % (time.time() - start_time))
