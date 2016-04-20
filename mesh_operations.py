@@ -1,22 +1,22 @@
 import numpy as np
 from rotation import rotate as rotation
-import decimal
+
 
 class mesh():
 
-	def __init__(self, input_triangles=0, input_normals=0, input_areas=0, fix_mesh=False):
-		if type(input_triangles) == int:
+	def __init__(self, input_triangles=[], input_normals=[], input_areas=[], fix_mesh=False):
+		if len(input_triangles) == 0:
 			return "Input mesh required"
 
-
 		self.triangles = np.asarray(input_triangles)
-
-		if type(input_normals) == int:
+		self.scale_to_int()
+		
+		if len(input_normals) != len(input_triangles):
 			self.normals = self.compute_normals()
 		else:
 			self.normals = np.asarray(input_normals)
 
-		if type(input_areas) == int:
+		if len(input_areas) != len(input_triangles):
 			self.areas   = self.compute_areas()
 		else:
 			self.areas   = np.asarray(input_areas)
@@ -27,7 +27,6 @@ class mesh():
 	
 		self.normalise_normals()
 		self.sort_by_z()
-#		self.scale_to_int()
 
 
 	def compute_normals(self):
@@ -47,7 +46,7 @@ class mesh():
 	def normalise_normals(self):
 
 		normal_len = np.sqrt(self.normals[:,0]**2 + self.normals[:,1]**2 + self.normals[:,2]**2)
-		self.normals = self.normals / normal_len[:,None]
+		self.normals = ((self.normals / normal_len[:,None]) * 1000).astype(int)
 
 	def sort_by_z(self):
         	# Sort the triangles (normals) in order of ascending z
@@ -96,16 +95,11 @@ class mesh():
 			
 
 	def scale_to_int(self):
-
-	        # This function returns the points and normals as ints with 5 digits of precision
-		# throwing away some (irrelevant) precision to make checking equalities easier
-		# both are rounded to different tolerances, changing their units. 
-		# the areas are unaltered, meaning that they are no longer in the same units are the triangles.
+		# We presume that the triagnles are in units of mm and scale them to ints with units of micrometres
+		# this makes checking equalities easier.
+		# The areas are unaltered, meaning that they are no longer in the same units are the triangles.
 		# this doesn't seem very important at the moment.
-		self.triangles = (self.triangles / 10**(np.floor(np.log10(np.abs(np.max(self.triangles)))) - 5)).astype(int)
-	
-		self.normals   = (self.normals / 10**(np.floor(np.log10(np.abs(np.max(self.normals)))) - 5)).astype(int)
-	
+		self.triangles = (self.triangles * 1000).astype(int)	
 
 	def rotate(self, axis, theta):
 		
