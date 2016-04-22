@@ -4,6 +4,7 @@ from utils import *
 from clipper_operations import *
 import time
 from mesh_operations import mesh as MPmesh
+from config import *
 
 global start_time
 
@@ -62,7 +63,9 @@ def get_polygon_layers():
     cut = BBox[4:].tolist()
     BBox = [0,150,0,150] + cut
 
-    slice_layers = slicer_from_mesh_as_dict(mesh, slice_height_from=BBox[4], slice_height_to=BBox[5], slice_step=0.3)
+    settings = PrintSettings({})
+
+    slice_layers = slicer_from_mesh_as_dict(mesh, slice_height_from=BBox[4], slice_height_to=BBox[5], slice_step=settings.layerThickness)
     print("--- %s seconds ---" % (time.time() - start_time))
     layers_as_polygons = polygonize_layers_from_trimed_dict(slice_layers)
     print("--- %s seconds ---" % (time.time() - start_time))

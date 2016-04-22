@@ -6,8 +6,11 @@ from path_planner import *
 from utils import *
 from Polygon_stack import *
 from Line_stack import *
+from config import *
 
 import numpy as np
+
+settings = PrintSettings({})
 
 class Outline:
     def __init__(self,island,polygons):
@@ -30,7 +33,7 @@ class Outline:
             # shell = Outline.process_shell(self.polygon,0.8)
             # if len(shell) != 0:
             #     self.shells.append(shell)
-            shell = Outline.process_shell(self.polygon,0.8)
+            shell = Outline.process_shell(self.polygon,settings.line_width)
             boundary_innershell = self.outline.boundary.get_innershell()
             # self.shells.append(shell)
 
@@ -65,7 +68,7 @@ class Outline:
             # shell = Outline.process_shell(self.polygon,-0.8)
             # if len(shell) != 0:
             #     self.shells.append(shell)
-            shell = Outline.process_shell(self.polygon,-0.8)
+            shell = Outline.process_shell(self.polygon,-settings.line_width)
             # self.shells.append(shell)
 
             intersect_existing_shell = False
@@ -129,10 +132,8 @@ class Outline:
             return []
         polyline = []
         start_point = polygon[0] # frist vertex of the polygon
-        start_point = Point2D(start_point[0],start_point[1])
         polyline.append(start_point)
         for point in polygon[1:]: # the rest of the vertices
-            point = Point2D(point[0],point[1])
             polyline.append(point)
         # goes back to the start point since the polygon does not repeat the start (end) vertice twice
         polyline.append(start_point)
@@ -182,10 +183,10 @@ class Infill:
         # first two layers and last two layers are set to be fully filled
         if layer_index == 1 or layer_index == 2 or layer_index == len(self.layers) - 2 or layer_index == len(self.layers)-1:
             # self.pattern = pyclipper.scale_to_clipper(linear_infill(0.8,self.XorY,self.BBox))
-             self.pattern = Line_stack(pyclipper.scale_to_clipper(linear_infill(0.8,self.XorY,self.BBox)))
+             self.pattern = Line_stack(pyclipper.scale_to_clipper(linear_infill(settings.line_width,self.XorY,self.BBox)))
         else: # low infill density
             # self.pattern = pyclipper.scale_to_clipper(linear_infill(3,self.XorY,self.BBox))
-             self.pattern = Line_stack(pyclipper.scale_to_clipper(linear_infill(3,self.XorY,self.BBox)))
+             self.pattern = Line_stack(pyclipper.scale_to_clipper(linear_infill(7,self.XorY,self.BBox)))
         if layer_index != 0 and layer_index != len(self.layers)-2 and layer_index != len(self.layers)-1:
             innerlines = Line_stack(self.pattern.intersect_with(polygons))
             innerlines = innerlines.difference_with(skin_islands)
@@ -228,10 +229,8 @@ class Infill:
             return []
         polyline = []
         start_point = polygon[0] # frist vertex of the polygon
-        start_point = Point2D(start_point[0],start_point[1])
         polyline.append(start_point)
         for point in polygon[1:]: # the rest of the vertices
-            point = Point2D(point[0],point[1])
             polyline.append(point)
         return polyline
 
@@ -258,7 +257,7 @@ class Skin:
 
     def make_polyline(self,skins_as_polygon_stack,layer_index):
 
-        self.pattern = Line_stack(pyclipper.scale_to_clipper(linear_infill(0.8,self.XorY,self.BBox)))
+        self.pattern = Line_stack(pyclipper.scale_to_clipper(linear_infill(settings.line_width,self.XorY,self.BBox)))
         innerlines =self.pattern.intersect_with(skins_as_polygon_stack)
 
         # for island in skins_as_island_stack:
@@ -283,10 +282,8 @@ class Skin:
             return []
         polyline = []
         start_point = polygon[0] # frist vertex of the polygon
-        start_point = Point2D(start_point[0],start_point[1])
         polyline.append(start_point)
         for point in polygon[1:]: # the rest of the vertices
-            point = Point2D(point[0],point[1])
             polyline.append(point)
         return polyline
 
