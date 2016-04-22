@@ -23,7 +23,7 @@ class Plane:
             return None
         else:
             t =  dist_0 /  float(dist_0 - dist_1)
-            outP = vertice_0 + t * (vertice_1 - vertice_0)
+            outP = (vertice_0 + t * (vertice_1 - vertice_0)).astype(int)
 
             return outP
 
@@ -60,15 +60,7 @@ class Plane:
 def min_max_z(triangle):
     return [np.min(triangle[:,2]), np.max(triangle[:,2])]
 
-def slicer(stl_filepath, slice_height_from=0, slice_height_to=100, slice_step=1):
-    from stl import mesh
 
-    your_mesh = mesh.Mesh.from_file(stl_filepath)
-
-    return slicer_from_mesh(your_mesh, 
-                            slice_height_from=slice_height_from, 
-                            slice_height_to=slice_height_to, 
-                            slice_step=slice_step)
 
 def slicer_from_mesh(mesh, slice_height_from=0, slice_height_to=100, slice_step=1):
 
@@ -101,7 +93,7 @@ def slicer_from_mesh_as_dict(mesh, slice_height_from=0, slice_height_to=100, sli
     import decimal
 
     normal = np.array([[0.],[0.],[1.]])
-    # ufunc = np.vectorize(lambda x: truncate(x,8))
+    
 
 
     sliceplanes_height = np.arange(slice_height_from, slice_height_to, slice_step)
@@ -116,21 +108,11 @@ def slicer_from_mesh_as_dict(mesh, slice_height_from=0, slice_height_to=100, sli
         for index, plane in zip(plane_index, planes):
             line = plane.intersection_with_triangle(triangle)
             line[0] =line[0][:2]
-            # print(type(line[0][0]))
-            # ufunc(line[0])
             line[1] =line[1][:2]
-            # ufunc(line[1])
-
 
             line[0] = line[0].tolist()
             line[1] = line[1].tolist()
-            for point_index in range(len(line)):
-            # #     # for val_index in range(len(line[point_index])):
-            # #     #     line[point_index][val_index] = round(line[point_index][val_index],2)
-            # #     # line[point_index] = line[point_index].tolist()
-                for val_index in range(len(line[point_index])):
-                    line[point_index][val_index] = truncate(line[point_index][val_index],8)
-
+ 
             point1 = tuple(line[0])
 
             point2= tuple(line[1])
@@ -181,8 +163,19 @@ def visualization_2d(slice_layers):
     plt.show()
 
 if __name__ == '__main__':
-    import datetime
-    start = datetime.datetime.now()
-    slice_layers = slicer('FLATFOOT_StanfordBunny_jmil_HIGH_RES_Smoothed.stl', slice_height_from=0, slice_height_to=100, slice_step=1)
-    print(datetime.datetime.now() - start)
+    import time
+    from stl import mesh as np_mesh
+    import mesh_operations as MPmesh   
+
+    start =time.time()
+    stl_mesh = np_mesh.Mesh.from_file("elephant.stl")
+    our_mesh = MPmesh.mesh(stl_mesh.vectors, fix_mesh=True) 
+    bbox = our_mesh.bounding_box()
+    step = bbox[2][0] / 20.
+
+    slice_layers = slicer_from_mesh(our_mesh, 
+                            slice_height_from=bbox[2][1], 
+                            slice_height_to=bbox[2][0], 
+                            slice_step=step)
+    print(time.time() - start)
     visualization_2d(slice_layers)
