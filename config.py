@@ -33,12 +33,12 @@ class PrintSettings:
         try:
             dict["temperature"]
         except KeyError:
-            dict["temperature"]=230
+            dict["temperature"]=220
     #Speed in  mm/min
         try:
             dict["inAirSpeed"]
         except KeyError:
-            dict["inAirSpeed"]=7000
+            dict["inAirSpeed"]=3000
         try:
             dict["flowRate"]
         except KeyError:
@@ -62,7 +62,7 @@ class PrintSettings:
         try:
             dict["speedRate"]
         except KeyError:
-            dict["speedRate"]=2500 # mm/min
+            dict["speedRate"]=2200 # mm/min
 
         try:
             dict["filamentDiameter"]

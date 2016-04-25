@@ -20,7 +20,7 @@ class GCodeEnvironment:
 
         self.X = 0
         self.Y = 0
-        self.Z = self.settings.layerThickness
+        self.Z = 0.1
 
 
     # Calculate the extrusion for a straight movement from A to B
@@ -39,9 +39,10 @@ class GCodeEnvironment:
     # go to point A without extruding filament
     def goToNextPoint(self,A):
         distance = self.calculDis(A)
-        if distance > 5:
+        if distance > 3:
             instruction = self.retract()
-            instruction +=  "G0" + " X"+str(A[0]) + " Y"+str(A[1]) + " Z"+str(self.Z) + " F"+str(self.settings.inAirSpeed)+"\n"
+
+            instruction +=  "G0" + " X"+str(A[0]) + " Y"+str(A[1]) + " Z"+str(self.Z) +" F"+str(self.settings.inAirSpeed)+"\n"
             instruction += self.unretract()
         else :
             instruction =  "G0" + " X"+str(A[0]) + " Y"+str(A[1]) + " Z"+str(self.Z) + " F"+str(self.settings.inAirSpeed)+"\n"
@@ -53,13 +54,13 @@ class GCodeEnvironment:
         return instruction
 
     def retract(self):
-        self.E -= 2
-        instruction = "G1 E" + str(self.E)+ " F1800\n"
+        self.E -= 5
+        instruction = "G1 E" + str(self.E)+ " F2400\n"
         return instruction
 
     def unretract(self):
-        self.E += 2.1
-        instruction = "G1 E" + str(self.E)+ " F1800\n"
+        self.E += 5
+        instruction = "G1 E" + str(self.E)+ " F2400\n"
         return instruction
 
 

@@ -47,7 +47,7 @@ class Layer():
         return polygons.split_in_islands()
 
 
-
+    #DO NOT delete: this might be faster than detecting islands with pyclipper only
     # def detect_islands_old(self):
     #     islands = Polynode([])
     #     polygons = self.layers[self.index]

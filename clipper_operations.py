@@ -3,7 +3,9 @@ import utils as util
 from Island_stack import *
 
 
+
 def diff_layers( _subj,_clip,closed):
+
 
     pc = pyclipper.Pyclipper()
     pc.AddPaths(_clip, pyclipper.PT_CLIP, True)
@@ -35,6 +37,8 @@ def diff_layers_as_polytree( _subj,_clip,closed):
 
 
 def inter_layers( _subj,_clip,closed):
+    if len(_clip) == 0 :
+        return []
 
     pc = pyclipper.Pyclipper()
     try:
@@ -42,8 +46,10 @@ def inter_layers( _subj,_clip,closed):
     except:
         print("ysgfsfssffy")
 
-
-    pc.AddPaths(_subj, pyclipper.PT_SUBJECT, closed)
+    try:
+        pc.AddPaths(_subj, pyclipper.PT_SUBJECT, closed)
+    except:
+        print("sifsisfsifsi")
 
     if closed:
         solution = pc.Execute(pyclipper.CT_INTERSECTION, pyclipper.PFT_EVENODD, pyclipper.PFT_EVENODD)
@@ -65,12 +71,18 @@ def inter_layers_as_polytree( _subj,_clip,closed):
 
     return solution
 
+def isPaths(paths):
+    assert(isinstance(paths[0][0][0], long))
 
-def offset(path,val):
-    # path = pyclipper.scale_to_clipper(path)
+
+def offset(polygon_stack,val):
+    path = polygon_stack.polygons
     po = pyclipper.PyclipperOffset()
-    po.AddPath(path,pyclipper.JT_SQUARE,pyclipper.ET_CLOSEDPOLYGON)
+    po.AddPaths(path,pyclipper.JT_SQUARE,pyclipper.ET_CLOSEDPOLYGON)
+
+
     offseted = po.Execute(pyclipper.scale_to_clipper(val))
+
     return offseted
 
 

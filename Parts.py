@@ -7,6 +7,7 @@ from utils import *
 from Polygon_stack import *
 from Line_stack import *
 from config import *
+from Line import Line
 
 import numpy as np
 
@@ -17,91 +18,128 @@ class Outline:
 
         self.island = island
         self.polygons = polygons
-        self.boundary = self.Boundary(self, polygons[0])
+        try:
+            polygon = Polygon_stack(polygons[0])
+            self.boundary = self.Boundary(self, Line(polygon,settings.line_width) )
+        except:
+            print("sfsocbbgny")
         self.holes  = []
         for poly_index in range(1, len(polygons)):
-            self.holes.append(self.Hole(self, polygons[poly_index]))
+            polygon = Polygon_stack(polygons[poly_index])
+            self.holes.append(self.Hole(self, Line(polygon, settings.line_width)))
 
     class Hole():
-        def __init__(self,outline, polygon):
+        def __init__(self,outline, line):
             self.outline = outline
-            self.polygon = polygon
+            self.line = line
             self.shells = []
             self.polylines = []
 
         def make_shells(self):
-            # shell = Outline.process_shell(self.polygon,0.8)
-            # if len(shell) != 0:
-            #     self.shells.append(shell)
-            shell = Outline.process_shell(self.polygon,settings.line_width)
-            boundary_innershell = self.outline.boundary.get_innershell()
-            # self.shells.append(shell)
 
-            # if len(boundary_innershell) != 0:
-            # diff = diff_layers_as_path(shell,boundary_innershell,True )
-            # if len(diff_layers_as_path(shell,boundary_innershell,True )) != 0:
-            #     print("didid")
-            if len(diff_layers(shell,boundary_innershell,True )) == 0:
-                self.shells += shell
+            shell = Outline.process_shell(self.line,settings.line_width)
+            boundary_innershell = self.outline.boundary.get_innershell()
+
+            if len(shell.get_outter_bound().difference_with(boundary_innershell ).polygons) == 0:
+                self.shells.append(shell)
 
 
         def g_print(self):
-            self.polylines.append(Outline.process_polyline(self.polygon))
+            self.polylines.append(Outline.process_polyline(self.line.get_contour()))
             for shell in self.shells:
-                self.polylines.append(Outline.process_polyline(shell))
+                self.polylines.append(Outline.process_polyline(shell.get_contour()))
             return self.polylines
 
         def get_innershell(self):
             if len(self.shells) != 0:
-                return [self.shells[len(self.shells)-1]]
+                return self.shells[len(self.shells)-1].get_contour()
             else:
-                return [self.polygon]
+                return self.line.get_contour()
+
+        def get_inner_bound(self):
+            if len(self.shells) != 0:
+                return self.shells[len(self.shells)-1].get_outter_bound()
+            else:
+                return self.line.get_outter_bound()
+
+        def get_outter_bound(self):
+            if len(self.shells) != 0:
+                return self.shells[len(self.shells)-1].get_inner_bound()
+            else:
+                return self.line.get_inner_bound()
 
     class Boundary():
-        def __init__(self,outline, polygon):
+        def __init__(self,outline, line):
             self.outline = outline
-            self.polygon = polygon
+            self.line = line
             self.shells = []
             self.polylines = []
 
         def make_shells(self):
-            # shell = Outline.process_shell(self.polygon,-0.8)
-            # if len(shell) != 0:
-            #     self.shells.append(shell)
-            shell = Outline.process_shell(self.polygon,-settings.line_width)
-            # self.shells.append(shell)
+            shell = Outline.process_shell(self.line,-settings.line_width)
 
             intersect_existing_shell = False
             for hole in self.outline.holes:
-                hole_innershell = hole.get_innershell()
-                if len(hole_innershell) != 0:
-                    if (len(diff_layers(hole_innershell,shell,True )) != 0):
-                        intersect_existing_shell = True
+                hole_innershell = hole.get_outter_bound()
+                # if len(hole_innershell) != 0:
+                if (len(hole_innershell.difference_with(shell.get_inner_bound()).polygons) != 0):
+                    intersect_existing_shell = True
 
             if not intersect_existing_shell:
-                self.shells += shell
+                self.shells.append(shell)
 
         def g_print(self):
-            self.polylines.append(Outline.process_polyline(self.polygon))
+
             for shell in self.shells:
-                self.polylines.append(Outline.process_polyline(shell))
+                self.polylines.append(Outline.process_polyline(shell.get_contour()))
+            self.polylines.append(Outline.process_polyline(self.line.get_contour()))
             return self.polylines
 
         def get_innershell(self):
             if len(self.shells) != 0:
-                return [self.shells[len(self.shells)-1]]
+                return self.shells[len(self.shells)-1].get_contour()
             else:
-                return [self.polygon]
+                return self.line.get_contour()
+
+        def get_inner_bound(self):
+            if len(self.shells) != 0:
+                return self.shells[len(self.shells)-1].get_inner_bound()
+            else:
+                return self.line.get_inner_bound()
+
+        def get_outterbound(self):
+            if len(self.shells) != 0:
+                return self.shells[len(self.shells)-1].get_outter_bound()
+            else:
+                return self.line.get_outter_bound()
 
 
     def get_innershells(self):
-        innershells = []
+        innershells = Polygon_stack()
 
-        innershells += self.boundary.get_innershell()
+        innershells.add_polygon_stack(self.boundary.get_innershell())
         for hole in self.holes:
-            innershells += hole.get_innershell()
+            innershells.add_polygon_stack(hole.get_innershell())
 
         return innershells
+
+    def get_inner_bounds(self):
+        inner_bounds = Polygon_stack()
+
+        inner_bounds.add_polygon_stack(self.boundary.get_inner_bound())
+        for hole in self.holes:
+            inner_bounds.add_polygon_stack(hole.get_inner_bound())
+
+        return inner_bounds
+
+    def get_outterbounds(self):
+        outter_bounds = Polygon_stack()
+
+        outter_bounds .add_polygon_stack(self.boundary.get_outterbound())
+        for hole in self.holes:
+            outter_bounds.add_polygon_stack(hole.get_outter_bound())
+
+        return outter_bounds
 
     def make_shells(self):
         self.boundary.make_shells()
@@ -109,27 +147,20 @@ class Outline:
             hole.make_shells()
 
 
-
-
-    # todo: replace with a pyclipper wrap
     @staticmethod
-    def process_shell(polygon,offset):
-        # clipper_polygon = pyclipper.scale_to_clipper(polygon)
-        po = pyclipper.PyclipperOffset()
-        po.AddPath(polygon,pyclipper.JT_SQUARE,pyclipper.ET_CLOSEDPOLYGON)
-        clipper_offset = pyclipper.scale_to_clipper(offset)
-        # offset_poly = pyclipper.scale_from_clipper(po.Execute(clipper_offset))
-        offset_poly = po.Execute(clipper_offset)
-        if len(offset_poly) >0:
-            return  offset_poly
-        else:
-            return []
+    def process_shell(line,offset_val):
+        contour = line.get_contour()
+        offset_poly = Polygon_stack(offset(contour,offset_val))
+
+        return  Line(offset_poly, line.width)
+
 
     @staticmethod
-    def process_polyline(polygon):
-        polygon = pyclipper.scale_from_clipper(polygon)
-        if len(polygon) == 0:
+    def process_polyline(line):
+        if len(line.polygons) == 0:
             return []
+        polygon = pyclipper.scale_from_clipper(line.polygons[0])
+
         polyline = []
         start_point = polygon[0] # frist vertex of the polygon
         polyline.append(start_point)
@@ -138,18 +169,6 @@ class Outline:
         # goes back to the start point since the polygon does not repeat the start (end) vertice twice
         polyline.append(start_point)
         return polyline
-
-
-
-
-
-
-    # @staticmethod
-    # def make_polyline(polygon):
-    #     polylines = []
-    #     for polygon in polygons:
-    #         polylines.append(self.get_polyline(polygon))
-    #     return polylines
 
     def g_print(self):
         polylines = []
@@ -182,14 +201,16 @@ class Infill:
         # slice_max = np.max(self.BBox)
         # first two layers and last two layers are set to be fully filled
         if layer_index == 1 or layer_index == 2 or layer_index == len(self.layers) - 2 or layer_index == len(self.layers)-1:
-            # self.pattern = pyclipper.scale_to_clipper(linear_infill(0.8,self.XorY,self.BBox))
              self.pattern = Line_stack(pyclipper.scale_to_clipper(linear_infill(settings.line_width,self.XorY,self.BBox)))
         else: # low infill density
-            # self.pattern = pyclipper.scale_to_clipper(linear_infill(3,self.XorY,self.BBox))
              self.pattern = Line_stack(pyclipper.scale_to_clipper(linear_infill(7,self.XorY,self.BBox)))
         if layer_index != 0 and layer_index != len(self.layers)-2 and layer_index != len(self.layers)-1:
-            innerlines = Line_stack(self.pattern.intersect_with(polygons))
-            innerlines = innerlines.difference_with(skin_islands)
+
+            if not skin_islands.isEmpty:
+                innerlines = Line_stack(self.pattern.intersect_with(polygons))
+                innerlines = innerlines.difference_with(skin_islands)
+            else:
+                innerlines = self.pattern.intersect_with(polygons)
         else:
             innerlines = self.pattern.intersect_with(polygons)
 
@@ -220,8 +241,10 @@ class Infill:
         #         for interline in innerlines_as_tree.Childs:
         #             innerlines.append(interline.Contour)
         #         # innerlines = pyclipper.scale_from_clipper(innerlines)
-
-        return pyclipper.scale_from_clipper(innerlines)
+        try:
+            return pyclipper.scale_from_clipper(innerlines)
+        except:
+            print("uheufheueh")
 
 
     def process_polyline(self,polygon):

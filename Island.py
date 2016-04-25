@@ -8,7 +8,7 @@ class Island():
     def __init__(self,print_tree, polynode, layers,layer_index,BBox ):
         self.print_tree = print_tree
         self.type = None # object/support/enclosure/ raft
-        self.outlines = []
+        self.outline = None
         self.skins = None
         self.infill = None
         self.layer_index = layer_index
@@ -26,22 +26,32 @@ class Island():
         # self.process_infill()
 
     def process_outlines(self, polygons):
-        self.outlines.append(Outline(self, polygons))
+        self.outline = Outline(self, polygons)
 
     def process_shells(self):
-        for outline in self.outlines:
-            outline.make_shells()
+
+        self.outline.make_shells()
 
     def process_infill(self):
 
-        for outline in self.outlines:
-            boundaries = Polygon_stack(outline.get_innershells())
-            self.infill = Infill(boundaries,self.skins ,self.layers, self.layer_index,self.BBox)
+
+        boundaries = Polygon_stack(self.outline.get_inner_bounds())
+        self.infill = Infill(boundaries,self.skins ,self.layers, self.layer_index,self.BBox)
 
     def get_innershells(self):
-        for outline in self.outlines:
-            innershells = outline.get_innershells()
+
+        innershells = self.outline.get_innershells()
         return innershells
+
+    def get_innerbounds(self):
+
+        innerbounds = self.outline.get_inner_bounds()
+        return innerbounds
+
+    def get_outterbounds(self):
+
+        outterbounds = self.outline.get_outterbounds()
+        return outterbounds
 
     def process_skins(self):
         if self.layer_index != 0 and self.layer_index != len(self.layers)-2 and self.layer_index != len(self.layers)-1:
@@ -50,17 +60,19 @@ class Island():
 
             up_shells = Polygon_stack()
             for island in up_islands:
-                up_shells.add_polygons(island.get_innershells())
+                up_shells.add_polygon_stack(island.get_outterbounds())
 
             down_shells = Polygon_stack()
             for island in down_islands:
-                innershells = island.get_innershells()
-                down_shells.add_polygons(innershells)
+                outterbounds = island.get_outterbounds()
+                down_shells.add_polygon_stack(outterbounds)
 
             this_shells = Polygon_stack(self.get_innershells())
 
-            downskins = this_shells.intersect_with(down_shells)
-            upskins = this_shells.intersect_with(up_shells)
+            downskins = this_shells.difference_with(down_shells)
+            # vizz_2d_multi(downskins.polygons)
+            upskins = this_shells.difference_with(up_shells)
+            # vizz_2d_multi(upskins.polygons)
 
             skins = Polygon_stack()
             skins.add_polygon_stack(downskins)
@@ -87,9 +99,9 @@ class Island():
 
     def g_print(self):
         printable_parts = []
-        for outline in self.outlines:
-            printable_parts += outline.g_print()
         printable_parts += self.infill.g_print()
+        printable_parts += self.outline.g_print()
+
         if self.skins != None:
             printable_parts += self.skins.g_print()
         return  printable_parts
