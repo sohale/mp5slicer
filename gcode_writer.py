@@ -20,7 +20,7 @@ class GCodeEnvironment:
 
         self.X = 0
         self.Y = 0
-        self.Z = 0.1
+        self.Z = 1.5
 
 
     # Calculate the extrusion for a straight movement from A to B
@@ -104,15 +104,4 @@ class GCodeEnvironment:
         endCode.close()
         return endString
 
-
-# class Point2D:
-#     def __init__(self, x, y):
-#         self.x = x
-#         self.y = y
-#
-# class Point3D:
-#     def __init__(self, x, y, z):
-#         self.x = x
-#         self.y = y
-#         self.z = z
 

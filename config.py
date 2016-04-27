@@ -6,11 +6,7 @@ class PrintSettings:
         dic = PrintSettings.addDefaults(argDictionnary)
         for key,value in dic.items():
             setattr(self, key, value)
-        #self.crossArea = 6.376 # cross-section area of feedstock
         self.crossArea = ((self.filamentDiameter/2.0)**2) * math.pi #6.37939
-        print("cross area = "+str(self.crossArea))
-        #specific to PLA:
-        self.volFactor = 1/2.53 # vol of filament -> vol of extruded material
 
 
     #def getVolFactor():
@@ -33,7 +29,7 @@ class PrintSettings:
         try:
             dict["temperature"]
         except KeyError:
-            dict["temperature"]=220
+            dict["temperature"]=210
     #Speed in  mm/min
         try:
             dict["inAirSpeed"]
@@ -62,7 +58,7 @@ class PrintSettings:
         try:
             dict["speedRate"]
         except KeyError:
-            dict["speedRate"]=2200 # mm/min
+            dict["speedRate"]=1600 # mm/min
 
         try:
             dict["filamentDiameter"]
@@ -123,7 +119,6 @@ class PrintSettings:
         # except KeyError:
         #     dict["autoZScar"] = True
 
-        #todo: filamentType = PLA or ABS
 
         saveEffectiveSettings = False
         if saveEffectiveSettings:
@@ -134,3 +129,12 @@ class PrintSettings:
             f1.write(jsoncontent)
 
         return dict
+
+
+class Printer_config():
+    def __init__(self):
+        self.autoZhop = False
+        self.bedX = 1000
+        self.bedY = 1000
+        self.maxExtrusion = 123
+        self.hasAutoTemperature = False

@@ -8,6 +8,7 @@ from Polygon_stack import *
 from Line_stack import *
 from config import *
 from Line import Line
+from Line_group import *
 
 import numpy as np
 
