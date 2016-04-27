@@ -55,9 +55,9 @@ def get_polygon_layers():
     print("--- %s seconds ---" % (time.time() - start_time))
     # assume the center of the mesh are at (0,0)
     # translate x by 70
-    mesh.triangles[:,:,0]+= 70
+    mesh.triangles[:,:,0]+= 90
     # translate y by 70
-    mesh.triangles[:,:,1]+= 70
+    mesh.triangles[:,:,1]+= 130
     print("--- %s seconds ---" % (time.time() - start_time))
     BBox = bounding_box(stl_mesh)
     cut = BBox[4:].tolist()

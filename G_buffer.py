@@ -34,7 +34,7 @@ class G_buffer:
 
 
         for layer in self.layer_list:
-            if layer != None:
+            if len(layer) != 0:
                 for line in layer:
                     if len(line) > 0:
                         gcodeFile.write(gcodeEnvironment.goToNextPoint(line[0]))

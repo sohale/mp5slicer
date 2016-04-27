@@ -20,7 +20,15 @@ class GCodeEnvironment:
 
         self.X = 0
         self.Y = 0
-        self.Z = 1.5
+        self.Z = 0.15
+
+    def truncate(self,f, n):
+        '''Truncates/pads a float f to n decimal places without rounding'''
+        s = '{}'.format(f)
+        if 'e' in s or 'E' in s:
+            return '{0:.{1}f}'.format(f, n)
+        i, p, d = s.partition('.')
+        return float('.'.join([i, (d+'0'*n)[:n]]))
 
 
     # Calculate the extrusion for a straight movement from A to B
@@ -38,6 +46,10 @@ class GCodeEnvironment:
 
     # go to point A without extruding filament
     def goToNextPoint(self,A):
+        B = [0.1]*2
+        for i in range(len(A)):
+            B[i] = self.truncate(A[i],3)
+        A = B
         distance = self.calculDis(A)
         if distance > 3:
             instruction = self.retract()
@@ -66,6 +78,10 @@ class GCodeEnvironment:
 
     # draw to point A
     def drawToNextPoint(self,A):
+        B = [0.1]*2
+        for i in range(len(A)):
+            B[i] = self.truncate(A[i],3)
+        A = B
         currentPoint = [self.X,self.Y,self.Z]
         self.E += self.calculE(currentPoint,A)
         self.F=self.settings.speedRate
