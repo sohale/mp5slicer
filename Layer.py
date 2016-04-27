@@ -4,6 +4,7 @@ from Polynode import *
 from utils import *
 from Island_stack import *
 from Polygon_stack import *
+from Line_group import *
 
 class Layer():
 
@@ -16,9 +17,9 @@ class Layer():
         self.process_islands()
 
     def G_print(self):
-        polylines = []
+        polylines = Line_group("layer")
         for island in self.islands:
-            polylines += island.g_print()
+            polylines.add_group(island.g_print())
         return polylines
 
     def process_shells(self):

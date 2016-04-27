@@ -28,7 +28,7 @@ class GCodeEnvironment:
         if 'e' in s or 'E' in s:
             return '{0:.{1}f}'.format(f, n)
         i, p, d = s.partition('.')
-        return float('.'.join([i, (d+'0'*n)[:n]]))
+        return float('.'.join((i, (d+'0'*n)[:n])))
 
 
     # Calculate the extrusion for a straight movement from A to B
@@ -37,7 +37,8 @@ class GCodeEnvironment:
         section_surface = self.settings.layerThickness * self.settings.line_width
         volume = section_surface * distance * 1.2
         filament_length = volume / self.settings.crossArea
-        return (filament_length)
+        # filament_length = self.truncate(filament_length, 4)
+        return filament_length
 
     def calculDis(self,A):
 
@@ -45,13 +46,13 @@ class GCodeEnvironment:
         return distance
 
     # go to point A without extruding filament
-    def goToNextPoint(self,A):
+    def goToNextPoint(self,A, retract):
         B = [0.1]*2
         for i in range(len(A)):
             B[i] = self.truncate(A[i],3)
         A = B
         distance = self.calculDis(A)
-        if distance > 3:
+        if distance > 3 and retract:
             instruction = self.retract()
 
             instruction +=  "G0" + " X"+str(A[0]) + " Y"+str(A[1]) + " Z"+str(self.Z) +" F"+str(self.settings.inAirSpeed)+"\n"
@@ -83,7 +84,11 @@ class GCodeEnvironment:
             B[i] = self.truncate(A[i],3)
         A = B
         currentPoint = [self.X,self.Y,self.Z]
-        self.E += self.calculE(currentPoint,A)
+        try:
+            extrusion = self.calculE(currentPoint,A)
+            self.E += extrusion
+        except:
+            print("eugsigieso")
         self.F=self.settings.speedRate
         instruction = "G1" + " X" +str(A[0]) + " Y" +str(A[1]) + " Z" +str(self.Z) + " E" +str(self.E) + " F" +str(self.F) + "\n"
         self.X = A[0]

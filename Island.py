@@ -98,12 +98,12 @@ class Island():
 
 
     def g_print(self):
-        printable_parts = []
-        printable_parts += self.infill.g_print()
-        printable_parts += self.outline.g_print()
+        printable_parts = Line_group("island")
+        printable_parts.add_group(self.infill.g_print())
+        printable_parts.add_group(self.outline.g_print())
 
         if self.skins != None:
-            printable_parts += self.skins.g_print()
+            printable_parts.add_group(self.skins.g_print())
         return  printable_parts
 
 

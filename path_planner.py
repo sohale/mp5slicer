@@ -1,9 +1,13 @@
 import bintrees
+from Line_group import *
 
 def dist(point1, point2):
     return pow((point1[0]-point2[0]),2) + pow((point1[1]-point2[1]),2)
 
-def arrange_path(lines):
+def arrange_path(line_group):
+    assert (isinstance(line_group, Line_group))
+    assert (line_group.type == "skin" or line_group.type == "infill")
+    lines = line_group.sub_lines
 
 
     start_points_list = [None]*len(lines)
@@ -40,7 +44,7 @@ def arrange_path(lines):
             current_index = next_point_tuple[1] % (len(lines))
             end_point = next_point_tuple[2]
 
-    return ordered_lines
+    line_group.sub_lines = ordered_lines
 
 def get_next_point(init_point_index, end_point, start_points_list, end_points_list, already_used_points, end_offset):
     min_dist_tuple = (float("inf"),None,None)

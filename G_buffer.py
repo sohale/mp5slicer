@@ -1,10 +1,12 @@
 from gcode_writer import *
+from Line_group import *
 
 class G_buffer:
     layer_list = []
     filename= "tppt.gcode"
+
     def __init__(self):
-        pass
+        self.skip_retraction = False
 
     def add_layer(self,list):
         self.layer_list.append(list)
@@ -21,9 +23,9 @@ class G_buffer:
         gcodeFile.write(gcodeEnvironment.startcode())
 
         # print two lines to extrude filament
-        gcodeFile.write(gcodeEnvironment.goToNextPoint((0,0)))
+        gcodeFile.write(gcodeEnvironment.goToNextPoint((0,0),True))
         gcodeFile.write(gcodeEnvironment.drawToNextPoint((180,0)))
-        gcodeFile.write(gcodeEnvironment.goToNextPoint((180,2)))
+        gcodeFile.write(gcodeEnvironment.goToNextPoint((180,2),True))
         gcodeFile.write(gcodeEnvironment.drawToNextPoint((0,2)))
         gcodeFile.write(gcodeEnvironment.drawToNextPoint((0,4)))
         gcodeFile.write(gcodeEnvironment.drawToNextPoint((180,4)))
@@ -33,14 +35,66 @@ class G_buffer:
         gcodeFile.write(gcodeEnvironment.drawToNextPoint((0,10)))
 
 
+
+        def print_leaf(leaf):
+            for line in leaf.sub_lines:
+                if len(line) > 0:
+                    if self.skip_retraction:
+                        gcodeFile.write(gcodeEnvironment.goToNextPoint(line[0],False))
+                        self.skip_retraction = False
+                    else:
+                        gcodeFile.write(gcodeEnvironment.goToNextPoint(line[0], True))
+                    for point_index in range(1,len(line)):
+                        gcodeFile.write(gcodeEnvironment.drawToNextPoint(line[point_index]))
+
+        def print_boundary(boundary):
+            for line in boundary.sub_lines:
+                if len(line) > 0:
+                    gcodeFile.write(gcodeEnvironment.goToNextPoint(line[0],True))
+                    for point_index in range(1,len(line)):
+                        gcodeFile.write(gcodeEnvironment.drawToNextPoint(line[point_index]))
+            self.skip_retraction = True
+
+
+
+        def switch_leaf(leaf):
+            switch = {
+                "skin": print_leaf,
+                "infill": print_leaf,
+                "hole": print_leaf,
+                "boundary": print_boundary
+            }
+            switch[leaf.type](leaf)
+
+        def swith_node(node):
+            switch = {
+                "outline": print_node,
+                "layer": print_layer,
+                "island": print_node,
+            }
+            switch[node.type](node)
+
+        def print_layer(node):
+
+            for node in node.sub_lines:
+                gotroughgroup(node)
+            gcodeEnvironment.Z += printSettings.layerThickness
+
+        def print_node(node):
+            for node in node.sub_lines:
+                gotroughgroup(node)
+
+
+        def gotroughgroup(group):
+            if (group.isLeaf):
+                switch_leaf(group)
+            else:
+                swith_node(group)
+
         for layer in self.layer_list:
-            if len(layer) != 0:
-                for line in layer:
-                    if len(line) > 0:
-                        gcodeFile.write(gcodeEnvironment.goToNextPoint(line[0]))
-                        for point_index in range(1,len(line)):
-                            gcodeFile.write(gcodeEnvironment.drawToNextPoint(line[point_index]))
-                gcodeEnvironment.Z += printSettings.layerThickness
+            if len(layer.sub_lines) != 0:
+                gotroughgroup(layer)
+
 
 
         gcodeFile.write(gcodeEnvironment.retractFilament(printSettings.retractionLength))

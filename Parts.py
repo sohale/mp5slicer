@@ -19,11 +19,8 @@ class Outline:
 
         self.island = island
         self.polygons = polygons
-        try:
-            polygon = Polygon_stack(polygons[0])
-            self.boundary = self.Boundary(self, Line(polygon,settings.line_width) )
-        except:
-            print("sfsocbbgny")
+        polygon = Polygon_stack(polygons[0])
+        self.boundary = self.Boundary(self, Line(polygon,settings.line_width) )
         self.holes  = []
         for poly_index in range(1, len(polygons)):
             polygon = Polygon_stack(polygons[poly_index])
@@ -34,7 +31,7 @@ class Outline:
             self.outline = outline
             self.line = line
             self.shells = []
-            self.polylines = []
+            self.polylines = Line_group("hole", settings.line_width)
 
         def make_shells(self):
 
@@ -46,9 +43,10 @@ class Outline:
 
 
         def g_print(self):
-            self.polylines.append(Outline.process_polyline(self.line.get_contour()))
+
+            self.polylines.add_chain(Outline.process_polyline(self.line.get_contour()))
             for shell in self.shells:
-                self.polylines.append(Outline.process_polyline(shell.get_contour()))
+                self.polylines.add_chain(Outline.process_polyline(shell.get_contour()))
             return self.polylines
 
         def get_innershell(self):
@@ -74,7 +72,7 @@ class Outline:
             self.outline = outline
             self.line = line
             self.shells = []
-            self.polylines = []
+            self.polylines = Line_group("boundary", settings.line_width)
 
         def make_shells(self):
             shell = Outline.process_shell(self.line,-settings.line_width)
@@ -92,8 +90,8 @@ class Outline:
         def g_print(self):
 
             for shell in self.shells:
-                self.polylines.append(Outline.process_polyline(shell.get_contour()))
-            self.polylines.append(Outline.process_polyline(self.line.get_contour()))
+                self.polylines.add_chain(Outline.process_polyline(shell.get_contour()))
+            self.polylines.add_chain(Outline.process_polyline(self.line.get_contour()))
             return self.polylines
 
         def get_innershell(self):
@@ -169,13 +167,15 @@ class Outline:
             polyline.append(point)
         # goes back to the start point since the polygon does not repeat the start (end) vertice twice
         polyline.append(start_point)
+        # print_line = Line_group(line.width)
+        # print_line.add_chain(polyline)
         return polyline
 
     def g_print(self):
-        polylines = []
+        polylines = Line_group("outline")
         for hole in self.holes:
-            polylines += hole.g_print()
-        polylines += self.boundary.g_print()
+            polylines.add_group(hole.g_print())
+        polylines.add_group(self.boundary.g_print())
 
         return polylines
 
@@ -249,6 +249,7 @@ class Infill:
 
 
     def process_polyline(self,polygon):
+
         if len(polygon) == 0:
             return []
         polyline = []
@@ -262,10 +263,10 @@ class Infill:
 
 
     def g_print(self):
-        polylines = []
+        polylines = Line_group("infill", settings.line_width)
         for polyline in self.polylines:
-            polylines.append(self.process_polyline(polyline))
-        polylines = arrange_path(polylines)
+            polylines.add_chain(self.process_polyline(polyline))
+        arrange_path(polylines)
         return polylines
 
 class Skin:
@@ -315,8 +316,8 @@ class Skin:
 
 
     def g_print(self):
-        polylines = []
+        polylines = Line_group("skin", settings.line_width)
         for polyline in self.polylines:
-            polylines.append(self.process_polyline(polyline))
-        polylines = arrange_path(polylines)
+            polylines.add_chain(self.process_polyline(polyline))
+        arrange_path(polylines)
         return polylines
