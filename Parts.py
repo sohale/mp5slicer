@@ -19,8 +19,9 @@ class Outline:
 
         self.island = island
         self.polygons = polygons
-        polygon = Polygon_stack(polygons[0])
-        self.boundary = self.Boundary(self, Line(polygon,settings.line_width) )
+        external_perimeter = Polygon_stack(polygons[0])
+        scaled_external_perimeter = Polygon_stack(offset(external_perimeter, -settings.line_width/2))
+        self.boundary = self.Boundary(self, Line(scaled_external_perimeter,settings.line_width) )
         self.holes  = []
         for poly_index in range(1, len(polygons)):
             polygon = Polygon_stack(polygons[poly_index])
