@@ -285,12 +285,13 @@ class Skin:
         self.polylines = None
 
 
-    def process(self, skins):
-        skins.add_polygon_stack(self.skins_as_polygon_stack)
+    def process(self, skins, perimeter):
+        self.skins_as_polygon_stack.add_polygon_stack(skins)
 
 
         self.pattern = Line_stack(pyclipper.scale_to_clipper(linear_infill(settings.line_width,self.XorY,self.BBox)))
-        innerlines =self.pattern.intersect_with(skins)
+        innerlines =  Line_stack(self.pattern.intersect_with(self.skins_as_polygon_stack))
+        innerlines = innerlines.intersect_with(perimeter)
 
         innerlines = pyclipper.scale_from_clipper(innerlines)
 

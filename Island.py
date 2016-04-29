@@ -101,6 +101,7 @@ class Island():
             top_layers_indexes_to_agregate = range(self.layer_index + 1, min(self.layer_index + 5, len(self.layers)))
             bottom_layers_indexes_to_agregate = range(max(self.layer_index - 5, 0),self.layer_index - 1 )
             skins = Polygon_stack()
+            perimeter = self.outline.get_inner_bounds()
 
             for layer_index in top_layers_indexes_to_agregate:
                 other_skins = self.print_tree[layer_index].get_upskins()
@@ -111,10 +112,10 @@ class Island():
                 skins = skins.union_with(other_skins)
 
             if self.skins is not None:
-                self.skins.process(skins)
+                self.skins.process(skins, perimeter)
             elif not skins.isEmpty:
                 self.skins = Skin(skins, self.layers, self.layer_index,self.BBox)
-                self.skins.process(Polygon_stack())
+                self.skins.process(Polygon_stack(), perimeter)
 
 
 

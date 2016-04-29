@@ -83,7 +83,7 @@ class G_buffer:
             switch = {
                 "skin": print_skin,
                 "infill": print_infill,
-                "hole": print_boundary(),
+                "hole": print_boundary,
                 "boundary": print_boundary
             }
             switch[leaf.type](leaf)
