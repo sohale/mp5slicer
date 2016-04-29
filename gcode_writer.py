@@ -20,7 +20,7 @@ class GCodeEnvironment:
 
         self.X = 0
         self.Y = 0
-        self.Z = 0.15
+        self.Z = 0.13
 
     def truncate(self,f, n):
         '''Truncates/pads a float f to n decimal places without rounding'''
@@ -78,7 +78,12 @@ class GCodeEnvironment:
 
 
     # draw to point A
-    def drawToNextPoint(self,A):
+    def drawToNextPoint(self, A, speed = 0):
+        if speed == 0:
+            self.F = self.settings.speedRate
+        else:
+            self.F = speed
+
         B = [0.1]*2
         for i in range(len(A)):
             B[i] = self.truncate(A[i],3)

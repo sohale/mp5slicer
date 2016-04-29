@@ -59,7 +59,14 @@ class Polygon_stack():
         return Polygon_stack(inter_layers(self.polygons, other.polygons, True))
 
     def union_with(self, other):
-        pass
+        if self.isEmpty and other.isEmpty:
+            return Polygon_stack()
+        elif self.isEmpty:
+            return other
+        elif other.isEmpty:
+            return self
+        else:
+            return Polygon_stack(union_layers(self.polygons, other.polygons, True))
 
     def difference_with(self, other):
         if self.isEmpty or other.isEmpty:

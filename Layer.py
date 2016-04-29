@@ -30,6 +30,31 @@ class Layer():
         for island in self.islands:
             island.process_skins()
 
+    def prepare_skins(self):
+        for island in self.islands:
+            island.prepare_skins()
+
+    # def get_skins(self):
+    #     skins = Polygon_stack()
+    #     for island in self.islands:
+    #         if island.skins is not None:
+    #             skins.add_polygon_stack(island.skins.skins_as_polygon_stack)
+    #     return skins
+
+    def get_downskins(self):
+        skins = Polygon_stack()
+        for island in self.islands:
+            if island.skins is not None:
+                skins.add_polygon_stack(island.skins.downskins)
+        return skins
+
+    def get_upskins(self):
+        skins = Polygon_stack()
+        for island in self.islands:
+            if island.skins is not None:
+                skins.add_polygon_stack(island.skins.upskins)
+        return skins
+
     def process_infill(self):
         for island in self.islands:
             island.process_infill()

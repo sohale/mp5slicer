@@ -30,6 +30,9 @@ def get_layer_list(polygon_layers,BBox):
 
     # process skins
     for layer in layer_list:
+        layer.prepare_skins()
+
+    for layer in layer_list:
         layer.process_skins()
         layer.process_infill()
 

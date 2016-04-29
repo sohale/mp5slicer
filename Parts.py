@@ -88,10 +88,10 @@ class Outline:
                 self.shells.append(shell)
 
         def g_print(self):
-
+            self.polylines.add_chain(Outline.process_polyline(self.line.get_contour()))
             for shell in self.shells:
                 self.polylines.add_chain(Outline.process_polyline(shell.get_contour()))
-            self.polylines.add_chain(Outline.process_polyline(self.line.get_contour()))
+
             return self.polylines
 
         def get_innershell(self):
@@ -270,36 +270,31 @@ class Infill:
         return polylines
 
 class Skin:
-    def __init__(self,skins_as_polygon_stack,layers,layer_index,BBox):
+    def __init__(self,downskins, upskins,layers,layer_index,BBox):
         self.layers = layers
-        self.skins_as_polygon_stack =skins_as_polygon_stack
+        self.layer_index = layer_index
+        self.skins_as_polygon_stack =Polygon_stack()
+        self.skins_as_polygon_stack.add_polygon_stack(downskins)
+        self.skins_as_polygon_stack.add_polygon_stack(upskins)
+        self.downskins = downskins
+        self.upskins = upskins
         self.BBox = BBox
         self.XorY = (layer_index+1)%2
         self.pattern = None
 
-        self.polylines = self.make_polyline(skins_as_polygon_stack, layer_index)
+        self.polylines = None
 
 
-    def make_polyline(self,skins_as_polygon_stack,layer_index):
+    def process(self, skins):
+        skins.add_polygon_stack(self.skins_as_polygon_stack)
+
 
         self.pattern = Line_stack(pyclipper.scale_to_clipper(linear_infill(settings.line_width,self.XorY,self.BBox)))
-        innerlines =self.pattern.intersect_with(skins_as_polygon_stack)
-
-        # for island in skins_as_island_stack:
-        #     # vizz_2d(island.Contour)
-        #     innerlines += pyclipper.OpenPathsFromPolyTree(inter_layers(self.pattern,island.Contour,False))
-        # for island in skins_as_island_stack:
-        #     for hole in island.Childs:
-        #         innerlines = pyclipper.OpenPathsFromPolyTree(diff_layers(innerlines,hole.Contour,False))
-        #     # if len(polygon) != 0:
-            #     # innerlines += pyclipper.OpenPathsFromPolyTree(inter_layers(self.pattern,pyclipper.scale_from_clipper(polygon),False))
-            #     innerlines += pyclipper.OpenPathsFromPolyTree(inter_layers(self.pattern,polygon,False))
-            #     # print("gsgsgxg")
-            #     # pyclipper.PolyTreeToPaths()
+        innerlines =self.pattern.intersect_with(skins)
 
         innerlines = pyclipper.scale_from_clipper(innerlines)
 
-        return innerlines
+        self.polylines = innerlines
 
 
     def process_polyline(self,polygon):

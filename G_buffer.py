@@ -53,15 +53,37 @@ class G_buffer:
                     gcodeFile.write(gcodeEnvironment.goToNextPoint(line[0],True))
                     for point_index in range(1,len(line)):
                         gcodeFile.write(gcodeEnvironment.drawToNextPoint(line[point_index]))
-            self.skip_retraction = True
+            self.skip_retraction = False
+
+        def print_infill(leaf):
+            for line in leaf.sub_lines:
+                if len(line) > 0:
+                    if self.skip_retraction:
+                        gcodeFile.write(gcodeEnvironment.goToNextPoint(line[0],False))
+                        self.skip_retraction = False
+                    else:
+                        gcodeFile.write(gcodeEnvironment.goToNextPoint(line[0], True))
+                    for point_index in range(1,len(line)):
+                        gcodeFile.write(gcodeEnvironment.drawToNextPoint(line[point_index], 3000))
+
+        def print_skin(leaf):
+            for line in leaf.sub_lines:
+                if len(line) > 0:
+                    if self.skip_retraction:
+                        gcodeFile.write(gcodeEnvironment.goToNextPoint(line[0],False))
+                        self.skip_retraction = False
+                    else:
+                        gcodeFile.write(gcodeEnvironment.goToNextPoint(line[0], True))
+                    for point_index in range(1,len(line)):
+                        gcodeFile.write(gcodeEnvironment.drawToNextPoint(line[point_index], 2500))
 
 
 
         def switch_leaf(leaf):
             switch = {
-                "skin": print_leaf,
-                "infill": print_leaf,
-                "hole": print_leaf,
+                "skin": print_skin,
+                "infill": print_infill,
+                "hole": print_boundary(),
                 "boundary": print_boundary
             }
             switch[leaf.type](leaf)

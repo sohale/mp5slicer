@@ -58,12 +58,12 @@ class PrintSettings:
         try:
             dict["speedRate"]
         except KeyError:
-            dict["speedRate"]=1600 # mm/min
+            dict["speedRate"]=2000 # mm/min
 
         try:
             dict["filamentDiameter"]
         except KeyError:
-            dict["filamentDiameter"]=2.85
+            dict["filamentDiameter"]=1.75
 
     #     try:
     #         dict["emptyLayer"]
