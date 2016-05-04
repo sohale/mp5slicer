@@ -274,9 +274,11 @@ class Skin:
     def __init__(self,downskins, upskins,layers,layer_index,BBox):
         self.layers = layers
         self.layer_index = layer_index
+        downskins = Polygon_stack(offset(downskins,1))
+        upskins = Polygon_stack(offset(upskins, 1))
         self.skins_as_polygon_stack =Polygon_stack()
-        self.skins_as_polygon_stack.add_polygon_stack(downskins)
-        self.skins_as_polygon_stack.add_polygon_stack(upskins)
+        self.skins_as_polygon_stack = self.skins_as_polygon_stack.union_with(downskins)
+        self.skins_as_polygon_stack = self.skins_as_polygon_stack.union_with(upskins)
         self.downskins = downskins
         self.upskins = upskins
         self.BBox = BBox
@@ -287,7 +289,7 @@ class Skin:
 
 
     def process(self, skins, perimeter):
-        self.skins_as_polygon_stack.add_polygon_stack(skins)
+        self.skins_as_polygon_stack = self.skins_as_polygon_stack.union_with(skins)
 
 
         self.pattern = Line_stack(pyclipper.scale_to_clipper(linear_infill(settings.line_width,self.XorY,self.BBox)))

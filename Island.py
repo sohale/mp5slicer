@@ -63,11 +63,11 @@ class Island():
 
             up_shells = Polygon_stack()
             for island in up_islands:
-                up_shells.add_polygon_stack(island.get_innerbounds())
+                up_shells.add_polygon_stack(island.get_outterbounds())
 
             down_shells = Polygon_stack()
             for island in down_islands:
-                outterbounds = island.get_innerbounds()
+                outterbounds = island.get_outterbounds()
                 down_shells.add_polygon_stack(outterbounds)
 
             this_shells = Polygon_stack(self.get_innerbounds())
@@ -98,8 +98,8 @@ class Island():
 
     def process_skins(self):
         if self.layer_index != 0 and self.layer_index != len(self.layers)-2 and self.layer_index != len(self.layers)-1:
-            top_layers_indexes_to_agregate = range(self.layer_index + 1, min(self.layer_index + 5, len(self.layers)))
-            bottom_layers_indexes_to_agregate = range(max(self.layer_index - 5, 0),self.layer_index - 1 )
+            top_layers_indexes_to_agregate = range(self.layer_index + 1, min(self.layer_index + 4, len(self.layers)))
+            bottom_layers_indexes_to_agregate = range(max(self.layer_index - 2, 0),self.layer_index - 1, -1 )
             skins = Polygon_stack()
             perimeter = self.outline.get_inner_bounds()
 

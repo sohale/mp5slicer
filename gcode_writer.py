@@ -94,7 +94,6 @@ class GCodeEnvironment:
             self.E += extrusion
         except:
             print("eugsigieso")
-        self.F=self.settings.speedRate
         instruction = "G1" + " X" +str(A[0]) + " Y" +str(A[1]) + " Z" +str(self.Z) + " E" +str(self.E) + " F" +str(self.F) + "\n"
         self.X = A[0]
         self.Y = A[1]

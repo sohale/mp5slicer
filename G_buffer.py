@@ -64,7 +64,7 @@ class G_buffer:
                     else:
                         gcodeFile.write(gcodeEnvironment.goToNextPoint(line[0], True))
                     for point_index in range(1,len(line)):
-                        gcodeFile.write(gcodeEnvironment.drawToNextPoint(line[point_index], 3000))
+                        gcodeFile.write(gcodeEnvironment.drawToNextPoint(line[point_index], 4000))
 
         def print_skin(leaf):
             for line in leaf.sub_lines:
@@ -75,7 +75,7 @@ class G_buffer:
                     else:
                         gcodeFile.write(gcodeEnvironment.goToNextPoint(line[0], True))
                     for point_index in range(1,len(line)):
-                        gcodeFile.write(gcodeEnvironment.drawToNextPoint(line[point_index], 2500))
+                        gcodeFile.write(gcodeEnvironment.drawToNextPoint(line[point_index], 3000))
 
 
 

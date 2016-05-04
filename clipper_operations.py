@@ -93,8 +93,22 @@ def isPaths(paths):
     assert(isinstance(paths[0][0][0], long))
 
 
+def offset_default(polygon_stack,val):
+    path = polygon_stack.polygons
+    po = pyclipper.PyclipperOffset()
+    po.AddPaths(path,pyclipper.JT_SQUARE,pyclipper.ET_CLOSEDPOLYGON)
+
+
+    offseted = po.Execute(pyclipper.scale_to_clipper(val))
+
+    return offseted
+
 def offset(polygon_stack,val):
     path = polygon_stack.polygons
+    # path = pyclipper.ReversePaths(polygon_stack.polygons)
+    # for polygon_index in range(len(path)):
+    #     if not pyclipper.Orientation(path[polygon_index]):
+    #         path[polygon_index] = pyclipper.ReversePath(path[polygon_index])
     po = pyclipper.PyclipperOffset()
     po.AddPaths(path,pyclipper.JT_SQUARE,pyclipper.ET_CLOSEDPOLYGON)
 
