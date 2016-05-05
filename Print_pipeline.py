@@ -52,7 +52,7 @@ def bounding_box(stl_mesh):
 
 def get_polygon_layers():
     from stl import mesh
-    stl_mesh = mesh.Mesh.from_file("stl/elephant.stl")
+    stl_mesh = mesh.Mesh.from_file("stl/fine_positive_features.stl")
     print("--- %s seconds ---" % (time.time() - start_time))
     mesh = MPmesh(stl_mesh.vectors, fix_mesh= True)
     print("--- %s seconds ---" % (time.time() - start_time))

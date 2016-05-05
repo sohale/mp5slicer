@@ -5,11 +5,12 @@ from  slicer import *
 
 def polygonize_layers_from_trimed_dict(slice_layers):
 
-    for slice in slice_layers:
+    for slice_index in range(len(slice_layers)):
+        print(slice_index)
 
-        for bipoint in slice:
-            if len(slice[bipoint]) != 2:
-                print(bipoint," : ",slice[bipoint])
+        for bipoint in slice_layers[slice_index]:
+            if len(slice_layers[slice_index][bipoint]) != 2:
+                print(bipoint," : ",slice_layers[slice_index][bipoint])
 
     slicesAsPolygons = []
     for slicee in slice_layers:

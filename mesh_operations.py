@@ -29,7 +29,10 @@ class mesh():
 		self.normalise_normals()
 		self.sort_by_z()
 		self.scale_to_int()
-
+    #
+	# def add_noise(self):
+	# 	noise = np.random.uniform(-1,0,self.triangles[:,:,0].size /3)
+	# 	self.triangles[:,:,0] = np.sum(self.triangles[:,:,2] , noise,
 
 	def compute_normals(self):
 

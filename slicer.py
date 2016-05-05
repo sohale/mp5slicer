@@ -18,7 +18,12 @@ class Plane:
     def intersection_with_line_segment(self, vertice_0, vertice_1):
         dist_0 = self.distance_to_vertice(vertice_0)
         dist_1 = self.distance_to_vertice(vertice_1)
-    
+
+        if dist_0 == 0:
+            return vertice_0
+        if dist_1 == 0:
+            return vertice_1
+
         if dist_0*dist_1 > 0:
             return None
         else:
@@ -32,28 +37,68 @@ class Plane:
     def intersection_with_triangle(self, triangle):
         # triangle is a 3*3 matrix
         assert isinstance(triangle, np.ndarray)
-        if(np.array_equal(triangle[0],triangle[1])):
-            return []
-        if(np.array_equal(triangle[0],triangle[2])):
-            return []
-        if(np.array_equal(triangle[2],triangle[1])):
-            return []
+        # if(np.array_equal(triangle[0],triangle[1])):
+        #     return []
+        # if(np.array_equal(triangle[0],triangle[2])):
+        #     return []
+        # if(np.array_equal(triangle[2],triangle[1])):
+        #     return []
+
+
+
         vertice_0 = triangle[0]
         vertice_1 = triangle[1]
         vertice_2 = triangle[2]
 
+
+
+
+        if vertice_0[2] == self.z:
+            if vertice_1[2] == self.z:
+                if  vertice_2[2] != self.z:
+                    return [vertice_0,vertice_1]
+                else:
+                    return None
+            if vertice_2[2] == self.z:
+                if  vertice_1[2] != self.z:
+                    return [vertice_0,vertice_2]
+                else:
+                    return None
+        if vertice_1[2] == self.z:
+            if vertice_2[2] == self.z:
+                if  vertice_0[2] != self.z:
+                    return [vertice_1,vertice_2]
+                else:
+                    return None
+
+
+
+
+
+
         line = []
+        # if vertice_0[2] != self.z:
         intersection_point_0 = self.intersection_with_line_segment(vertice_0, vertice_1)
-        if intersection_point_0 is not None:
+        if intersection_point_0 is not None :
             line.append(intersection_point_0)
-
+        # if vertice_1[2] != self.z:
         intersection_point_1 = self.intersection_with_line_segment(vertice_1, vertice_2)
-        if intersection_point_1 is not None:
-            line.append(intersection_point_1)
-
+        if intersection_point_1 is not None :
+            if not np.array_equal(intersection_point_1,intersection_point_0):
+                line.append(intersection_point_1)
+        # if vertice_2[2] != self.z:
         intersection_point_2 = self.intersection_with_line_segment(vertice_0, vertice_2)
-        if intersection_point_2 is not None:
-            line.append(intersection_point_2)
+        if intersection_point_2 is not None :
+            if not np.array_equal(intersection_point_2,intersection_point_0) and not np.array_equal(intersection_point_1,intersection_point_2):
+                line.append(intersection_point_2)
+        if len(line) == 1:
+            return None
+        if len(line) != 2:
+            print("eror : " + str(len(line)))
+            print((vertice_0,vertice_1,vertice_2))
+            print(self.z)
+            print(line)
+
 
         return line
 
@@ -73,6 +118,7 @@ def slicer(stl_filepath, slice_height_from=0, slice_height_to=100, slice_step=1)
 def slicer_from_mesh(mesh, slice_height_from=0, slice_height_to=100, slice_step=1):
 
     normal = np.array([[0.],[0.],[1.]], dtype=np.dtype(decimal.Decimal))
+
 
     sliceplanes_height = np.arange(slice_height_from, slice_height_to, slice_step)
     slice_layers = [[] for i in range(len(sliceplanes_height))]
@@ -100,50 +146,61 @@ def truncate(f, n):
 def slicer_from_mesh_as_dict(mesh, slice_height_from=0, slice_height_to=100, slice_step=1):
     import decimal
 
+    slice_height_from += 0.0001
+    slice_height_to += 0.0001
+
     normal = np.array([[0.],[0.],[1.]])
     # ufunc = np.vectorize(lambda x: truncate(x,8))
 
 
     sliceplanes_height = np.arange(slice_height_from, slice_height_to, slice_step)
+    print(sliceplanes_height)
     slice_layers = [{} for i in range(len(sliceplanes_height))]
 
     for triangle in mesh.triangles:
         tri_min, tri_max = min_max_z(triangle)
-        intersect_planes_heights = sliceplanes_height[(tri_min<sliceplanes_height)&(sliceplanes_height<tri_max)]
-        plane_index = np.where((tri_min<sliceplanes_height)&(sliceplanes_height<tri_max))[0]
+        intersect_planes_heights = sliceplanes_height[(tri_min<=sliceplanes_height)&(sliceplanes_height<=tri_max)]
+        plane_index = np.where((tri_min<=sliceplanes_height)&(sliceplanes_height<=tri_max))[0]
 
         planes = [Plane(normal=normal, z=height) for height in intersect_planes_heights]
         for index, plane in zip(plane_index, planes):
             line = plane.intersection_with_triangle(triangle)
-            line[0] =line[0][:2]
-            # print(type(line[0][0]))
-            # ufunc(line[0])
-            line[1] =line[1][:2]
-            # ufunc(line[1])
+            if isinstance(line, list):
+                line[0] =line[0][:2]
+                # print(type(line[0][0]))
+                # ufunc(line[0])
+                line[1] =line[1][:2]
+                # ufunc(line[1])
 
 
-            line[0] = line[0].tolist()
-            line[1] = line[1].tolist()
-            for point_index in range(len(line)):
-            # #     # for val_index in range(len(line[point_index])):
-            # #     #     line[point_index][val_index] = round(line[point_index][val_index],2)
-            # #     # line[point_index] = line[point_index].tolist()
-                for val_index in range(len(line[point_index])):
-                    line[point_index][val_index] = truncate(line[point_index][val_index],8)
+                line[0] = line[0].tolist()
+                line[1] = line[1].tolist()
+                for point_index in range(len(line)):
+                # #     # for val_index in range(len(line[point_index])):
+                # #     #     line[point_index][val_index] = round(line[point_index][val_index],2)
+                # #     # line[point_index] = line[point_index].tolist()
+                    for val_index in range(len(line[point_index])):
+                        line[point_index][val_index] = truncate(line[point_index][val_index],8)
 
-            point1 = tuple(line[0])
+                point1 = tuple(line[0])
 
-            point2= tuple(line[1])
-            try:
-                slice_layers[index][point1].append(point2)
-            except:
-                slice_layers[index][point1] = []
-                slice_layers[index][point1].append(point2)
-            try:
-                slice_layers[index][point2].append(point1)
-            except:
-                slice_layers[index][point2] = []
-                slice_layers[index][point2].append(point1)
+                point2= tuple(line[1])
+                try:
+                    if point1 == (-8.60379886, -42.98500823):
+                        print("gogo")
+                    if point2 not in slice_layers[index][point1]:
+                        slice_layers[index][point1].append(point2)
+                except:
+                    slice_layers[index][point1] = []
+                    slice_layers[index][point1].append(point2)
+                try:
+                    if point1 == (-8.60379886, -42.98500823):
+                        print("dance")
+                    if point1 not in slice_layers[index][point2]:
+                        slice_layers[index][point2].append(point1)
+                except:
+                    slice_layers[index][point2] = []
+                    slice_layers[index][point2].append(point1)
 
     return slice_layers
 

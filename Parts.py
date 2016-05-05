@@ -25,7 +25,8 @@ class Outline:
         self.holes  = []
         for poly_index in range(1, len(polygons)):
             polygon = Polygon_stack(polygons[poly_index])
-            self.holes.append(self.Hole(self, Line(polygon, settings.line_width)))
+            scaled_hole = Polygon_stack(offset(polygon, settings.line_width/2))
+            self.holes.append(self.Hole(self, Line(scaled_hole, settings.line_width)))
 
     class Hole():
         def __init__(self,outline, line):
