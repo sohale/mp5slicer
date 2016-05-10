@@ -77,6 +77,7 @@ class Outline:
 
 
         def make_shells(self):
+            previousShell = self.line
             for i in range(1,settings.shellSize,1):
                 shell = Outline.process_shell(self.line,-i*settings.line_width)
 
@@ -87,8 +88,9 @@ class Outline:
                     if (len(hole_innershell.difference_with(shell.get_inner_bound()).polygons) != 0):
                         intersect_existing_shell = True
 
-                if not intersect_existing_shell:
+                if (not intersect_existing_shell and len(previousShell.get_outter_bound().difference_with(shell.get_inner_bound()).polygons) != 0):
                     self.shells.append(shell)
+                    previousShell = shell
 
 
         def g_print(self):
