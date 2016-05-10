@@ -54,32 +54,22 @@ def get_polygon_layers():
     from stl import mesh
     stl_mesh = mesh.Mesh.from_file("../../elephant.stl")
     print("--- %s seconds ---" % (time.time() - start_time))
-    mesh = MPmesh(stl_mesh.vectors, fix_mesh= True)
+    this_mesh = MPmesh(stl_mesh.vectors, fix_mesh= True)
     print("--- %s seconds ---" % (time.time() - start_time))
-    # assume the center of the mesh are at (0,0)
-    # translate x by 70
-    mesh.triangles[:,:,0]+= 90
-    # translate y by 70
-    mesh.triangles[:,:,1]+= 130
-    print("--- %s seconds ---" % (time.time() - start_time))
-    BBox = bounding_box(stl_mesh)
-    cut = BBox[4:].tolist()
-    BBox = [0,150,0,150] + cut
+
+    this_mesh.translate([90,130,0])
+    BBox = this_mesh.bounding_box()
 
     settings = PrintSettings({})
 
-    slice_layers = slicer_from_mesh_as_dict(mesh, slice_height_from=BBox[4], slice_height_to=BBox[5], slice_step=settings.layerThickness)
+    slice_layers = slicer_from_mesh_as_dict(this_mesh, slice_height_from=BBox[4], slice_height_to=BBox[5], slice_step=settings.layerThickness)
     print("--- %s seconds ---" % (time.time() - start_time))
     layers_as_polygons = polygonize_layers_from_trimed_dict(slice_layers)
     print("--- %s seconds ---" % (time.time() - start_time))
-    # for layer in layers_as_polygons:
-    #     vizz_2d_multi(layer)
-    # layers_as_polygons = reord_layers(layers_as_polygons)
+
 
     return layers_as_polygons,BBox
 
-# def decimal_to_float(arr):
-#     for layer in arr
 
 
 
