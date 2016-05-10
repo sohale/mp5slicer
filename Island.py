@@ -57,65 +57,58 @@ class Island():
 
     def prepare_skins(self):
 
-        if self.layer_index != 0 and self.layer_index != len(self.layers)-2 and self.layer_index != len(self.layers)-1:
+        # if self.layer_index != 0 and self.layer_index != len(self.layers)-2 and self.layer_index != len(self.layers)-1:
+        if (self.layer_index +1 < len(self.layers)):
             up_islands = self.print_tree[self.layer_index+1].islands
+        else:
+            up_islands = []
+            up_islands.append(Island(self.print_tree,Polynode([]),self.layers,self.layer_index+1,self.BBox))
+
+        if (self.layer_index -1 > 0):
             down_islands = self.print_tree[self.layer_index-1].islands
+        else:
+            down_islands  = []
+            down_islands.append((Island(self.print_tree,Polynode([]),self.layers,self.layer_index-1,self.BBox)))
 
-            up_shells = Polygon_stack()
-            for island in up_islands:
-                up_shells.add_polygon_stack(island.get_outterbounds())
+        up_shells = Polygon_stack()
+        for island in up_islands:
+            up_shells.add_polygon_stack(island.get_outterbounds())
 
-            down_shells = Polygon_stack()
-            for island in down_islands:
-                outterbounds = island.get_outterbounds()
-                down_shells.add_polygon_stack(outterbounds)
+        down_shells = Polygon_stack()
+        for island in down_islands:
+            outterbounds = island.get_outterbounds()
+            down_shells.add_polygon_stack(outterbounds)
 
-            this_shells = Polygon_stack(self.get_innerbounds())
+        this_shells = Polygon_stack(self.get_innerbounds())
 
-            downskins = this_shells.difference_with(down_shells)
-            # vizz_2d_multi(downskins.polygons)
-            upskins = this_shells.difference_with(up_shells)
-            # vizz_2d_multi(upskins.polygons)
+        downskins = this_shells.difference_with(down_shells)
 
-            # skins = Polygon_stack()
-            # skins.add_polygon_stack(downskins)
-            # skins.add_polygon_stack(upskins)
-            self.skins = Skin(downskins, upskins, self.layers, self.layer_index,self.BBox)
-            # if self.layer_index == 8:
-            #     # vizz_2d_multi(down_shells)
-            #     # vizz_2d_multi(this_shells)
-            #     # vizz_2d_multi(up_shells)
-            # skins = intersect_layers_new(down_islands,self,up_islands)
+        upskins = this_shells.difference_with(up_shells)
 
-            # if len(skins) != 0 :
-            #
-            #     # vizz_2d_multi(skins)
-            #
-            #     self.skins = Skin(skins,self.layers, self.layer_index,self.BBox)
+        self.skins = Skin(downskins, upskins, self.layers, self.layer_index,self.BBox)
 
-            # print("zfsgsg")
 
 
     def process_skins(self):
-        if self.layer_index != 0 and self.layer_index != len(self.layers)-2 and self.layer_index != len(self.layers)-1:
-            top_layers_indexes_to_agregate = range(self.layer_index + 1, min(self.layer_index + 4, len(self.layers)))
-            bottom_layers_indexes_to_agregate = range(max(self.layer_index - 2, 0),self.layer_index - 1, -1 )
-            skins = Polygon_stack()
-            perimeter = self.outline.get_inner_bounds()
+        # if self.layer_index != 0 and self.layer_index != len(self.layers)-2 and self.layer_index != len(self.layers)-1:
+        top_layers_indexes_to_agregate = range(self.layer_index + 1, min(self.layer_index + 4, len(self.layers)))
+        bottom_layers_indexes_to_agregate = range(max(self.layer_index - 2, 0),self.layer_index - 1, -1 )
+        skins = Polygon_stack()
+        perimeter = self.outline.get_inner_bounds()
 
-            for layer_index in top_layers_indexes_to_agregate:
-                other_skins = self.print_tree[layer_index].get_upskins()
-                skins = skins.union_with(other_skins)
+        for layer_index in top_layers_indexes_to_agregate:
+            other_skins = self.print_tree[layer_index].get_upskins()
+            skins = skins.union_with(other_skins)
 
-            for layer_index in bottom_layers_indexes_to_agregate:
-                other_skins = self.print_tree[layer_index].get_downskins()
-                skins = skins.union_with(other_skins)
+        for layer_index in bottom_layers_indexes_to_agregate:
+            other_skins = self.print_tree[layer_index].get_downskins()
+            skins = skins.union_with(other_skins)
 
-            if self.skins is not None:
-                self.skins.process(skins, perimeter)
-            elif not skins.isEmpty:
-                self.skins = Skin(skins, self.layers, self.layer_index,self.BBox)
-                self.skins.process(Polygon_stack(), perimeter)
+        if self.skins is not None:
+            self.skins.process(skins, perimeter)
+        elif not skins.isEmpty:
+            self.skins = Skin(skins, self.layers, self.layer_index,self.BBox)
+            self.skins.process(Polygon_stack(), perimeter)
 
 
 

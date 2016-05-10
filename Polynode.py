@@ -3,6 +3,6 @@
 
 class Polynode:
     def __init__(self,contour):
-        self.contour = contour
-        self.childs = []
+        self.Contour = contour
+        self.Childs = []
         self.depth = 0

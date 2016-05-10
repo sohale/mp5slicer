@@ -109,6 +109,6 @@ class Layer():
         if len(self.layers[self.index]) != 0:
             islands = self.detect_islands()
             for island in islands:
-                isle =Island(self.print_tree,island, self.layers,self.index,self.BBox)
+                isle = Island(self.print_tree,island, self.layers,self.index,self.BBox)
                 self.islands.append(isle)
 
