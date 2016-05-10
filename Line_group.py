@@ -6,7 +6,7 @@ class Line_group():
         self.sub_lines = []
         self.type = type
         self.print_time = 0
-        if (type == "skin" or type == "infill" or type == "boundary" or type == "hole"):
+        if (type == "skin" or type == "infill" or type == "boundary" or type == "hole" or type == "inner_boundary" or type == "inner_hole"):
             self.isLeaf = True
             assert (width != 0)
             self.width = width

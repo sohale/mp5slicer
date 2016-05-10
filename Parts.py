@@ -33,6 +33,7 @@ class Outline:
             self.line = line
             self.shells = []
             self.polylines = Line_group("hole", settings.line_width)
+            self.innerPolylines = Line_group("inner_hole", settings.line_width)
 
         def make_shells(self):
             for i in range(1,settings.shellSize,1):
@@ -46,9 +47,14 @@ class Outline:
         def g_print(self):
 
             self.polylines.add_chain(Outline.process_polyline(self.line.get_contour()))
-            for shell in self.shells:
-                self.polylines.add_chain(Outline.process_polyline(shell.get_contour()))
+
             return self.polylines
+
+        def g_print_inner_shell(self):
+
+            for shell in self.shells:
+                self.innerPolylines.add_chain(Outline.process_polyline(shell.get_contour()))
+            return self.innerPolylines
 
         def get_innershell(self):
             if len(self.shells) != 0:
@@ -74,6 +80,7 @@ class Outline:
             self.line = line
             self.shells = []
             self.polylines = Line_group("boundary", settings.line_width)
+            self.innerPolylines = Line_group("inner_boundary", settings.line_width)
 
 
         def make_shells(self):
@@ -95,10 +102,13 @@ class Outline:
 
         def g_print(self):
             self.polylines.add_chain(Outline.process_polyline(self.line.get_contour()))
-            for shell in self.shells:
-                self.polylines.add_chain(Outline.process_polyline(shell.get_contour()))
 
-            return self.polylines
+            return  self.polylines
+
+        def g_print_inner_shell(self):
+            for shell in self.shells:
+                self.innerPolylines.add_chain(Outline.process_polyline(shell.get_contour()))
+            return self.innerPolylines
 
         def get_innershell(self):
             if len(self.shells) != 0:
@@ -180,7 +190,9 @@ class Outline:
     def g_print(self):
         polylines = Line_group("outline")
         for hole in self.holes:
+            polylines.add_group(hole.g_print_inner_shell())
             polylines.add_group(hole.g_print())
+        polylines.add_group(self.boundary.g_print_inner_shell())
         polylines.add_group(self.boundary.g_print())
 
         return polylines

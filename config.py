@@ -68,7 +68,7 @@ class PrintSettings:
         try:
             dict["shellSize"]
         except KeyError:
-            dict["shellSize"]=10
+            dict["shellSize"]=3
 
     #     try:
     #         dict["emptyLayer"]
