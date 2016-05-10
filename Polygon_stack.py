@@ -12,10 +12,10 @@ class Polygon_stack():
             self.isEmpty = polygons.isEmpty
         elif isinstance(polygons, list) and len(polygons) == 0:
             self.polygons  = []
-        elif isinstance(polygons[0][0],long):
+        elif isinstance(polygons[0][0],long) or isinstance(polygons[0][0],int):
             self.polygons  = [polygons]
             self.isEmpty = False
-        elif isinstance(polygons[0][0][0],long):
+        elif isinstance(polygons[0][0][0],long) or isinstance(polygons[0][0][0],int):
             self.polygons = polygons
             self.isEmpty = False
         else: raise TypeError

@@ -11,10 +11,10 @@ class Line_stack():
             self.isEmpty = lines.isEmpty
         elif isinstance(lines, list) and len(lines) == 0:
             self.lines  = []
-        elif isinstance(lines[0][0],long):
+        elif isinstance(lines[0][0],long) or isinstance(lines[0][0],int):
             self.lines  = [lines]
             self.isEmpty = False
-        elif isinstance(lines[0][0][0],long):
+        elif isinstance(lines[0][0][0],long) or isinstance(lines[0][0][0],int):
             self.lines = lines
             self.isEmpty = False
         else: raise TypeError

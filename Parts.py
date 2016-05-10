@@ -16,7 +16,6 @@ settings = PrintSettings({})
 
 class Outline:
     def __init__(self,island,polygons):
-
         self.island = island
         self.polygons = polygons
         external_perimeter = Polygon_stack(polygons[0])
@@ -36,12 +35,12 @@ class Outline:
             self.polylines = Line_group("hole", settings.line_width)
 
         def make_shells(self):
+            for i in range(1,settings.shellSize,1):
+                shell = Outline.process_shell(self.line,i*settings.line_width)
+                boundary_innershell = self.outline.boundary.get_innershell()
 
-            shell = Outline.process_shell(self.line,settings.line_width)
-            boundary_innershell = self.outline.boundary.get_innershell()
-
-            if len(shell.get_outter_bound().difference_with(boundary_innershell ).polygons) == 0:
-                self.shells.append(shell)
+                if len(shell.get_outter_bound().difference_with(boundary_innershell ).polygons) == 0:
+                    self.shells.append(shell)
 
 
         def g_print(self):
@@ -76,18 +75,21 @@ class Outline:
             self.shells = []
             self.polylines = Line_group("boundary", settings.line_width)
 
+
         def make_shells(self):
-            shell = Outline.process_shell(self.line,-settings.line_width)
+            for i in range(1,settings.shellSize,1):
+                shell = Outline.process_shell(self.line,-i*settings.line_width)
 
-            intersect_existing_shell = False
-            for hole in self.outline.holes:
-                hole_innershell = hole.get_outter_bound()
-                # if len(hole_innershell) != 0:
-                if (len(hole_innershell.difference_with(shell.get_inner_bound()).polygons) != 0):
-                    intersect_existing_shell = True
+                intersect_existing_shell = False
+                for hole in self.outline.holes:
+                    hole_innershell = hole.get_outter_bound()
+                    # if len(hole_innershell) != 0:
+                    if (len(hole_innershell.difference_with(shell.get_inner_bound()).polygons) != 0):
+                        intersect_existing_shell = True
 
-            if not intersect_existing_shell:
-                self.shells.append(shell)
+                if not intersect_existing_shell:
+                    self.shells.append(shell)
+
 
         def g_print(self):
             self.polylines.add_chain(Outline.process_polyline(self.line.get_contour()))

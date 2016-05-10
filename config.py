@@ -65,6 +65,11 @@ class PrintSettings:
         except KeyError:
             dict["filamentDiameter"]=1.75
 
+        try:
+            dict["shellSize"]
+        except KeyError:
+            dict["shellSize"]=10
+
     #     try:
     #         dict["emptyLayer"]
     #     except KeyError:
