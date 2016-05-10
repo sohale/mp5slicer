@@ -35,13 +35,20 @@ class Outline:
             self.polylines = Line_group("hole", settings.line_width)
             self.innerPolylines = Line_group("inner_hole", settings.line_width)
 
-        def make_shells(self):
-            for i in range(1,settings.shellSize,1):
-                shell = Outline.process_shell(self.line,i*settings.line_width)
-                boundary_innershell = self.outline.boundary.get_innershell()
+        def make_one_shell(self,index):
+            shell = Outline.process_shell(self.line, index * settings.line_width)
+            boundary_innershell = self.outline.boundary.get_innershell()
 
-                if len(shell.get_outter_bound().difference_with(boundary_innershell ).polygons) == 0:
-                    self.shells.append(shell)
+            if len(shell.get_outter_bound().difference_with(boundary_innershell).polygons) == 0:
+                self.shells.append(shell)
+
+        # def make_shells(self):
+        #     for i in range(1,settings.shellSize,1):
+        #         shell = Outline.process_shell(self.line,i*settings.line_width)
+        #         boundary_innershell = self.outline.boundary.get_innershell()
+        #
+        #         if len(shell.get_outter_bound().difference_with(boundary_innershell ).polygons) == 0:
+        #             self.shells.append(shell)
 
 
         def g_print(self):
@@ -77,27 +84,43 @@ class Outline:
     class Boundary():
         def __init__(self,outline, line):
             self.outline = outline
+
             self.line = line
             self.shells = []
             self.polylines = Line_group("boundary", settings.line_width)
             self.innerPolylines = Line_group("inner_boundary", settings.line_width)
 
+        def make_one_shell(self,index,previousShell):
+            shell = Outline.process_shell(self.line, -index * settings.line_width)
 
-        def make_shells(self):
-            previousShell = self.line
-            for i in range(1,settings.shellSize,1):
-                shell = Outline.process_shell(self.line,-i*settings.line_width)
+            intersect_existing_shell = False
+            for hole in self.outline.holes:
+                hole_innershell = hole.get_outter_bound()
+                # if len(hole_innershell) != 0:
+                if (len(hole_innershell.difference_with(shell.get_inner_bound()).polygons) != 0):
+                    intersect_existing_shell = True
 
-                intersect_existing_shell = False
-                for hole in self.outline.holes:
-                    hole_innershell = hole.get_outter_bound()
-                    # if len(hole_innershell) != 0:
-                    if (len(hole_innershell.difference_with(shell.get_inner_bound()).polygons) != 0):
-                        intersect_existing_shell = True
+            if (not intersect_existing_shell and len(
+                    previousShell.get_outter_bound().difference_with(shell.get_inner_bound()).polygons) != 0):
+                self.shells.append(shell)
+                return shell
+            return None
 
-                if (not intersect_existing_shell and len(previousShell.get_outter_bound().difference_with(shell.get_inner_bound()).polygons) != 0):
-                    self.shells.append(shell)
-                    previousShell = shell
+        # def make_shells(self):
+        #     previousShell = self.line
+        #     for i in range(1,settings.shellSize,1):
+        #         shell = Outline.process_shell(self.line,-i*settings.line_width)
+        #
+        #         intersect_existing_shell = False
+        #         for hole in self.outline.holes:
+        #             hole_innershell = hole.get_outter_bound()
+        #             # if len(hole_innershell) != 0:
+        #             if (len(hole_innershell.difference_with(shell.get_inner_bound()).polygons) != 0):
+        #                 intersect_existing_shell = True
+        #
+        #         if (not intersect_existing_shell and len(previousShell.get_outter_bound().difference_with(shell.get_inner_bound()).polygons) != 0):
+        #             self.shells.append(shell)
+        #             previousShell = shell
 
 
         def g_print(self):
@@ -157,9 +180,13 @@ class Outline:
         return outter_bounds
 
     def make_shells(self):
-        self.boundary.make_shells()
-        for hole in self.holes:
-            hole.make_shells()
+        previousBoundaryShell = self.boundary.line
+        for i in range(1, settings.shellSize, 1):
+            previousBoundaryShell = self.boundary.make_one_shell(i,previousBoundaryShell)
+            if previousBoundaryShell == None:
+                return
+            for hole in self.holes:
+                hole.make_one_shell(i)
 
 
     @staticmethod
