@@ -1,5 +1,6 @@
 from gcode_writer import *
 from Line_group import *
+import config
 
 class G_buffer:
     layer_list = []
@@ -13,11 +14,10 @@ class G_buffer:
 
 
     def print_Gcode(self):
-        printSettings = PrintSettings({})
-        gcodeEnvironment = GCodeEnvironment(printSettings)
+        gcodeEnvironment = GCodeEnvironment()
         # create the gcodefile
         gcodeFile = open(self.filename, "w+")
-        gcodeFile.write("M109 S"+str(printSettings.temperature)+"\n")
+        gcodeFile.write("M109 S"+str(config.temperature)+"\n")
         # gcodeFile.write("M207 S4 F30 Z0.5\n")
         # gcodeFile.write("M208 S0 F20\n")
         gcodeFile.write(gcodeEnvironment.startcode())
@@ -122,7 +122,7 @@ class G_buffer:
 
             for node in node.sub_lines:
                 gotroughgroup(node)
-            gcodeEnvironment.Z += printSettings.layerThickness
+            gcodeEnvironment.Z += config.layerThickness
 
         def print_node(node):
             for node in node.sub_lines:
@@ -141,7 +141,7 @@ class G_buffer:
 
 
 
-        gcodeFile.write(gcodeEnvironment.retractFilament(printSettings.retractionLength))
+        gcodeFile.write(gcodeEnvironment.retractFilament(config.retractionLength))
         gcodeFile.write(gcodeEnvironment.endcode())
         gcodeFile.close()
 

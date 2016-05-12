@@ -11,10 +11,11 @@ from Line import Line
 from Line_group import *
 from Polynode import Polynode
 import Island
+import config
 
 import numpy as np
 
-settings = PrintSettings({})
+
 
 class Outline:
     def __init__(self,island,polygons):
@@ -22,7 +23,7 @@ class Outline:
         self.polygons = polygons
         external_perimeter = Polygon_stack(polygons[0])
 
-        scaled_external_perimeter = Polygon_stack(offset(external_perimeter, -settings.line_width/2))
+        scaled_external_perimeter = Polygon_stack(offset(external_perimeter, -config.line_width/2))
         if len(scaled_external_perimeter.polygons)> 1:
             for polygon_index in range(1, len(scaled_external_perimeter.polygons)):
                 layer = self.island.layer
@@ -30,23 +31,23 @@ class Outline:
                 isle = Island.Island(layer.print_tree,island, layer.layers,layer.index,layer.BBox,layer)
                 layer.islands.append(isle)
             scaled_external_perimeter.polygons = scaled_external_perimeter.polygons[:1]
-        self.boundary = self.Boundary(self, Line(scaled_external_perimeter,settings.line_width) )
+        self.boundary = self.Boundary(self, Line(scaled_external_perimeter,config.line_width) )
         self.holes  = []
         for poly_index in range(1, len(polygons)):
             polygon = Polygon_stack(polygons[poly_index])
-            scaled_hole = Polygon_stack(offset(polygon, settings.line_width/2))
-            self.holes.append(self.Hole(self, Line(scaled_hole, settings.line_width)))
+            scaled_hole = Polygon_stack(offset(polygon, config.line_width/2))
+            self.holes.append(self.Hole(self, Line(scaled_hole, config.line_width)))
 
     class Hole():
         def __init__(self,outline, line):
             self.outline = outline
             self.line = line
             self.shells = []
-            self.polylines = Line_group("hole", settings.line_width)
-            self.innerPolylines = Line_group("inner_hole", settings.line_width)
+            self.polylines = Line_group("hole", config.line_width)
+            self.innerPolylines = Line_group("inner_hole", config.line_width)
 
         def make_one_shell(self,index):
-            shell = Outline.process_shell(self.line, index * settings.line_width)
+            shell = Outline.process_shell(self.line, index * config.line_width)
             boundary_innershell = self.outline.boundary.get_innershell()
 
             if len(shell.get_outter_bound().difference_with(boundary_innershell).polygons) == 0:
@@ -97,11 +98,11 @@ class Outline:
 
             self.line = line
             self.shells = []
-            self.polylines = Line_group("boundary", settings.line_width)
-            self.innerPolylines = Line_group("inner_boundary", settings.line_width)
+            self.polylines = Line_group("boundary", config.line_width)
+            self.innerPolylines = Line_group("inner_boundary", config.line_width)
 
         def make_one_shell(self,index,previousShell):
-            shell = Outline.process_shell(self.line, -index * settings.line_width)
+            shell = Outline.process_shell(self.line, -index * config.line_width)
 
             intersect_existing_shell = False
             for hole in self.outline.holes:
@@ -191,7 +192,7 @@ class Outline:
 
     def make_shells(self):
         previousBoundaryShell = self.boundary.line
-        for i in range(1, settings.shellSize, 1):
+        for i in range(1, config.shellSize, 1):
             previousBoundaryShell = self.boundary.make_one_shell(i,previousBoundaryShell)
             if previousBoundaryShell == None:
                 return
@@ -318,7 +319,7 @@ class Infill:
 
 
     def g_print(self):
-        polylines = Line_group("infill", settings.line_width)
+        polylines = Line_group("infill", config.line_width)
         for polyline in self.polylines:
             polylines.add_chain(self.process_polyline(polyline))
         arrange_path(polylines)
@@ -346,7 +347,7 @@ class Skin:
         self.skins_as_polygon_stack = self.skins_as_polygon_stack.union_with(skins)
 
 
-        self.pattern = Line_stack(pyclipper.scale_to_clipper(linear_infill(settings.line_width,self.XorY,self.BBox)))
+        self.pattern = Line_stack(pyclipper.scale_to_clipper(linear_infill(config.line_width,self.XorY,self.BBox)))
         innerlines =  Line_stack(self.pattern.intersect_with(self.skins_as_polygon_stack))
         innerlines = innerlines.intersect_with(perimeter)
 
@@ -369,7 +370,7 @@ class Skin:
 
 
     def g_print(self):
-        polylines = Line_group("skin", settings.line_width)
+        polylines = Line_group("skin", config.line_width)
         for polyline in self.polylines:
             polylines.add_chain(self.process_polyline(polyline))
         arrange_path(polylines)

@@ -58,68 +58,6 @@ def polygonize_layers_from_trimed_dict(slice_layers):
     return slicesAsPolygons
 
 
-def polygonize_layers(slice_layers):
-    newslices = []
-    for layer in slice_layers:
-        newlayer = []
-        for line in layer:
-            line[0].pop()
-            line[1].pop()
-            newlayer.append(line)
-        newslices.append(newlayer)
-
-    slicesAsPolygons = []
-    for slicee in newslices:
-        polygons = []
-        slicesAsPolygons.append(polygons)
-
-        while True:
-            try:
-                line = slicee.pop()
-            except IndexError:
-                break
-
-            start = line[0]
-            end = line[1]
-
-            newPolygon = []
-            polygons.append(newPolygon)
-
-            newPolygon.append(start)
-            newPolygon.append(end)
-            continuePolygon = True
-            # Is there a new line i the polygon
-            while continuePolygon:
-                continuePolygon = False
-                pointNotFound = True
-                slicee2 = list(slicee)
-                while pointNotFound:
-                    try:
-                        line2 = slicee2.pop()
-                    except IndexError:
-                        break
-                    linePoint1 = line2[0]
-                    linePoint2 = line2[1]
-                    if (np.fabs(end[0] - linePoint2[0]) < 0.00001) and (np.fabs(end[1] - linePoint2[1]) < 0.00001):
-                        if start != linePoint1:
-                            # An other line in the polygon was found
-                            slicee.remove(line2)
-                            start = linePoint2
-                            end = linePoint1
-                            newPolygon.append(end)
-                            continuePolygon = True
-                            pointNotFound = False
-                    if (np.fabs(end[0] - linePoint1[0]) < 0.00001) and (np.fabs(end[1] - linePoint1[1]) < 0.00001):
-                        if start != linePoint2:
-                            slicee.remove(line2)
-                            start = linePoint1
-                            end = linePoint2
-                            newPolygon.append(end)
-                            continuePolygon = True
-                            pointNotFound = False
-
-    return slicesAsPolygons
-
 def vizz_2d(layer):
     import matplotlib.pyplot as plt
     from matplotlib.path import Path

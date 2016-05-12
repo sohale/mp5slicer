@@ -1,5 +1,5 @@
 import math
-from config import *
+import config
 
 
 ############################ GCodeEnvironment Taken from old slicer without any changes ###########################
@@ -10,9 +10,9 @@ class GCodeEnvironment:
 
 
 
-    def __init__(self, printSettings):
+    def __init__(self):
         #print(self.Z," self.Z ",GCodeEnvironment.Z)
-        self.settings = printSettings
+        self.settings = config
         #print(self.Z," self.Z ",GCodeEnvironment.Z)
 
         self.E = 0
