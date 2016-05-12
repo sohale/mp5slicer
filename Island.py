@@ -1,5 +1,7 @@
 from utils import *
-from Parts import *
+from Parts import Infill, Skin
+from Elements import Outline
+from Line_group import *
 from Polynode import *
 from clipper_operations import *
 from Polygon_stack import *

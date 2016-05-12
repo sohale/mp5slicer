@@ -117,6 +117,20 @@ def offset(polygon_stack,val):
 
     return offseted
 
+def SingleLineOffset(single_line,val):
+    path = single_line
+    # path = pyclipper.ReversePaths(polygon_stack.polygons)
+    # for polygon_index in range(len(path)):
+    #     if not pyclipper.Orientation(path[polygon_index]):
+    #         path[polygon_index] = pyclipper.ReversePath(path[polygon_index])
+    po = pyclipper.PyclipperOffset()
+    po.AddPath(path,pyclipper.JT_SQUARE,pyclipper.ET_CLOSEDPOLYGON)
+
+
+    offseted = po.Execute(pyclipper.scale_to_clipper(val))
+
+    return offseted
+
 
 # def diff_layers_as_path( _subj,_clip):
 #
