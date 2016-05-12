@@ -52,7 +52,7 @@ def bounding_box(stl_mesh):
 
 def get_polygon_layers():
     from stl import mesh
-    stl_mesh = mesh.Mesh.from_file("../../13xx_fixed.stl")
+    stl_mesh = mesh.Mesh.from_file("stl/tealight_dbl_layer.stl")
     print("--- %s seconds ---" % (time.time() - start_time))
     this_mesh = MPmesh(stl_mesh.vectors, fix_mesh= True)
     print("--- %s seconds ---" % (time.time() - start_time))
@@ -87,6 +87,9 @@ if __name__ == '__main__':
     print("--- %s seconds ---" % (time.time() - start_time))
     # pyclipper.scale_to_clipper(polygon_layers)
     layer_list = get_layer_list(polygon_layers,BBox)
+    print("--- %s seconds ---" % (time.time() - start_time))
     for layer in layer_list:
         g_buffer.add_layer(layer.G_print())
+    print("--- %s seconds ---" % (time.time() - start_time))
     g_buffer.print_Gcode()
+    print("--- %s seconds ---" % (time.time() - start_time))

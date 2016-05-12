@@ -146,8 +146,8 @@ def truncate(f, n):
 def slicer_from_mesh_as_dict(mesh, slice_height_from=0, slice_height_to=100, slice_step=1):
     import decimal
 
-    slice_height_from += 0.0001
-    slice_height_to += 0.0001
+    slice_height_from += 0.0123
+    slice_height_to += 0.0123
 
     normal = np.array([[0.],[0.],[1.]])
     # ufunc = np.vectorize(lambda x: truncate(x,8))

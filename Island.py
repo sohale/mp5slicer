@@ -5,7 +5,8 @@ from clipper_operations import *
 from Polygon_stack import *
 
 class Island():
-    def __init__(self,print_tree, polynode, layers,layer_index,BBox ):
+    def __init__(self,print_tree, polynode, layers,layer_index,BBox, layer ):
+        self.layer = layer
         self.print_tree = print_tree
         self.type = None # object/support/enclosure/ raft
         self.outline = None
@@ -62,13 +63,13 @@ class Island():
             up_islands = self.print_tree[self.layer_index+1].islands
         else:
             up_islands = []
-            up_islands.append(Island(self.print_tree,Polynode([]),self.layers,self.layer_index+1,self.BBox))
+            up_islands.append(Island(self.print_tree,Polynode([]),self.layers,self.layer_index+1,self.BBox,self.layer))
 
         if (self.layer_index -1 > 0):
             down_islands = self.print_tree[self.layer_index-1].islands
         else:
             down_islands  = []
-            down_islands.append((Island(self.print_tree,Polynode([]),self.layers,self.layer_index-1,self.BBox)))
+            down_islands.append((Island(self.print_tree,Polynode([]),self.layers,self.layer_index-1,self.BBox,self.layer)))
 
         up_shells = Polygon_stack()
         for island in up_islands:

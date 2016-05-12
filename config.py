@@ -24,7 +24,7 @@ class PrintSettings:
         try:
             dict["line_width"]
         except KeyError:
-            dict["line_width"] = 0.5
+            dict["line_width"] = 0.4
 
         try:
             dict["temperature"]
@@ -58,71 +58,18 @@ class PrintSettings:
         try:
             dict["speedRate"]
         except KeyError:
-            dict["speedRate"]=2000 # mm/min
+            dict["speedRate"]=1500 # mm/min
 
         try:
             dict["filamentDiameter"]
         except KeyError:
-            dict["filamentDiameter"]=1.75
+            dict["filamentDiameter"]=2.85
 
         try:
             dict["shellSize"]
         except KeyError:
-            dict["shellSize"]=6
 
-    #     try:
-    #         dict["emptyLayer"]
-    #     except KeyError:
-    #         dict["emptyLayer"] = 0
-    #     try:
-    #         dict["infillSpace"]
-    #     except KeyError:
-    #         dict["infillSpace"]=4
-    #     try:
-    #         dict["topThickness"]
-    #     except KeyError:
-    #         dict["topThickness"]=0.6
-    #     try:
-    #         dict["paramSamples"]
-    #     except KeyError:
-    #         dict["paramSamples"]=75
-    #     try:
-    #         dict["name"]
-    #     except KeyError:
-    #         dict["name"]="test"
-    # #Speed in  mm/min
-
-        # try:
-        #     dict["circleSpeedRate"]
-        # except KeyError:
-        #     dict["circleSpeedRate"]=1000
-
-        #try:
-        #    dict["areaFilament"]
-        #except KeyError:
-        #    dict["areaFilament"]=6.6
-        # try:
-        #     dict["bottomLayerSpeed"]
-        # except KeyError:
-        #     dict["bottomLayerSpeed"]=500
-
-        # try:
-        #     dict["shellNumber"]
-        # except KeyError:
-        #     dict["shellNumber"] = 3
-        # try:
-        #     dict["critLayerTime"]
-        # except KeyError:
-        #     dict["critLayerTime"] = 6
-        # in seconds
-        # try:
-        #     dict["zScarGap"]
-        # except KeyError:
-        #     dict["zScarGap"] = 0.5
-        # try:
-        #     dict["autoZScar"]
-        # except KeyError:
-        #     dict["autoZScar"] = True
+            dict["shellSize"]=3
 
 
         saveEffectiveSettings = False

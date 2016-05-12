@@ -35,7 +35,7 @@ class GCodeEnvironment:
     def calculE(self,A,B):
         distance = math.sqrt( (pow((A[0]-B[0]),2)) + pow((A[1]-B[1]),2))
         section_surface = self.settings.layerThickness * self.settings.line_width
-        volume = section_surface * distance * 1.2
+        volume = section_surface * distance * 1.1
         filament_length = volume / self.settings.crossArea
         # filament_length = self.truncate(filament_length, 4)
         return filament_length

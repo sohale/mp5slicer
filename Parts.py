@@ -9,6 +9,8 @@ from Line_stack import *
 from config import *
 from Line import Line
 from Line_group import *
+from Polynode import Polynode
+import Island
 
 import numpy as np
 
@@ -19,7 +21,15 @@ class Outline:
         self.island = island
         self.polygons = polygons
         external_perimeter = Polygon_stack(polygons[0])
+
         scaled_external_perimeter = Polygon_stack(offset(external_perimeter, -settings.line_width/2))
+        if len(scaled_external_perimeter.polygons)> 1:
+            for polygon_index in range(1, len(scaled_external_perimeter.polygons)):
+                layer = self.island.layer
+                island = Polynode(scaled_external_perimeter.polygons[polygon_index])
+                isle = Island.Island(layer.print_tree,island, layer.layers,layer.index,layer.BBox,layer)
+                layer.islands.append(isle)
+            scaled_external_perimeter.polygons = scaled_external_perimeter.polygons[:1]
         self.boundary = self.Boundary(self, Line(scaled_external_perimeter,settings.line_width) )
         self.holes  = []
         for poly_index in range(1, len(polygons)):
