@@ -46,7 +46,7 @@ class Outline:
             self.holePolylines = Line_group("hole", config.line_width)
             self.innerHolePolylines = Line_group("inner_hole", config.line_width)
             self.BoundaryPolylines = Line_group("boundary", config.line_width)
-            
+
             self.innerBoundaryPolylines = Line_group("inner_boundary", config.line_width)
             self.holeShells = Polygon_stack()
             self.boundaryShells = Polygon_stack()
@@ -54,8 +54,6 @@ class Outline:
 
     def g_print(self):
         polylines = Line_group("outline")
-        for hs in self.holeShells.polygons:
-            self.innerHolePolylines.add_chain(Outline.process_polyline(hs))
 
         for bs in self.boundaryShells.polygons:
             self.innerBoundaryPolylines.add_chain(Outline.process_polyline(bs))
@@ -64,7 +62,6 @@ class Outline:
             polylines.add_group(hole.g_print())
         polylines.add_group(self.boundary.g_print())
         polylines.add_group(self.innerBoundaryPolylines)
-        polylines.add_group(self.innerHolePolylines)
         return polylines
 
 
@@ -95,10 +92,7 @@ class Outline:
                     pc.AddPaths(pstackhole.polygons, pyclipper.PT_CLIP, True)
                 shell = Polygon_stack(pc.Execute(pyclipper.CT_DIFFERENCE, pyclipper.PFT_EVENODD, pyclipper.PFT_EVENODD))
                 self.boundaryShells.add_polygon_stack(shell)
-                #self.boundaryShells.add_polygon_stack(pstack)
                 self.innerShells = Polygon_stack(shell)
-                #self.holeShells.add_polygon_stack(pstackhole)
-                #self.innerShells.add_polygon_stack(pstackhole)
 
     def get_innershells(self):
         if self.empty:
