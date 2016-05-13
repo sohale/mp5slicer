@@ -24,6 +24,7 @@ class Polygon_stack():
         if isinstance(polygons[0][0][0],long) or isinstance(polygons[0][0][0],int):
             self.polygons += polygons
             self.isEmpty = False
+
         else: raise TypeError
 
     def add_polygon(self,polygon):

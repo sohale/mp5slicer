@@ -4,7 +4,6 @@ import json
 class config_factory:
 
     def __init__(self, json_conf):
-        print(json_conf)
         json_file = open(json_conf)
         json_str = json_file.read().replace('\n', '')
         json_file.close()

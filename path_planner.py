@@ -236,5 +236,5 @@ def arrange_path_with_sorted_lists(lines):
     #     iter = rbtree.iter(dist_lists[0] + end_offset)
     #     i.goto(0)
     #     next_point = i.item
-    #     print(next_point)
+
 

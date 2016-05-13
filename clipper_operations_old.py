@@ -18,7 +18,7 @@ def diff_layers( _subj,_clip,closed):
     try:
         pc.AddPaths(_subj, pyclipper.PT_SUBJECT, closed)
     except:
-        print("sgs")
+        raise StandardError
 
     solution = pc.Execute2(pyclipper.CT_DIFFERENCE, pyclipper.PFT_EVENODD, pyclipper.PFT_EVENODD)
 
@@ -43,7 +43,7 @@ def diff_layers_as_path( _subj,_clip,closed,multiple_paths):
     try:
         pc.AddPaths(_subj, pyclipper.PT_SUBJECT, closed)
     except:
-        print("sgs")
+        raise StandardError
 
     solution = pc.Execute(pyclipper.CT_DIFFERENCE, pyclipper.PFT_EVENODD, pyclipper.PFT_EVENODD)
 
@@ -61,7 +61,7 @@ def inter_layers( _subj,_clip,closed):
     try:
         pc.AddPath(_clip, pyclipper.PT_CLIP, True)
     except:
-        print("dsgs")
+        raise StandardError
 
     pc.AddPaths(_subj, pyclipper.PT_SUBJECT, closed)
 
@@ -81,11 +81,11 @@ def inter_layers_as_path( _subj,_clip,closed):
     try:
         pc.AddPath(_clip, pyclipper.PT_CLIP, True)
     except:
-        print("dsgs")
+        raise StandardError
     try:
         pc.AddPaths(_subj, pyclipper.PT_SUBJECT, closed)
     except:
-        print("bubu")
+        raise StandardError
 
     solution = pc.Execute(pyclipper.CT_INTERSECTION, pyclipper.PFT_EVENODD, pyclipper.PFT_EVENODD)
 
@@ -204,11 +204,11 @@ def intersect_layers_new(botLay,thisLay, topLay):
     try:
         pc.AddPaths(topLay, pyclipper.PT_CLIP, True)
     except:
-        print("dsgs")
+        raise StandardError
     try:
         pc.AddPaths(thisLay, pyclipper.PT_SUBJECT, True)
     except:
-        print("bubu")
+        raise StandardError
 
     solution = pc.Execute(pyclipper.CT_DIFFERENCE, pyclipper.PFT_EVENODD, pyclipper.PFT_EVENODD)
     # util.vizz_2d_multi(solution)
@@ -239,7 +239,7 @@ def intersect_layers_PT( botLay,thisLay, topLay):
             else:
                 cliped = []
             # except:
-            #     print("dibivx")
+            #     raise StandardError
             for poly in cliped:
                 upskins.append(poly)
         if pol_dex >0:#is hole
@@ -250,7 +250,7 @@ def intersect_layers_PT( botLay,thisLay, topLay):
             else:
                 cliped = []
             # except:
-            #     print("igsugsi")
+            #     raise StandardError
             for poly in cliped:
                 upskins.append(poly)
 

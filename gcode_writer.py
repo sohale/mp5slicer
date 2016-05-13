@@ -11,9 +11,9 @@ class GCodeEnvironment:
 
 
     def __init__(self):
-        #print(self.Z," self.Z ",GCodeEnvironment.Z)
+
         self.settings = config
-        #print(self.Z," self.Z ",GCodeEnvironment.Z)
+
 
         self.E = 0
         self.F = 1000 # in mm/minute
@@ -93,7 +93,7 @@ class GCodeEnvironment:
             extrusion = self.calculE(currentPoint,A)
             self.E += extrusion
         except:
-            print("eugsigieso")
+            raise StandardError
         instruction = "G1" + " X" +str(A[0]) + " Y" +str(A[1]) + " Z" +str(self.Z) + " E" +str(self.E) + " F" +str(self.F) + "\n"
         self.X = A[0]
         self.Y = A[1]

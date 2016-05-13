@@ -169,7 +169,7 @@ def visulisation_selfsupport_facet(mesh, boolist_triangle_selfsupport, boolist_s
         for i in range(len(boolist_support_required)):
             if boolist_support_required[i]:
                 if colors[i] == 'r':
-                    print('warning this facet requires support and self-supporting!!!!!!!')
+                    raise standardError#('warning this facet requires support and self-supporting!!!!!!!')
                 else:
                     colors[i] = 'green'
 

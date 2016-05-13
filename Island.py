@@ -21,7 +21,7 @@ class Island():
         try:
             self.polygons.append(polynode.Contour)
         except:
-            print("f")
+            raise StandardError
         if len(polynode.Childs) != 0:
             self.polygons += [poly.Contour for poly in polynode.Childs]
         self.process_outlines(self.polygons)

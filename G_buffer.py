@@ -1,12 +1,15 @@
 from gcode_writer import *
 from Line_group import *
 import config
+import sys
 
 class G_buffer:
     layer_list = []
-    filename= "tppt.gcode"
 
-    def __init__(self):
+
+    def __init__(self,to_file, gcode_filename = ""):
+        self.to_file = to_file
+        self.gcode_filename = gcode_filename
         self.skip_retraction = False
 
     def add_layer(self,list):
@@ -15,24 +18,28 @@ class G_buffer:
 
     def print_Gcode(self):
         gcodeEnvironment = GCodeEnvironment()
-        # create the gcodefile
-        gcodeFile = open(self.filename, "w+")
-        gcodeFile.write("M109 S"+str(config.temperature)+"\n")
-        # gcodeFile.write("M207 S4 F30 Z0.5\n")
-        # gcodeFile.write("M208 S0 F20\n")
-        gcodeFile.write(gcodeEnvironment.startcode())
+        # create the gcode_output
+        if self.to_file:
+            gcode_output = open(self.gcode_filename, "w+")
+        else:
+            gcode_output = sys.stdout
+
+        gcode_output.write("M109 S"+str(config.temperature)+"\n")
+        # gcode_output.write("M207 S4 F30 Z0.5\n")
+        # gcode_output.write("M208 S0 F20\n")
+        gcode_output.write(gcodeEnvironment.startcode())
 
         # print two lines to extrude filament
-        gcodeFile.write(gcodeEnvironment.goToNextPoint((0,0),True))
-        gcodeFile.write(gcodeEnvironment.drawToNextPoint((180,0)))
-        gcodeFile.write(gcodeEnvironment.goToNextPoint((180,2),True))
-        gcodeFile.write(gcodeEnvironment.drawToNextPoint((0,2)))
-        gcodeFile.write(gcodeEnvironment.drawToNextPoint((0,4)))
-        gcodeFile.write(gcodeEnvironment.drawToNextPoint((180,4)))
-        gcodeFile.write(gcodeEnvironment.drawToNextPoint((180,6)))
-        gcodeFile.write(gcodeEnvironment.drawToNextPoint((10,6)))
-        gcodeFile.write(gcodeEnvironment.drawToNextPoint((10,10)))
-        gcodeFile.write(gcodeEnvironment.drawToNextPoint((0,10)))
+        gcode_output.write(gcodeEnvironment.goToNextPoint((0,0),True))
+        gcode_output.write(gcodeEnvironment.drawToNextPoint((180,0)))
+        gcode_output.write(gcodeEnvironment.goToNextPoint((180,2),True))
+        gcode_output.write(gcodeEnvironment.drawToNextPoint((0,2)))
+        gcode_output.write(gcodeEnvironment.drawToNextPoint((0,4)))
+        gcode_output.write(gcodeEnvironment.drawToNextPoint((180,4)))
+        gcode_output.write(gcodeEnvironment.drawToNextPoint((180,6)))
+        gcode_output.write(gcodeEnvironment.drawToNextPoint((10,6)))
+        gcode_output.write(gcodeEnvironment.drawToNextPoint((10,10)))
+        gcode_output.write(gcodeEnvironment.drawToNextPoint((0,10)))
 
 
 
@@ -40,64 +47,67 @@ class G_buffer:
             for line in leaf.sub_lines:
                 if len(line) > 0:
                     if self.skip_retraction:
-                        gcodeFile.write(gcodeEnvironment.goToNextPoint(line[0],False))
+                        gcode_output.write(gcodeEnvironment.goToNextPoint(line[0],False))
                         self.skip_retraction = False
                     else:
-                        gcodeFile.write(gcodeEnvironment.goToNextPoint(line[0], True))
+                        gcode_output.write(gcodeEnvironment.goToNextPoint(line[0], True))
                     for point_index in range(1,len(line)):
-                        gcodeFile.write(gcodeEnvironment.drawToNextPoint(line[point_index]))
+                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index]))
 
         def print_boundary(boundary):
             for line in boundary.sub_lines:
                 if len(line) > 0:
-                    gcodeFile.write(gcodeEnvironment.goToNextPoint(line[0],True))
+                    gcode_output.write(gcodeEnvironment.goToNextPoint(line[0],True))
                     for point_index in range(1,len(line)):
-                        gcodeFile.write(gcodeEnvironment.drawToNextPoint(line[point_index]))
+                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index]))
             self.skip_retraction = False
 
         def print_infill(leaf):
             for line in leaf.sub_lines:
                 if len(line) > 0:
                     if self.skip_retraction:
-                        gcodeFile.write(gcodeEnvironment.goToNextPoint(line[0],False))
+                        gcode_output.write(gcodeEnvironment.goToNextPoint(line[0],False))
                         self.skip_retraction = False
                     else:
-                        gcodeFile.write(gcodeEnvironment.goToNextPoint(line[0], True))
+                        gcode_output.write(gcodeEnvironment.goToNextPoint(line[0], True))
                     for point_index in range(1,len(line)):
-                        gcodeFile.write(gcodeEnvironment.drawToNextPoint(line[point_index], 4000))
+                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index], 4000))
 
         def print_skin(leaf):
             for line in leaf.sub_lines:
                 if len(line) > 0:
                     if self.skip_retraction:
-                        gcodeFile.write(gcodeEnvironment.goToNextPoint(line[0],False))
+                        gcode_output.write(gcodeEnvironment.goToNextPoint(line[0],False))
                         self.skip_retraction = False
                     else:
-                        gcodeFile.write(gcodeEnvironment.goToNextPoint(line[0], True))
+                        gcode_output.write(gcodeEnvironment.goToNextPoint(line[0], True))
                     for point_index in range(1,len(line)):
-                        gcodeFile.write(gcodeEnvironment.drawToNextPoint(line[point_index], 3000))
+                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index], 3000))
 
         def print_inner_boundary(leaf):
             for line in leaf.sub_lines:
                 if len(line) > 0:
                     if self.skip_retraction:
-                        gcodeFile.write(gcodeEnvironment.goToNextPoint(line[0], False))
+                        gcode_output.write(gcodeEnvironment.goToNextPoint(line[0], False))
                         self.skip_retraction = False
                     else:
-                        gcodeFile.write(gcodeEnvironment.goToNextPoint(line[0], True))
+                        gcode_output.write(gcodeEnvironment.goToNextPoint(line[0], True))
                     for point_index in range(1, len(line)):
-                        gcodeFile.write(gcodeEnvironment.drawToNextPoint(line[point_index], 3500))
+
+                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index], 3000))
+
 
         def print_inner_hole(leaf):
             for line in leaf.sub_lines:
                 if len(line) > 0:
                     if self.skip_retraction:
-                        gcodeFile.write(gcodeEnvironment.goToNextPoint(line[0], False))
+                        gcode_output.write(gcodeEnvironment.goToNextPoint(line[0], False))
                         self.skip_retraction = False
                     else:
-                        gcodeFile.write(gcodeEnvironment.goToNextPoint(line[0], True))
+                        gcode_output.write(gcodeEnvironment.goToNextPoint(line[0], True))
                     for point_index in range(1, len(line)):
-                        gcodeFile.write(gcodeEnvironment.drawToNextPoint(line[point_index], 3500))
+
+                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index], 3000))
 
         def switch_leaf(leaf):
             switch = {
@@ -141,8 +151,8 @@ class G_buffer:
 
 
 
-        gcodeFile.write(gcodeEnvironment.retractFilament(config.retractionLength))
-        gcodeFile.write(gcodeEnvironment.endcode())
-        gcodeFile.close()
+        gcode_output.write(gcodeEnvironment.retractFilament(config.retractionLength))
+        gcode_output.write(gcodeEnvironment.endcode())
+        gcode_output.close()
 
-        print("GCode written")
+        sys.stderr.write("GCode written")

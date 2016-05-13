@@ -30,7 +30,6 @@ class PrintSettings:
             setattr(self, key, value)
         #self.crossArea = 6.376 # cross-section area of feedstock
         self.crossArea = ((self.filamentDiameter/2.0)**2) * math.pi #6.37939
-        print("cross area = "+str(self.crossArea))
         #specific to PLA:
         self.volFactor = 1/2.53 # vol of filament -> vol of extruded material
 

@@ -86,15 +86,15 @@ if __name__ == '__main__':
 	start_time = time.time()
 	remove_badtriangles(stl_mesh.vectors, stl_mesh.normals)
 
-	print("--- %s seconds ---" % (time.time() - start_time))
+	sys.stderr.write("--- %s seconds ---\n" % (time.time() - start_time))
 
 	start_time = time.time()
 	sort_by_z(stl_mesh.vectors, stl_mesh.normals)
 
-	print("--- %s seconds ---" % (time.time() - start_time))
+	sys.stderr.write("--- %s seconds ---\n" % (time.time() - start_time))
 
 	start_time = time.time()
 	remove_duplicates(stl_mesh.vectors, stl_mesh.normals)
 
-	print("--- %s seconds ---" % (time.time() - start_time))
+	sys.stderr.write("--- %s seconds ---\n" % (time.time() - start_time))
 

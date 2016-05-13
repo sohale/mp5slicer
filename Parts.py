@@ -272,7 +272,7 @@ class Infill:
             innerlines = self.pattern.intersect_with(polygons)
 
         # if len(self.polygons[0]) == 0:
-        #     print("fdf")
+        #     raise StandardError
         # innerlines_as_tree = inter_layers(self.pattern,self.polygons[0],False)
         # for interline in innerlines_as_tree.Childs:
         #     innerlines.append(interline.Contour)
@@ -301,7 +301,7 @@ class Infill:
         try:
             return pyclipper.scale_from_clipper(innerlines)
         except:
-            print("uheufheueh")
+            raise StandardError
 
 
     def process_polyline(self,polygon):

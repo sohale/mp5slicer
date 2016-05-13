@@ -1,16 +1,17 @@
 from clipper_operations import *
 from  slicer import *
+import sys
 
 
 
 def polygonize_layers_from_trimed_dict(slice_layers):
 
     for slice_index in range(len(slice_layers)):
-        print(slice_index)
+        # sys.stderr.write(slice_index)
 
         for bipoint in slice_layers[slice_index]:
             if len(slice_layers[slice_index][bipoint]) != 2:
-                print(bipoint," : ",slice_layers[slice_index][bipoint])
+                sys.stderr.write(bipoint," : ",slice_layers[slice_index][bipoint])
 
     slicesAsPolygons = []
     for slicee in slice_layers:
@@ -42,7 +43,7 @@ def polygonize_layers_from_trimed_dict(slice_layers):
                     slicekeys.remove(end)
                 except:
                     # pass
-                    print("yefy")
+                    raise StandardError
 
                 end = slicee[start][0]
                 if end == previous_neighbour:

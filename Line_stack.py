@@ -44,4 +44,4 @@ class Line_stack():
         try:
             return diff_layers(self.lines,other.polygons , False)
         except:
-            print("svsghsibiwcwsl")
+            raise StandardError

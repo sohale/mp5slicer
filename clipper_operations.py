@@ -12,7 +12,7 @@ def diff_layers( _subj,_clip,closed):
     try:
         pc.AddPaths(_subj, pyclipper.PT_SUBJECT, closed)
     except:
-        print("sgs")
+        raise StandardError
 
     if closed:
         solution = pc.Execute(pyclipper.CT_DIFFERENCE, pyclipper.PFT_EVENODD, pyclipper.PFT_EVENODD)
@@ -30,7 +30,7 @@ def union_layers( _subj,_clip,closed):
     try:
         pc.AddPaths(_subj, pyclipper.PT_SUBJECT, closed)
     except:
-        print("sgs")
+        raise StandardError
 
     if closed:
         solution = pc.Execute(pyclipper.CT_UNION, pyclipper.PFT_EVENODD, pyclipper.PFT_EVENODD)
@@ -47,7 +47,7 @@ def diff_layers_as_polytree( _subj,_clip,closed):
     try:
         pc.AddPaths(_subj, pyclipper.PT_SUBJECT, closed)
     except:
-        print("sgs")
+        raise StandardError
 
     solution = pc.Execute2(pyclipper.CT_DIFFERENCE, pyclipper.PFT_EVENODD, pyclipper.PFT_EVENODD)
 
@@ -62,12 +62,12 @@ def inter_layers( _subj,_clip,closed):
     try:
         pc.AddPaths(_clip, pyclipper.PT_CLIP, True)
     except:
-        print("ysgfsfssffy")
+        raise StandardError
 
     try:
         pc.AddPaths(_subj, pyclipper.PT_SUBJECT, closed)
     except:
-        print("sifsisfsifsi")
+        raise StandardError
 
     if closed:
         solution = pc.Execute(pyclipper.CT_INTERSECTION, pyclipper.PFT_EVENODD, pyclipper.PFT_EVENODD)

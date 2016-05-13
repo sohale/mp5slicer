@@ -93,10 +93,7 @@ class Plane:
         if len(line) == 1:
             return None
         if len(line) != 2:
-            print("eror : " + str(len(line)))
-            print((vertice_0,vertice_1,vertice_2))
-            print(self.z)
-            print(line)
+            raise StandardError
 
 
         return line
@@ -121,7 +118,6 @@ def slicer_from_mesh_as_dict(mesh, slice_height_from=0, slice_height_to=100, sli
 
 
     sliceplanes_height = np.arange(slice_height_from, slice_height_to, slice_step)
-    print(sliceplanes_height)
     slice_layers = [{} for i in range(len(sliceplanes_height))]
 
     for triangle in mesh.triangles:
