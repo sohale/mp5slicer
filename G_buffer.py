@@ -71,7 +71,7 @@ class G_buffer:
                     else:
                         gcode_output.write(gcodeEnvironment.goToNextPoint(line[0], True))
                     for point_index in range(1,len(line)):
-                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index], 4000))
+                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index], config.infillSpeed))
 
         def print_skin(leaf):
             for line in leaf.sub_lines:
@@ -82,7 +82,7 @@ class G_buffer:
                     else:
                         gcode_output.write(gcodeEnvironment.goToNextPoint(line[0], True))
                     for point_index in range(1,len(line)):
-                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index], 3000))
+                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index], config.skinSpeed))
 
         def print_inner_boundary(leaf):
             for line in leaf.sub_lines:
@@ -94,7 +94,7 @@ class G_buffer:
                         gcode_output.write(gcodeEnvironment.goToNextPoint(line[0], True))
                     for point_index in range(1, len(line)):
 
-                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index], 3000))
+                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index], config.boundarySpeed))
 
 
         def print_inner_hole(leaf):
@@ -107,7 +107,7 @@ class G_buffer:
                         gcode_output.write(gcodeEnvironment.goToNextPoint(line[0], True))
                     for point_index in range(1, len(line)):
 
-                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index], 3000))
+                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index], config.holeSpeed))
 
         def switch_leaf(leaf):
             switch = {

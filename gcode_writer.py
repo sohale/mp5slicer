@@ -20,7 +20,7 @@ class GCodeEnvironment:
 
         self.X = 0
         self.Y = 0
-        self.Z = 0.13
+        self.Z = config.firstLayerOffset + config.layerThickness
 
     def truncate(self,f, n):
         '''Truncates/pads a float f to n decimal places without rounding'''

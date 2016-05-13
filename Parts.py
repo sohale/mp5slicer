@@ -260,7 +260,7 @@ class Infill:
         # if layer_index == 1 or layer_index == 2 or layer_index == len(self.layers) - 2 or layer_index == len(self.layers)-1:
         #      self.pattern = Line_stack(pyclipper.scale_to_clipper(linear_infill(settings.line_width,self.XorY,self.BBox)))
         # else: # low infill density
-        self.pattern = Line_stack(pyclipper.scale_to_clipper(linear_infill(7,self.XorY,self.BBox)))
+        self.pattern = Line_stack(pyclipper.scale_to_clipper(linear_infill(3,self.XorY,self.BBox)))
         if layer_index != 0 and layer_index != len(self.layers)-2 and layer_index != len(self.layers)-1:
 
             if not skin_islands.isEmpty:
