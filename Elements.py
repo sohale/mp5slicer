@@ -32,8 +32,11 @@ class Outline:
                     isle = Island.Island(layer.print_tree,island, layer.layers,layer.index,layer.BBox,layer)
                     layer.islands.append(isle)
                 scaled_external_perimeter.polygons = scaled_external_perimeter.polygons[:1]
+            if not scaled_external_perimeter.isEmpty:
+                self.boundary = self.Boundary(self, SingleLine(scaled_external_perimeter.polygons[0],config.line_width) )
+            else:
+                self.boundary = self.Boundary(self, SingleLine([],config.line_width))
 
-            self.boundary = self.Boundary(self, SingleLine(scaled_external_perimeter.polygons[0],config.line_width) )
             self.holes  = []
             for poly_index in range(1, len(polygons)):
                 polygon = Polygon_stack(polygons[poly_index])
@@ -43,10 +46,11 @@ class Outline:
             self.holePolylines = Line_group("hole", config.line_width)
             self.innerHolePolylines = Line_group("inner_hole", config.line_width)
             self.BoundaryPolylines = Line_group("boundary", config.line_width)
+            
             self.innerBoundaryPolylines = Line_group("inner_boundary", config.line_width)
             self.holeShells = Polygon_stack()
             self.boundaryShells = Polygon_stack()
-            self.innerShells = None
+            self.innerShells = Polygon_stack()
 
     def g_print(self):
         polylines = Line_group("outline")
