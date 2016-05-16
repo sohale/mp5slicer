@@ -22,16 +22,7 @@ class Outline:
         self.empty = True
         if(len(polygons[0])>0):
             self.empty = False
-            external_perimeter = SingleLine(polygons[0],config.line_width)
 
-            scaled_external_perimeter = external_perimeter.offset(-config.line_width/2)
-            if len(scaled_external_perimeter.polygons)> 1:
-                for polygon_index in range(1, len(scaled_external_perimeter.polygons)):
-                    layer = self.island.layer
-                    island = Polynode(scaled_external_perimeter.polygons[polygon_index])
-                    isle = Island.Island(layer.print_tree,island, layer.layers,layer.index,layer.BBox,layer)
-                    layer.islands.append(isle)
-                scaled_external_perimeter.polygons = scaled_external_perimeter.polygons[:1]
             if len(polygons) != 0:
                 self.boundary = self.Boundary(self, SingleLine(polygons[0],config.line_width) )
             else:
@@ -39,8 +30,6 @@ class Outline:
 
             self.holes  = []
             for poly_index in range(1, len(polygons)):
-                polygon = Polygon_stack(polygons[poly_index])
-                scaled_hole = Polygon_stack(offset(polygon, config.line_width/2))
                 self.holes.append(self.Hole(self, SingleLine(polygons[poly_index], config.line_width)))
 
             self.holePolylines = Line_group("hole", config.line_width)

@@ -68,9 +68,15 @@ class Layer():
             return False
 
     def detect_islands(self):
-        polygons = Polygon_stack(self.layers[self.index])
-
-        return polygons.split_in_islands()
+        po = pyclipper.PyclipperOffset()
+        base = pow(10, 15)
+        empty_poly = Polygon_stack([[[base, base], [base + 1, base], [base + 1, base + 1], [base, base + 1]]])
+        polys = pyclipper.PolyTreeToPaths(diff_layers_as_polytree(self.layers[self.index], empty_poly.polygons, True))
+        po.AddPaths(polys, pyclipper.JT_SQUARE, pyclipper.ET_CLOSEDPOLYGON)
+        #offseted = Polygon_stack(po.Execute(pyclipper.scale_to_clipper(-config.line_width/2)))
+        islandStack = Island_stack(po.Execute2(pyclipper.scale_to_clipper(-config.line_width/2)))
+        #return offseted.split_in_islands()
+        return  islandStack.get_islands()
 
 
     #DO NOT delete: this might be faster than detecting islands with pyclipper only

@@ -105,7 +105,7 @@ def vizz_2d_multi(layers):
 
 
 
-        patch = patches.PathPatch(path, facecolor=np.random.random(3), lw=2)
+        patch = patches.PathPatch(path,fill=False, facecolor=None, lw=2)
         ax.add_patch(patch)
     plt.autoscale(enable=True, axis='both', tight=None)
     plt.show()
