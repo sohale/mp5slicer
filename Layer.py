@@ -5,6 +5,7 @@ from utils import *
 from Island_stack import *
 from Polygon_stack import *
 from Line_group import *
+import config
 
 class Layer():
 
@@ -67,7 +68,6 @@ class Layer():
             return False
 
     def detect_islands(self):
-
         polygons = Polygon_stack(self.layers[self.index])
 
         return polygons.split_in_islands()
@@ -109,6 +109,10 @@ class Layer():
         if len(self.layers[self.index]) != 0:
             islands = self.detect_islands()
             for island in islands:
+                pc = pyclipper.Pyclipper()
+
                 isle = Island(self.print_tree,island, self.layers,self.index,self.BBox,self)
                 self.islands.append(isle)
+
+
 
