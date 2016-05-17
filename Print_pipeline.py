@@ -37,6 +37,28 @@ def get_layer_list(polygon_layers,BBox):
 
     return layer_list
 
+def move_to_center(mesh):
+    import printer_config
+    bbox = mesh.bounding_box()
+    platform_center = {}
+    if printer_config.origin == "center":
+        platform_center["x"] = 0
+        platform_center["y"] = 0
+    else:
+        platform_center["x"] = printer_config.build_platformX/2
+        platform_center["y"] = printer_config.build_platformY/2
+    objet_center = {}
+    objet_center["x"] = (bbox.xmax - bbox.xmin)/2
+    objet_center["y"] = (bbox.ymax - bbox.ymin)/2
+    objet_center["x"] += bbox.xmin + 3 #+3 should be removed
+    objet_center["y"] += bbox.ymin + 3
+    x_slide = platform_center["x"] - objet_center["x"]
+    y_slide = platform_center["y"] - objet_center["y"]
+    mesh.translate([x_slide,y_slide,0])
+
+
+
+
 
 def get_polygon_layers(stl_file_name):
     from stl import mesh
@@ -47,12 +69,14 @@ def get_polygon_layers(stl_file_name):
     this_mesh = MPmesh(stl_mesh.vectors, fix_mesh= True)
     sys.stderr.write("--- %s seconds ---\n" % (time.time() - start_time))
 
-    this_mesh.translate([90,130,0])
+    move_to_center(this_mesh)
+
+    # this_mesh.translate([90,130,0])
     BBox = this_mesh.bounding_box()
 
 
 
-    slice_layers = slicer_from_mesh_as_dict(this_mesh, slice_height_from=BBox[4], slice_height_to=BBox[5], slice_step= config.layerThickness)
+    slice_layers = slicer_from_mesh_as_dict(this_mesh, slice_height_from=BBox.zmin, slice_height_to=BBox.zmax, slice_step= config.layerThickness)
     sys.stderr.write("--- %s seconds ---\n" % (time.time() - start_time))
     layers_as_polygons = polygonize_layers_from_trimed_dict(slice_layers)
     sys.stderr.write("--- %s seconds ---\n" % (time.time() - start_time))

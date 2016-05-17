@@ -20,8 +20,4 @@ class config_factory:
 
 class Printer_config():
     def __init__(self):
-        self.autoZhop = False
-        self.bedX = 1000
-        self.bedY = 1000
-        self.maxExtrusion = 123
-        self.hasAutoTemperature = False
+        import printer_config

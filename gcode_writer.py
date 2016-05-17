@@ -26,7 +26,7 @@ class GCodeEnvironment:
         '''Truncates/pads a float f to n decimal places without rounding'''
         s = '{}'.format(f)
         if 'e' in s or 'E' in s:
-            return '{0:.{1}f}'.format(f, n)
+            return float('{0:.{1}f}'.format(f, n))
         i, p, d = s.partition('.')
         return float('.'.join((i, (d+'0'*n)[:n])))
 
@@ -79,6 +79,8 @@ class GCodeEnvironment:
 
     # draw to point A
     def drawToNextPoint(self, A, speed = 0):
+        if isinstance(A,str):
+            raise StandardError
         if speed == 0:
             self.F = self.settings.speedRate
         else:
@@ -112,18 +114,30 @@ class GCodeEnvironment:
 
 
     # returns the code written in the file startcode.gcode
-    def startcode(self):
-        startString = ""
-        startCode = open("startcode.gcode","r")
+    def startcode(self, printer):
+        if printer == "r2x":
+            start_code_name = "r2xstart"
+            startString = ""
+        else:
+            start_code_name = "startcode"
+            startString = "M109 S"+str(config.temperature)+"\n"
+
+
+        startCode = open(start_code_name + ".gcode","r")
         for line in startCode:
             startString = startString + line
         startCode.close()
         return startString
 
     # returns the code written in the file endcode.gcode
-    def endcode(self):
+    def endcode(self,printer = 'default'):
+        if printer == "r2x":
+            end_code_name = "r2xend"
+        else:
+            end_code_name = "endcode"
+
         endString = ""
-        endCode = open("endcode.gcode","r")
+        endCode = open(end_code_name + ".gcode","r")
         for line in endCode:
             endString = endString + line
         endCode.close()

@@ -2,9 +2,11 @@ from gcode_writer import *
 from Line_group import *
 import config
 import sys
+import printer_config
 
 class G_buffer:
     layer_list = []
+
 
 
     def __init__(self,to_file, gcode_filename = ""):
@@ -16,6 +18,8 @@ class G_buffer:
         self.layer_list.append(list)
 
 
+
+
     def print_Gcode(self):
         gcodeEnvironment = GCodeEnvironment()
         # create the gcode_output
@@ -24,22 +28,9 @@ class G_buffer:
         else:
             gcode_output = sys.stdout
 
-        gcode_output.write("M109 S"+str(config.temperature)+"\n")
-        # gcode_output.write("M207 S4 F30 Z0.5\n")
-        # gcode_output.write("M208 S0 F20\n")
-        gcode_output.write(gcodeEnvironment.startcode())
 
-        # print two lines to extrude filament
-        gcode_output.write(gcodeEnvironment.goToNextPoint((0,0),True))
-        gcode_output.write(gcodeEnvironment.drawToNextPoint((180,0)))
-        gcode_output.write(gcodeEnvironment.goToNextPoint((180,2),True))
-        gcode_output.write(gcodeEnvironment.drawToNextPoint((0,2)))
-        gcode_output.write(gcodeEnvironment.drawToNextPoint((0,4)))
-        gcode_output.write(gcodeEnvironment.drawToNextPoint((180,4)))
-        gcode_output.write(gcodeEnvironment.drawToNextPoint((180,6)))
-        gcode_output.write(gcodeEnvironment.drawToNextPoint((10,6)))
-        gcode_output.write(gcodeEnvironment.drawToNextPoint((10,10)))
-        gcode_output.write(gcodeEnvironment.drawToNextPoint((0,10)))
+        gcode_output.write(gcodeEnvironment.startcode(printer_config.model))
+
 
 
 
@@ -143,7 +134,7 @@ class G_buffer:
 
 
         gcode_output.write(gcodeEnvironment.retractFilament(config.retractionLength))
-        gcode_output.write(gcodeEnvironment.endcode())
+        gcode_output.write(gcodeEnvironment.endcode(printer_config.model))
         gcode_output.close()
 
         sys.stderr.write("GCode written")

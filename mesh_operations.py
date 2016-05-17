@@ -122,11 +122,15 @@ class mesh():
     def bounding_box(self):
         # Returns a tuple of (max, min) for each of (x,y,z)
 
-        x_max_min = (np.max(self.triangles[:,:,0]),  np.min(self.triangles[:,:,0]))
-        y_max_min = (np.max(self.triangles[:,:,1]),  np.min(self.triangles[:,:,1]))
-        z_max_min = (np.max(self.triangles[:,:,2]),  np.min(self.triangles[:,:,2]))
+        bbox = bounding_box(np.min(self.triangles[:,:,0]),
+                            np.max(self.triangles[:,:,0]),
+                            np.min(self.triangles[:,:,1]),
+                            np.max(self.triangles[:,:,1]),
+                            np.min(self.triangles[:,:,2]),
+                            np.max(self.triangles[:,:,2])
+                            )
 
-        return (x_max_min[1],x_max_min[0], y_max_min[1],y_max_min[0], z_max_min[1], z_max_min[0])
+        return bbox
 
     def translate(self, translation):
         # Apply a given translation vector to the mesh
@@ -134,6 +138,19 @@ class mesh():
         self.triangles[:,:,0] += translation[0]
         self.triangles[:,:,1] += translation[1]
         self.triangles[:,:,2] += translation[2]
+
+class bounding_box():
+    def __init__(self,xmin,xmax,ymin,ymax,zmin,zmax):
+        self.xmin = xmin
+        self.xmax = xmax
+        self.ymin = ymin
+        self.ymax = ymax
+        self.zmin = zmin
+        self.zmax = zmax
+
+
+
+
 
 if __name__ == '__main__':
 

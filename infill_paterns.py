@@ -2,10 +2,10 @@ import numpy
 
 
 def linear_infill(spacing,XorY,BBox):
-    _min = min(BBox[0],BBox[2])
-    _max = max(BBox[1],BBox[3])
-    length_min = min(BBox[0],BBox[2])
-    length_max = max(BBox[1],BBox[3])
+    _min = min(BBox.xmin,BBox.ymin)
+    _max = max(BBox.xmax,BBox.ymax)
+    length_min = min(BBox.xmin,BBox.ymin)
+    length_max = max(BBox.xmax,BBox.ymax)
     lines = []
     vals = numpy.arange(_min,_max,spacing)
     if XorY == 0:
