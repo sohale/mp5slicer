@@ -1,4 +1,4 @@
-model = "UO"
+model = "r2x"
 gcode_flavor = "marlin"
 max_extrusion = 3 #mm3.s-1
 build_platformX = 240

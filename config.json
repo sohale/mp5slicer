@@ -6,6 +6,8 @@
   "retractionSpeed": 2400,
   "retractionLength": 5,
   "speedRate" : 3000,
-  "filamentDiameter" : 2.85,
-  "shellSize" : 2
+  "filamentDiameter" : 1.75,
+  "shellSize" : 2,
+  "shellSpeed" : 4500,
+  "infillSpeed" : 4500
 }

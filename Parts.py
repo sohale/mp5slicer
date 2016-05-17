@@ -261,15 +261,13 @@ class Infill:
         #      self.pattern = Line_stack(pyclipper.scale_to_clipper(linear_infill(settings.line_width,self.XorY,self.BBox)))
         # else: # low infill density
         self.pattern = Line_stack(pyclipper.scale_to_clipper(linear_infill(3,self.XorY,self.BBox)))
-        if layer_index != 0 and layer_index != len(self.layers)-2 and layer_index != len(self.layers)-1:
 
-            if not skin_islands.isEmpty:
-                innerlines = Line_stack(self.pattern.intersect_with(polygons))
-                innerlines = innerlines.difference_with(skin_islands)
-            else:
-                innerlines = self.pattern.intersect_with(polygons)
+        if not skin_islands.isEmpty:
+            innerlines = Line_stack(self.pattern.intersect_with(polygons))
+            innerlines = innerlines.difference_with(skin_islands)
         else:
             innerlines = self.pattern.intersect_with(polygons)
+
 
         # if len(self.polygons[0]) == 0:
         #     raise StandardError

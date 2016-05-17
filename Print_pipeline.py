@@ -50,11 +50,13 @@ def move_to_center(mesh):
     objet_center = {}
     objet_center["x"] = (bbox.xmax - bbox.xmin)/2
     objet_center["y"] = (bbox.ymax - bbox.ymin)/2
-    objet_center["x"] += bbox.xmin + 3 #+3 should be removed
-    objet_center["y"] += bbox.ymin + 3
+    objet_center["x"] += bbox.xmin
+    objet_center["y"] += bbox.ymin
     x_slide = platform_center["x"] - objet_center["x"]
     y_slide = platform_center["y"] - objet_center["y"]
     mesh.translate([x_slide,y_slide,0])
+
+
 
 
 
@@ -82,9 +84,11 @@ def get_polygon_layers(stl_file_name):
     sys.stderr.write("--- %s seconds ---\n" % (time.time() - start_time))
 
     for layer_index in range(len(layers_as_polygons)):
+
         layers_as_polygons[layer_index] = pyclipper.scale_to_clipper(layers_as_polygons[layer_index])
         # polygon_layers[layer_index] = pyclipper.SimplifyPolygons(polygon_layers[layer_index])
         # polygon_layers[layer_index] = pyclipper.CleanPolygons(polygon_layers[layer_index])
+
 
 
     return layers_as_polygons,BBox
