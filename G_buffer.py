@@ -59,7 +59,15 @@ class G_buffer:
                 if len(line) > 0:
                     gcode_output.write(gcodeEnvironment.goToNextPoint(line[0],True))
                     for point_index in range(1,len(line)):
-                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index]))
+                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index],config.boundarySpeed))
+            self.skip_retraction = False
+
+        def print_hole(boundary):
+            for line in boundary.sub_lines:
+                if len(line) > 0:
+                    gcode_output.write(gcodeEnvironment.goToNextPoint(line[0], True))
+                    for point_index in range(1, len(line)):
+                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index], config.holeSpeed))
             self.skip_retraction = False
 
         def print_infill(leaf):
@@ -84,38 +92,21 @@ class G_buffer:
                     for point_index in range(1,len(line)):
                         gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index], config.skinSpeed))
 
-        def print_inner_boundary(leaf):
-            for line in leaf.sub_lines:
+        def print_inner_shell(shell):
+            for line in shell.sub_lines:
                 if len(line) > 0:
-                    if self.skip_retraction:
-                        gcode_output.write(gcodeEnvironment.goToNextPoint(line[0], False))
-                        self.skip_retraction = False
-                    else:
-                        gcode_output.write(gcodeEnvironment.goToNextPoint(line[0], True))
+                    gcode_output.write(gcodeEnvironment.goToNextPoint(line[0], True))
                     for point_index in range(1, len(line)):
-
-                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index], config.boundarySpeed))
-
-
-        def print_inner_hole(leaf):
-            for line in leaf.sub_lines:
-                if len(line) > 0:
-                    if self.skip_retraction:
-                        gcode_output.write(gcodeEnvironment.goToNextPoint(line[0], False))
-                        self.skip_retraction = False
-                    else:
-                        gcode_output.write(gcodeEnvironment.goToNextPoint(line[0], True))
-                    for point_index in range(1, len(line)):
-
-                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index], config.holeSpeed))
+                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index],config.shellSpeed))
+            self.skip_retraction = False
 
         def switch_leaf(leaf):
             switch = {
                 "skin": print_skin,
                 "infill": print_infill,
-                "hole": print_boundary,
-                "inner_boundary" : print_inner_boundary,
-                "inner_hole": print_inner_hole,
+                "hole": print_hole,
+                "inner_boundary" : print_inner_shell,
+                "inner_hole": print_inner_shell,
                 "boundary": print_boundary
             }
             switch[leaf.type](leaf)
