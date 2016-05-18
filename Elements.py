@@ -107,7 +107,7 @@ class Outline:
     def get_outterbounds(self):
         if self.empty:
             return Polygon_stack()
-        return Polygon_stack(offset(self.innerShells, config.line_width / 2))
+        return self.boundary.get_outterbound()
 
 
 
@@ -198,10 +198,7 @@ class Outline:
                 return self.line.get_inner_bound()
 
         def get_outterbound(self):
-            if len(self.shells) != 0:
-                return self.shells[len(self.shells)-1].get_outter_bound()
-            else:
-                return self.line.get_outter_bound()
+            return self.line.get_outter_bound()
 
 
 
