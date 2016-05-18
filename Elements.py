@@ -34,12 +34,19 @@ class Outline:
 
             self.holePolylines = Line_group("hole", config.line_width)
             self.innerHolePolylines = Line_group("inner_hole", config.line_width)
-            self.BoundaryPolylines = Line_group("boundary", config.line_width)
+            self.strikePolyline = Line_group("boundary", config.line_width)
+
 
             self.innerBoundaryPolylines = Line_group("inner_boundary", config.line_width)
+            self.strike = Polygon_stack()
             self.holeShells = Polygon_stack()
             self.boundaryShells = Polygon_stack()
             self.innerShells = Polygon_stack()
+
+    def get_strike(self):
+        if self.island.layer_index == 0:
+            self.strike = self.boundary.line.offset(config.line_width * 5)
+        return self.strike
 
     def g_print(self):
         polylines = Line_group("outline")

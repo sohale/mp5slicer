@@ -28,6 +28,9 @@ class Island():
         self.process_shells()
         # self.process_infill()
 
+    def get_strike(self):
+        return self.outline.get_strike()
+
     def process_outlines(self, polygons):
         self.outline = Outline(self, polygons)
 

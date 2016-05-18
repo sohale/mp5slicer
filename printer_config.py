@@ -1,4 +1,4 @@
-model = "r2x"
+model = "ultimaker"
 gcode_flavor = "marlin"
 max_extrusion = 3 #mm3.s-1
 build_platformX = 240
@@ -6,4 +6,4 @@ build_platformY = 160
 print_box_X = 150
 print_box_Y = 150
 print_box_Z = 150
-origin = "center"
+origin = "corner"

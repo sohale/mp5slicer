@@ -3,8 +3,10 @@ import pyclipper
 from Polynode import *
 from utils import *
 from Island_stack import *
+from Elements import Outline
 from Polygon_stack import *
 from Line_group import *
+from clipper_operations import union_layers_polytree
 import config
 
 class Layer():
@@ -19,8 +21,17 @@ class Layer():
 
     def G_print(self):
         polylines = Line_group("layer")
+        strikePolylines = Line_group("boundary",config.line_width)
+        strikes = Polygon_stack()
         for island in self.islands:
+            if self.index == 0:
+                strikes.add_polygon_stack(island.get_strike())
             polylines.add_group(island.g_print())
+        if self.index == 0:
+            unionStrikes = union_layers_polytree(strikes.polygons,strikes.polygons,True)
+            for strike in unionStrikes.Childs:
+                strikePolylines.add_chain(Outline.process_polyline(strike.Contour))
+            polylines.add_group(strikePolylines)
         return polylines
 
     def process_shells(self):

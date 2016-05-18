@@ -40,6 +40,19 @@ def union_layers( _subj,_clip,closed):
 
     return solution
 
+def union_layers_polytree( _subj,_clip,closed):
+
+
+    pc = pyclipper.Pyclipper()
+    pc.AddPaths(_clip, pyclipper.PT_CLIP, True)
+    try:
+        pc.AddPaths(_subj, pyclipper.PT_SUBJECT, closed)
+    except:
+        raise StandardError
+
+    return pc.Execute2(pyclipper.CT_UNION, pyclipper.PFT_EVENODD, pyclipper.PFT_EVENODD)
+
+
 def diff_layers_as_polytree( _subj,_clip,closed):
 
     pc = pyclipper.Pyclipper()
