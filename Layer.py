@@ -23,15 +23,18 @@ class Layer():
         polylines = Line_group("layer")
         skirtPolylines = Line_group("boundary",config.line_width)
         skirts = Polygon_stack()
-        for island in self.islands:
-            if self.index == 0:
-                skirts.add_polygon_stack(island.get_skirt())
-            polylines.add_group(island.g_print())
         if self.index == 0:
-            unionskirts = union_layers_polytree(skirts.polygons,skirts.polygons,True)
+            for island in self.islands:
+                skirts.add_polygon_stack(island.get_skirt())
+            unionskirts = union_layers_polytree(skirts.polygons, skirts.polygons, True)
             for skirt in unionskirts.Childs:
                 skirtPolylines.add_chain(Outline.process_polyline(skirt.Contour))
             polylines.add_group(skirtPolylines)
+
+        for island in self.islands:
+            polylines.add_group(island.g_print())
+
+
         return polylines
 
     def process_shells(self):

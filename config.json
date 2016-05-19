@@ -1,6 +1,6 @@
 {
   "layerThickness":0.1,
-  "line_width" : 0.4,
+  "line_width" : 0.6,
   "temperature" : 210,
   "inAirSpeed" : 3000,
   "retractionSpeed": 2400,
