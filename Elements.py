@@ -38,15 +38,15 @@ class Outline:
 
 
             self.innerBoundaryPolylines = Line_group("inner_boundary", config.line_width)
-            self.strike = Polygon_stack()
+            self.skirt = Polygon_stack()
             self.holeShells = Polygon_stack()
             self.boundaryShells = Polygon_stack()
             self.innerShells = Polygon_stack()
 
-    def get_strike(self):
+    def get_skirt(self):
         if self.island.layer_index == 0:
-            self.strike = self.boundary.line.offset(config.line_width * 5)
-        return self.strike
+            self.skirt = self.boundary.line.offset(config.line_width * 5)
+        return self.skirt
 
     def g_print(self):
         polylines = Line_group("outline")

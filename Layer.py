@@ -21,17 +21,17 @@ class Layer():
 
     def G_print(self):
         polylines = Line_group("layer")
-        strikePolylines = Line_group("boundary",config.line_width)
-        strikes = Polygon_stack()
+        skirtPolylines = Line_group("boundary",config.line_width)
+        skirts = Polygon_stack()
         for island in self.islands:
             if self.index == 0:
-                strikes.add_polygon_stack(island.get_strike())
+                skirts.add_polygon_stack(island.get_skirt())
             polylines.add_group(island.g_print())
         if self.index == 0:
-            unionStrikes = union_layers_polytree(strikes.polygons,strikes.polygons,True)
-            for strike in unionStrikes.Childs:
-                strikePolylines.add_chain(Outline.process_polyline(strike.Contour))
-            polylines.add_group(strikePolylines)
+            unionskirts = union_layers_polytree(skirts.polygons,skirts.polygons,True)
+            for skirt in unionskirts.Childs:
+                skirtPolylines.add_chain(Outline.process_polyline(skirt.Contour))
+            polylines.add_group(skirtPolylines)
         return polylines
 
     def process_shells(self):
