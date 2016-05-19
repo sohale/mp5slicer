@@ -133,7 +133,7 @@ class G_buffer:
 
 
 
-        gcode_output.write(gcodeEnvironment.retractFilament(config.retractionLength))
+        # gcode_output.write(gcodeEnvironment.retractFilament(config.retractionLength))
         gcode_output.write(gcodeEnvironment.endcode(printer_config.model))
         gcode_output.close()
 

@@ -52,7 +52,7 @@ class GCodeEnvironment:
             B[i] = self.truncate(A[i],3)
         A = B
         distance = self.calculDis(A)
-        if distance > 3 and retract:
+        if distance > config.minRetractionDistance and retract:
             instruction = self.retract()
 
             instruction +=  "G0" + " X"+str(A[0]) + " Y"+str(A[1]) + " Z"+str(self.Z) +" F"+str(self.settings.inAirSpeed)+"\n"
@@ -117,7 +117,7 @@ class GCodeEnvironment:
     def startcode(self, printer):
         if printer == "r2x":
             start_code_name = "r2xstart"
-            startString = ""
+            startString = "M104 S"+str(config.temperature)+" T1 (set extruder temperature)\n"
         else:
             start_code_name = "startcode"
             startString = "M109 S"+str(config.temperature)+"\n"
