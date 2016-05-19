@@ -26,9 +26,12 @@ class Layer():
         if self.index == 0:
             for island in self.islands:
                 skirts.add_polygon_stack(island.get_skirt())
-            unionskirts = union_layers_polytree(skirts.polygons, skirts.polygons, True)
+
+            unionskirts = union_layers_polytree(skirts.polygons+[skirts.polygons[0]], skirts.polygons, True)
             for skirt in unionskirts.Childs:
                 skirtPolylines.add_chain(Outline.process_polyline(skirt.Contour))
+                for offsetskirt in offset(Polygon_stack(skirt.Contour),-config.line_width):
+                    skirtPolylines.add_chain(Outline.process_polyline(offsetskirt))
             polylines.add_group(skirtPolylines)
 
         for island in self.islands:
