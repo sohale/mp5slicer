@@ -11,7 +11,7 @@ def polygonize_layers_from_trimed_dict(slice_layers):
 
         for bipoint in slice_layers[slice_index]:
             if len(slice_layers[slice_index][bipoint]) != 2:
-                sys.stderr.write(bipoint," : ",slice_layers[slice_index][bipoint])
+                sys.stderr.write(str(bipoint)+" : "+str(slice_layers[slice_index][bipoint]) + "\n")
 
     slicesAsPolygons = []
     for slicee in slice_layers:

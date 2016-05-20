@@ -33,9 +33,7 @@ class Outline:
                 self.holes.append(self.Hole(self, SingleLine(polygons[poly_index], config.line_width)))
 
             self.holePolylines = Line_group("hole", config.line_width)
-            self.innerHolePolylines = Line_group("inner_hole", config.line_width)
             self.strikePolyline = Line_group("boundary", config.line_width)
-
 
             self.innerBoundaryPolylines = Line_group("inner_boundary", config.line_width)
             self.skirt = Polygon_stack()
@@ -45,7 +43,7 @@ class Outline:
 
     def get_skirt(self):
         if self.island.layer_index == 0:
-            self.skirt = self.boundary.line.offset(config.line_width * 5)
+            self.skirt = self.boundary.line.offset(config.line_width * 7)
         return self.skirt
 
     def g_print(self):
@@ -73,13 +71,7 @@ class Outline:
         self.innerShells.add_polygon_stack(poly_hole_stack)
 
         for i in range(1, config.shellSize, 1):
-            #previousBoundaryShell = self.boundary.make_one_shell(i, previousBoundaryShell)
             pstack = Polygon_stack(self.boundary.line.offset(-i*config.line_width))
-
-            #if previousBoundaryShell == None:
-            #    return
-
-            #faire une intersection
             pstackhole = Polygon_stack(offset(poly_hole_stack,i*config.line_width))
 
             pc = pyclipper.Pyclipper()
@@ -96,20 +88,18 @@ class Outline:
             return Polygon_stack()
         return self.innerShells
 
-
-
     def get_inner_bounds(self):
         if self.empty:
             return Polygon_stack()
         return Polygon_stack(offset(self.innerShells,-config.line_width/2))
 
-
     def get_outterbounds(self):
         if self.empty:
             return Polygon_stack()
-        return self.boundary.get_outterbound()
-
-
+        bounds = Polygon_stack(self.boundary.get_outterbound())
+        for hole in self.holes:
+            bounds.add_polygon_stack(hole.get_outter_bound())
+        return bounds
 
     @staticmethod
     def process_polyline(line):
@@ -131,9 +121,7 @@ class Outline:
         def __init__(self,outline, line):
             self.outline = outline
             self.line = line
-            self.shells = []
             self.polylines = Line_group("hole", config.line_width)
-            self.innerPolylines = Line_group("inner_hole", config.line_width)
 
         def g_print(self):
 
@@ -141,38 +129,17 @@ class Outline:
 
             return self.polylines
 
-        def g_print_inner_shell(self):
-
-            for shell in self.shells:
-                self.innerPolylines.add_chain(Outline.process_polyline(shell.get_contour()))
-            return self.innerPolylines
-
-        def get_innershell(self):
-            if len(self.shells) != 0:
-                return self.shells[len(self.shells)-1].get_contour()
-            else:
-                return self.line.get_contour()
-
         def get_inner_bound(self):
-            if len(self.shells) != 0:
-                return self.shells[len(self.shells)-1].get_outter_bound()
-            else:
                 return self.line.get_outter_bound()
 
         def get_outter_bound(self):
-            if len(self.shells) != 0:
-                return self.shells[len(self.shells)-1].get_inner_bound()
-            else:
                 return self.line.get_inner_bound()
 
     class Boundary():
         def __init__(self,outline, line):
             self.outline = outline
-
             self.line = line
-            self.shells = []
             self.polylines = Line_group("boundary", config.line_width)
-            self.innerPolylines = Line_group("inner_boundary", config.line_width)
 
 
         def g_print(self):
@@ -180,22 +147,8 @@ class Outline:
 
             return  self.polylines
 
-        def g_print_inner_shell(self):
-            for shell in self.shells:
-                self.innerPolylines.add_chain(Outline.process_polyline(shell.get_contour()))
-            return self.innerPolylines
-
-        def get_innershell(self):
-            if len(self.shells) != 0:
-                return self.shells[len(self.shells)-1].get_contour()
-            else:
-                return self.line.get_contour()
-
         def get_inner_bound(self):
-            if len(self.shells) != 0:
-                return self.shells[len(self.shells)-1].get_inner_bound()
-            else:
-                return self.line.get_inner_bound()
+            return self.line.get_inner_bound()
 
         def get_outterbound(self):
             return self.line.get_outter_bound()
