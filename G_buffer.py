@@ -3,6 +3,8 @@ from Line_group import *
 import config
 import sys
 import printer_config
+import copy
+from utils import copy_module
 
 class G_buffer:
     layer_list = []
@@ -13,6 +15,8 @@ class G_buffer:
         self.to_file = to_file
         self.gcode_filename = gcode_filename
         self.skip_retraction = False
+        self.config = copy_module(config)
+        self.layer_index = 0
 
     def add_layer(self,list):
         self.layer_list.append(list)
@@ -33,24 +37,12 @@ class G_buffer:
 
 
 
-
-        def print_leaf(leaf):
-            for line in leaf.sub_lines:
-                if len(line) > 0:
-                    if self.skip_retraction:
-                        gcode_output.write(gcodeEnvironment.goToNextPoint(line[0],False))
-                        self.skip_retraction = False
-                    else:
-                        gcode_output.write(gcodeEnvironment.goToNextPoint(line[0], True))
-                    for point_index in range(1,len(line)):
-                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index]))
-
         def print_boundary(boundary):
             for line in boundary.sub_lines:
                 if len(line) > 0:
                     gcode_output.write(gcodeEnvironment.goToNextPoint(line[0],True))
                     for point_index in range(1,len(line)):
-                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index],config.boundarySpeed))
+                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index],self.config.boundarySpeed, self.config.default_fan_speed))
             self.skip_retraction = False
 
         def print_hole(boundary):
@@ -58,7 +50,7 @@ class G_buffer:
                 if len(line) > 0:
                     gcode_output.write(gcodeEnvironment.goToNextPoint(line[0], True))
                     for point_index in range(1, len(line)):
-                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index], config.holeSpeed))
+                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index], self.config.holeSpeed, self.config.default_fan_speed))
             self.skip_retraction = False
 
         def print_infill(leaf):
@@ -70,7 +62,7 @@ class G_buffer:
                     else:
                         gcode_output.write(gcodeEnvironment.goToNextPoint(line[0], True))
                     for point_index in range(1,len(line)):
-                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index], config.infillSpeed))
+                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index], self.config.infillSpeed, self.config.default_fan_speed))
 
         def print_skin(leaf):
             for line in leaf.sub_lines:
@@ -81,14 +73,14 @@ class G_buffer:
                     else:
                         gcode_output.write(gcodeEnvironment.goToNextPoint(line[0], True))
                     for point_index in range(1,len(line)):
-                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index], config.skinSpeed))
+                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index], self.config.skinSpeed, self.config.default_fan_speed))
 
         def print_inner_shell(shell):
             for line in shell.sub_lines:
                 if len(line) > 0:
                     gcode_output.write(gcodeEnvironment.goToNextPoint(line[0], True))
                     for point_index in range(1, len(line)):
-                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index],config.shellSpeed))
+                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index],self.config.shellSpeed, self.config.default_fan_speed))
             self.skip_retraction = False
 
         def switch_leaf(leaf):
@@ -111,10 +103,18 @@ class G_buffer:
             switch[node.type](node)
 
         def print_layer(node):
+            if self.layer_index < 2:
+                self.config.infillSpeed  = 1500
+                self.config.skinSpeed = 1500
+                self.config.boundarySpeed = 1500
+                self.config.holeSpeed = 1500
+                self.config.shellSpeed = 1500
 
             for node in node.sub_lines:
                 gotroughgroup(node)
             gcodeEnvironment.Z += config.layerThickness
+
+            self.config = copy_module(config)
 
         def print_node(node):
             for node in node.sub_lines:
@@ -127,9 +127,10 @@ class G_buffer:
             else:
                 swith_node(group)
 
-        for layer in self.layer_list:
-            if len(layer.sub_lines) != 0:
-                gotroughgroup(layer)
+        for layer_index in range(len(self.layer_list)):
+            self.layer_index = layer_index
+            if len(self.layer_list[layer_index].sub_lines) != 0:
+                gotroughgroup(self.layer_list[layer_index])
 
 
 

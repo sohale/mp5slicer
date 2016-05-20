@@ -33,7 +33,6 @@ class Outline:
                 self.holes.append(self.Hole(self, SingleLine(polygons[poly_index], config.line_width)))
 
             self.holePolylines = Line_group("hole", config.line_width)
-            self.strikePolyline = Line_group("boundary", config.line_width)
 
             self.innerBoundaryPolylines = Line_group("inner_boundary", config.line_width)
             self.skirt = Polygon_stack()
@@ -49,14 +48,15 @@ class Outline:
     def g_print(self):
         polylines = Line_group("outline")
 
-        for bs in self.boundaryShells.polygons:
-            self.innerBoundaryPolylines.add_chain(Outline.process_polyline(bs))
+        for boundary_shell in self.boundaryShells.polygons:
+            self.innerBoundaryPolylines.add_chain(Outline.process_polyline(boundary_shell))
 
         for hole in self.holes:
             polylines.add_group(hole.g_print())
 
-        polylines.add_group(self.boundary.g_print())
         polylines.add_group(self.innerBoundaryPolylines)
+        polylines.add_group(self.boundary.g_print())
+
         return polylines
 
 

@@ -2,6 +2,17 @@ from clipper_operations import *
 from  slicer import *
 import sys
 
+def copy_module(module):
+    copy = conf_module
+    attributes = dir(module)
+    for atr in attributes:
+        setattr(copy,atr, getattr(module,atr))
+    return copy
+
+class conf_module:
+    def __init__(self):
+        pass
+
 
 
 def polygonize_layers_from_trimed_dict(slice_layers):
@@ -11,7 +22,8 @@ def polygonize_layers_from_trimed_dict(slice_layers):
 
         for bipoint in slice_layers[slice_index]:
             if len(slice_layers[slice_index][bipoint]) != 2:
-                sys.stderr.write(str(bipoint)+" : "+str(slice_layers[slice_index][bipoint]) + "\n")
+                sys.stderr.write(str(bipoint)+" : "+str(slice_layers[slice_index][bipoint]) +" : " + str(slice_index)+ "\n")
+
 
     slicesAsPolygons = []
     for slicee in slice_layers:

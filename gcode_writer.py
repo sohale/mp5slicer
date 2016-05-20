@@ -17,6 +17,7 @@ class GCodeEnvironment:
 
         self.E = 0
         self.F = 1000 # in mm/minute
+        self.fan_speed = 0
 
         self.X = 0
         self.Y = 0
@@ -46,13 +47,13 @@ class GCodeEnvironment:
         return distance
 
     # go to point A without extruding filament
-    def goToNextPoint(self,A, retract):
+    def goToNextPoint(self,A, retract,):
         B = [0.1]*2
         for i in range(len(A)):
             B[i] = self.truncate(A[i],3)
         A = B
         distance = self.calculDis(A)
-        if distance > config.minRetractionDistance and retract:
+        if distance > config.min_retraction_distance and retract:
             instruction = self.retract()
 
             instruction +=  "G0" + " X"+str(A[0]) + " Y"+str(A[1]) + " Z"+str(self.Z) +" F"+str(self.settings.inAirSpeed)+"\n"
@@ -78,7 +79,12 @@ class GCodeEnvironment:
 
 
     # draw to point A
-    def drawToNextPoint(self, A, speed = 0):
+    def drawToNextPoint(self, A, speed = 0, fan_speed = 0):
+        if fan_speed != self.fan_speed:
+            self.fan_speed = fan_speed
+            instruction = "M106 S" + str(math.floor(fan_speed*255)) + "\n"
+        else:
+            instruction = ""
         if isinstance(A,str):
             raise StandardError
         if speed == 0:
@@ -96,7 +102,7 @@ class GCodeEnvironment:
             self.E += extrusion
         except:
             raise StandardError
-        instruction = "G1" + " X" +str(A[0]) + " Y" +str(A[1]) + " Z" +str(self.Z) + " E" +str(self.E) + " F" +str(self.F) + "\n"
+        instruction += "G1" + " X" +str(A[0]) + " Y" +str(A[1]) + " Z" +str(self.Z) + " E" +str(self.E) + " F" +str(self.F) + "\n"
         self.X = A[0]
         self.Y = A[1]
         return instruction
