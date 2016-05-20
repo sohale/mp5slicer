@@ -76,10 +76,13 @@ class Outline:
 
             pc = pyclipper.Pyclipper()
             if not pstack.isEmpty:
+
                 pc.AddPaths(pstack.polygons, pyclipper.PT_SUBJECT,True)
                 if not poly_hole_stack.isEmpty:
                     pc.AddPaths(pstackhole.polygons, pyclipper.PT_CLIP, True)
                 shell = Polygon_stack(pc.Execute(pyclipper.CT_DIFFERENCE, pyclipper.PFT_EVENODD, pyclipper.PFT_EVENODD))
+                if len(shell.polygons) == 0:
+                    break
                 self.boundaryShells.add_polygon_stack(shell)
                 self.innerShells = Polygon_stack(shell)
 
