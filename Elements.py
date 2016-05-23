@@ -51,7 +51,7 @@ class Outline:
         for boundary_shell in reversed(self.boundaryShells.polygons):
             self.innerBoundaryPolylines.add_chain(Outline.process_polyline(boundary_shell))
         polylines.add_group(self.innerBoundaryPolylines)
-        
+
         for hole in self.holes:
             polylines.add_group(hole.g_print())
 
@@ -81,10 +81,15 @@ class Outline:
                 pc.AddPaths(pstack.polygons, pyclipper.PT_SUBJECT,True)
                 if not poly_hole_stack.isEmpty:
                     pc.AddPaths(pstackhole.polygons, pyclipper.PT_CLIP, True)
-                shell = Polygon_stack(pc.Execute(pyclipper.CT_DIFFERENCE, pyclipper.PFT_EVENODD, pyclipper.PFT_EVENODD))
-                if len(shell.polygons) == 0:
+                shell = pc.Execute(pyclipper.CT_DIFFERENCE, pyclipper.PFT_EVENODD, pyclipper.PFT_EVENODD)
+                if len(shell) == 0:
                     break
-                self.boundaryShells.add_polygon_stack(shell)
+
+                if i%2 == 0:
+                    self.boundaryShells.add_polygons(shell)
+                else:
+                    self.boundaryShells.add_polygons(shell[::-1])
+
                 self.innerShells = Polygon_stack(shell)
 
     def get_innershells(self):

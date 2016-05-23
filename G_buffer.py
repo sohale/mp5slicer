@@ -17,6 +17,8 @@ class G_buffer:
         self.skip_retraction = False
         self.config = copy_module(config)
         self.layer_index = 0
+        self.previousPos = None
+        self.layerIslands = None
 
     def add_layer(self,list):
         self.layer_list.append(list)
@@ -83,6 +85,16 @@ class G_buffer:
                         gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index],self.config.shellSpeed, self.config.default_fan_speed))
             self.skip_retraction = False
 
+        def print_skirt(skirt):
+            for line in skirt.sub_lines:
+                if len(line) > 0:
+                    gcode_output.write(gcodeEnvironment.goToNextPoint(line[0], True))
+                    for point_index in range(1, len(line)):
+                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index], self.config.shellSpeed,
+                                                                            self.config.default_fan_speed))
+                        self.previousPos = line[point_index]
+            self.skip_retraction = False
+
         def switch_leaf(leaf):
             switch = {
                 "skin": print_skin,
@@ -90,7 +102,8 @@ class G_buffer:
                 "hole": print_hole,
                 "inner_boundary" : print_inner_shell,
                 "inner_hole": print_inner_shell,
-                "boundary": print_boundary
+                "boundary": print_boundary,
+                "skirt" : print_skirt
             }
             switch[leaf.type](leaf)
 

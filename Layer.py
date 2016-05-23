@@ -21,7 +21,7 @@ class Layer():
 
     def G_print(self):
         polylines = Line_group("layer")
-        skirtPolylines = Line_group("boundary",config.line_width)
+        skirtPolylines = Line_group("skirt",config.line_width)
         skirts = Polygon_stack()
         if self.index == 0:
             for island in self.islands:
