@@ -48,13 +48,14 @@ class Outline:
     def g_print(self):
         polylines = Line_group("outline")
 
-        for boundary_shell in self.boundaryShells.polygons:
+        for boundary_shell in reversed(self.boundaryShells.polygons):
             self.innerBoundaryPolylines.add_chain(Outline.process_polyline(boundary_shell))
-
+        polylines.add_group(self.innerBoundaryPolylines)
+        
         for hole in self.holes:
             polylines.add_group(hole.g_print())
 
-        polylines.add_group(self.innerBoundaryPolylines)
+
         polylines.add_group(self.boundary.g_print())
 
         return polylines
