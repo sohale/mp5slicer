@@ -1,5 +1,6 @@
 from clipper_operations import *
 from  slicer import *
+from math import sqrt,pow
 import sys
 
 def copy_module(module):
@@ -14,6 +15,96 @@ class conf_module:
         pass
 
 
+def getPath(bound, holes,path):
+    pc = pyclipper.Pyclipper()
+    pc.AddPath(path, pyclipper.PT_SUBJECT, False)
+    pc.AddPath(bound, pyclipper.PT_CLIP, True)
+    result = pyclipper.PolyTreeToPaths(pc.Execute2(pyclipper.CT_DIFFERENCE, pyclipper.PFT_EVENODD, pyclipper.PFT_EVENODD))
+    resultSize = len(result)
+    if resultSize == 1:#cross once the bound
+        middlePoint = getMiddlePoint([result[0][0],result[0][1]])
+        vetctor = getVector([result[0][0],result[0][1]])
+        point = getInsidePoint(middlePoint,vetctor,bound)
+        return getPath(bound,holes,[path[0],point]) + getPath(bound,holes,[point,path[1]])[1:]
+    elif resultSize > 1:#cross multiple times the bound
+        middlePoint = None
+        solution = [path[0]]
+        previousMiddlePoint = path[0]
+        for i in range(0,resultSize-1):
+            middlePoint = getMiddlePoint([result[i][1],result[i+1][0]])
+            vetctor = getVector([result[i][1],result[i+1][0]])
+            for hole in holes:
+                if pyclipper.PointInPolygon(middlePoint,hole):
+                    middlePoint = getOutsidePoint(middlePoint,vetctor,hole)
+                    break
+            solution += getPath(bound,holes,[previousMiddlePoint,middlePoint])[1:]
+            previousMiddlePoint = middlePoint
+        solution += getPath(bound, holes, [previousMiddlePoint, path[1]])[1:]
+        return solution
+
+    pc.Clear()
+    pc.AddPath(path, pyclipper.PT_SUBJECT, False)
+    for hole in holes:
+        pc.AddPath(hole, pyclipper.PT_CLIP, True)
+    result = pyclipper.PolyTreeToPaths(pc.Execute2(pyclipper.CT_DIFFERENCE, pyclipper.PFT_EVENODD, pyclipper.PFT_EVENODD))
+    resultSize = len(result)
+    if(resultSize==2):#cross only one hole once
+        for hole in holes:# seek the crossing hole
+            pc.Clear()
+            pc.AddPath(path, pyclipper.PT_SUBJECT, False)
+            pc.AddPath(hole, pyclipper.PT_CLIP, True)
+            result = pyclipper.PolyTreeToPaths(pc.Execute2(pyclipper.CT_DIFFERENCE, pyclipper.PFT_EVENODD, pyclipper.PFT_EVENODD))
+            resultSize = len(result)
+            if resultSize == 2:
+                middlePoint = getMiddlePoint([result[0][1], result[1][0]])
+                vetctor = getVector([result[0][1], result[1][0]])
+                point = getOutsidePoint(middlePoint, vetctor, hole)
+                return getPath(bound, holes, [path[0], point]) + getPath(bound, holes, [point, path[1]])[1:]
+
+    elif(resultSize > 2):#cross multipleholes or one hole multiple times
+        middlePoint = None
+        solution = [path[0]]
+        previousMiddlePoint = path[0]
+        for i in range(1, resultSize - 1):
+            middlePoint = getMiddlePoint([result[i][0], result[i][1]])
+            solution += getPath(bound, holes, [previousMiddlePoint, middlePoint])[1:]
+            previousMiddlePoint = middlePoint
+        solution += getPath(bound, holes, [previousMiddlePoint, path[1]])[1:]
+        return solution
+
+
+    return path
+
+def getMiddlePoint(points):
+    return [(points[0][0]/2)+(points[1][0]/2),(points[0][1]/2)+(points[1][1]/2)]
+
+def getVector(points):
+    val = sqrt(pow(points[0][0] - points[1][0],2) + pow(points[0][1] - points[1][1],2))
+    return [pyclipper.scale_to_clipper((points[0][1] - points[1][1])/val)*0.1,pyclipper.scale_to_clipper((points[1][0] - points[0][0])/val)*0.1]
+
+def getInsidePoint(startPoint,vect,polygon):
+    point = startPoint
+    reversePoint = startPoint
+    soluce = None
+    while soluce == None :
+        point = [point[0]+vect[0],point[1]+vect[1]]
+        if pyclipper.PointInPolygon(point,polygon):
+            return point
+        reversePoint = [reversePoint[0] - vect[0], reversePoint[1] - vect[1]]
+        if pyclipper.PointInPolygon(reversePoint, polygon):
+            return reversePoint
+
+def getOutsidePoint(startPoint,vect,polygon):
+    point = startPoint
+    reversePoint = startPoint
+    soluce = None
+    while soluce == None :
+        point = [point[0]+vect[0],point[1]+vect[1]]
+        if not pyclipper.PointInPolygon(point,polygon):
+            return point
+        reversePoint = [reversePoint[0] - vect[0], reversePoint[1] - vect[1]]
+        if not pyclipper.PointInPolygon(reversePoint, polygon):
+            return reversePoint
 
 def polygonize_layers_from_trimed_dict(slice_layers):
 
@@ -121,6 +212,7 @@ def vizz_2d_multi(layers):
         ax.add_patch(patch)
     plt.autoscale(enable=True, axis='both', tight=None)
     plt.show()
+    plt.savefig("im.png")
 
 
 def poly1_in_poly2(poly1,poly2):
