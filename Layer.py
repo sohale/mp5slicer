@@ -86,13 +86,12 @@ class Layer():
 
     def detect_islands(self):
         po = pyclipper.PyclipperOffset()
-        base = pow(10, 15)
+        po.MiterLimit = 2
+        base = 1#pow(10, 15)
         empty_poly = Polygon_stack([[[base, base], [base + 1, base], [base + 1, base + 1], [base, base + 1]]])
         polys = pyclipper.PolyTreeToPaths(diff_layers_as_polytree(self.layers[self.index], empty_poly.polygons, True))
-        po.AddPaths(polys, pyclipper.JT_SQUARE, pyclipper.ET_CLOSEDPOLYGON)
-        #offseted = Polygon_stack(po.Execute(pyclipper.scale_to_clipper(-config.line_width/2)))
+        po.AddPaths(polys, pyclipper.JT_MITER, pyclipper.ET_CLOSEDPOLYGON)
         islandStack = Island_stack(po.Execute2(pyclipper.scale_to_clipper(-config.line_width/2)))
-        #return offseted.split_in_islands()
         return  islandStack.get_islands()
 
 
