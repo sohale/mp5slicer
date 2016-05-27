@@ -121,10 +121,6 @@ class Island():
             other_skins = self.print_tree[layer_index].get_downskins()
             skins = skins.union_with(other_skins)
 
-        if self.layer_index >= 435:
-            vizz_2d_multi(pyclipper.scale_from_clipper(skins.polygons), "iiskins.png")
-            print "holla"
-
         if self.skins is not None:
             self.skins.process(skins, perimeter)
         elif not skins.isEmpty:
