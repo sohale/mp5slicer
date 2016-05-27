@@ -185,7 +185,7 @@ def vizz_2d(layer):
     plt.autoscale(enable=True, axis='both', tight=None)
     plt.show()
 
-def vizz_2d_multi(layers):
+def vizz_2d_multi(layers,img):
     import matplotlib.pyplot as plt
     from matplotlib.path import Path
     import matplotlib.patches as patches
@@ -212,7 +212,7 @@ def vizz_2d_multi(layers):
         ax.add_patch(patch)
     plt.autoscale(enable=True, axis='both', tight=None)
     plt.show()
-    plt.savefig("im.png")
+    plt.savefig(img)
 
 
 def poly1_in_poly2(poly1,poly2):

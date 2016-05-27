@@ -327,8 +327,8 @@ class Skin:
     def __init__(self,downskins, upskins,layers,layer_index,BBox):
         self.layers = layers
         self.layer_index = layer_index
-        downskins = Polygon_stack(offset(downskins,1))
-        upskins = Polygon_stack(offset(upskins, 1))
+        #downskins = Polygon_stack(offset(downskins,1))
+        #upskins = Polygon_stack(offset(upskins, 1))
         self.skins_as_polygon_stack =Polygon_stack()
         self.skins_as_polygon_stack = self.skins_as_polygon_stack.union_with(downskins)
         self.skins_as_polygon_stack = self.skins_as_polygon_stack.union_with(upskins)

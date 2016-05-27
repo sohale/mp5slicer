@@ -78,20 +78,31 @@ class Island():
 
         up_shells = Polygon_stack()
         for island in up_islands:
-            up_shells.add_polygon_stack(island.get_outterbounds())
+            up_shells.add_polygon_stack(island.get_innershells())
 
         down_shells = Polygon_stack()
         for island in down_islands:
-            outterbounds = island.get_outterbounds()
+            outterbounds = island.get_innershells()
             down_shells.add_polygon_stack(outterbounds)
 
         this_shells = Polygon_stack(self.get_innerbounds())
 
+
         downskins = this_shells.difference_with(down_shells)
 
         upskins = this_shells.difference_with(up_shells)
+        # if self.layer_index == 7 or self.layer_index == 15 or self.layer_index == 8 or self.layer_index == 16:
+        #     vizz_2d_multi(pyclipper.scale_from_clipper(up_shells.polygons),"iiup.png")
+        #     vizz_2d_multi(pyclipper.scale_from_clipper(down_shells.polygons ), "iidown.png")
+        #     vizz_2d_multi(pyclipper.scale_from_clipper(this_shells.polygons), "iithis.png")
+        #     vizz_2d_multi(pyclipper.scale_from_clipper(upskins.polygons), "iiupskin.png")
+        #     vizz_2d_multi(pyclipper.scale_from_clipper(downskins.polygons), "iidownskin.png")
+        #     print "skin"
+
 
         self.skins = Skin(downskins, upskins, self.layers, self.layer_index,self.BBox)
+
+        #self.skins = Skin(Polygon_stack(), Polygon_stack(), self.layers, self.layer_index, self.BBox)
 
 
 
@@ -106,9 +117,13 @@ class Island():
             other_skins = self.print_tree[layer_index].get_upskins()
             skins = skins.union_with(other_skins)
 
-        for layer_index in bottom_layers_indexes_to_agregate:
+        for layer_index in reversed(bottom_layers_indexes_to_agregate):
             other_skins = self.print_tree[layer_index].get_downskins()
             skins = skins.union_with(other_skins)
+
+        if self.layer_index >= 435:
+            vizz_2d_multi(pyclipper.scale_from_clipper(skins.polygons), "iiskins.png")
+            print "holla"
 
         if self.skins is not None:
             self.skins.process(skins, perimeter)
