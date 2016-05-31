@@ -109,7 +109,7 @@ class Island():
     def process_skins(self):
         # if self.layer_index != 0 and self.layer_index != len(self.layers)-2 and self.layer_index != len(self.layers)-1:
         top_layers_indexes_to_agregate = range(self.layer_index + 1, min(self.layer_index + 4, len(self.layers)))
-        bottom_layers_indexes_to_agregate = range(max(self.layer_index - 2, 0),self.layer_index - 1, -1 )
+        bottom_layers_indexes_to_agregate = range(max(self.layer_index - 2, 0),self.layer_index)
         skins = Polygon_stack()
         perimeter = self.outline.get_inner_bounds()
 
