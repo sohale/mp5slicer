@@ -32,6 +32,29 @@ class Plane:
 
             return outP
 
+    def intersection_with_line(self, vertice_0, vertice_1):
+        if vertice_0[2]< vertice_1[2]:
+            low = vertice_1
+            high = vertice_0
+        else:
+            low = vertice_0
+            high = vertice_1
+        if self.z < high[2] or self.z> low[2]:
+            if high[2] == self.z:
+                return high
+            elif low[2] == self.z:
+                return low
+            else:
+                return None
+        else :
+            r = (self.z - low[2]) / (high[2] - low[2])
+
+            S = np.array([low[0] + (r * (high[0]- low[0])),
+                          low[1] + (r * (high[1] - low[1])),
+                         0])
+            return S
+
+
 
 
     def intersection_with_triangle(self, triangle):
@@ -77,16 +100,16 @@ class Plane:
 
         line = []
 
-        intersection_point_0 = self.intersection_with_line_segment(vertice_0, vertice_1)
+        intersection_point_0 = self.intersection_with_line(vertice_0, vertice_1)
         if intersection_point_0 is not None :
             line.append(intersection_point_0)
 
-        intersection_point_1 = self.intersection_with_line_segment(vertice_1, vertice_2)
+        intersection_point_1 = self.intersection_with_line(vertice_1, vertice_2)
         if intersection_point_1 is not None :
             if not np.array_equal(intersection_point_1,intersection_point_0):
                 line.append(intersection_point_1)
 
-        intersection_point_2 = self.intersection_with_line_segment(vertice_0, vertice_2)
+        intersection_point_2 = self.intersection_with_line(vertice_0, vertice_2)
         if intersection_point_2 is not None :
             if not np.array_equal(intersection_point_2,intersection_point_0) and not np.array_equal(intersection_point_1,intersection_point_2):
                 line.append(intersection_point_2)
@@ -101,6 +124,7 @@ class Plane:
 def min_max_z(triangle):
     return [np.min(triangle[:,2]), np.max(triangle[:,2])]
 
+
 def truncate(f, n):
     '''Truncates/pads a float f to n decimal places without rounding'''
     s = '{}'.format(f)
@@ -109,11 +133,11 @@ def truncate(f, n):
     i, p, d = s.partition('.')
     return float('.'.join([i, (d+'0'*n)[:n]]))
 
+
 def slicer_from_mesh_as_dict(mesh, slice_height_from=0, slice_height_to=100, slice_step=1):
 
-    slice_height_from += 0.198
-    slice_height_to += 0.198
-
+    slice_height_from += 0.198768976
+    slice_height_to += 0.198768976
     normal = np.array([[0.],[0.],[1.]])
 
 

@@ -1,6 +1,6 @@
 import math
 import config
-
+import printer_config
 
 ############################ GCodeEnvironment Taken from old slicer without any changes ###########################
 
@@ -82,7 +82,10 @@ class GCodeEnvironment:
     def drawToNextPoint(self, A, speed = 0, fan_speed = 0):
         if fan_speed != self.fan_speed:
             self.fan_speed = fan_speed
-            instruction = "M106 S" + str(math.floor(fan_speed*255)) + "\n"
+            if printer_config.model == "r2x":
+                instruction = "M126 S" + str(fan_speed) + "\n"
+            else:
+                instruction = "M106 S" + str(int(math.floor(fan_speed*255))) + "\n"
         else:
             instruction = ""
         if isinstance(A,str):

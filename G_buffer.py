@@ -44,7 +44,7 @@ class G_buffer:
                 if len(line) > 0:
                     gcode_output.write(gcodeEnvironment.goToNextPoint(line[0],True))
                     for point_index in range(1,len(line)):
-                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index],self.config.boundarySpeed, self.config.default_fan_speed))
+                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index],self.config.boundarySpeed, 0.2))
             self.skip_retraction = False
 
         def print_hole(boundary):
@@ -64,7 +64,7 @@ class G_buffer:
                     else:
                         gcode_output.write(gcodeEnvironment.goToNextPoint(line[0], True))
                     for point_index in range(1,len(line)):
-                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index], self.config.infillSpeed, self.config.default_fan_speed))
+                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index], self.config.infillSpeed, 1))
 
         def print_skin(leaf):
             for line in leaf.sub_lines:
@@ -75,14 +75,14 @@ class G_buffer:
                     else:
                         gcode_output.write(gcodeEnvironment.goToNextPoint(line[0], True))
                     for point_index in range(1,len(line)):
-                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index], self.config.skinSpeed, self.config.default_fan_speed))
+                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index], self.config.skinSpeed, 1))
 
         def print_inner_shell(shell):
             for line in shell.sub_lines:
                 if len(line) > 0:
                     gcode_output.write(gcodeEnvironment.goToNextPoint(line[0], True))
                     for point_index in range(1, len(line)):
-                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index],self.config.shellSpeed, self.config.default_fan_speed))
+                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index],self.config.shellSpeed, 0.2))
             self.skip_retraction = False
 
         def print_skirt(skirt):
