@@ -1,5 +1,5 @@
 import numpy as np
-from rotation import rotate as rotation
+from slicer.rotation import rotate as rotation
 import decimal
 
 
@@ -104,7 +104,7 @@ class mesh():
         # this makes checking equalities easier.
         # The areas are unaltered, meaning that they are no longer in the same units are the triangles.
         # this doesn't seem very important at the moment.
-        self.triangles = (self.triangles).astype(dtype= np.dtype(decimal.Decimal))
+        self.triangles = (self.triangles).astype(dtype= np.dtype(float))
 
     def rotate(self, axis, theta):
 

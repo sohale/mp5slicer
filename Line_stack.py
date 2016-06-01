@@ -1,4 +1,4 @@
-from clipper_operations import *
+from slicer.clipper_operations import *
 
 
 class Line_stack():
@@ -11,10 +11,10 @@ class Line_stack():
             self.isEmpty = lines.isEmpty
         elif isinstance(lines, list) and len(lines) == 0:
             self.lines  = []
-        elif isinstance(lines[0][0],long) or isinstance(lines[0][0],int):
+        elif  isinstance(lines[0][0],int):
             self.lines  = [lines]
             self.isEmpty = False
-        elif isinstance(lines[0][0][0],long) or isinstance(lines[0][0][0],int):
+        elif  isinstance(lines[0][0][0],int):
             self.lines = lines
             self.isEmpty = False
         else: raise TypeError
@@ -44,4 +44,4 @@ class Line_stack():
         try:
             return diff_layers(self.lines,other.polygons , False)
         except:
-            raise StandardError
+            raise RuntimeError

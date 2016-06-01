@@ -1,9 +1,9 @@
-from clipper_operations import SingleLineOffset
-from Polygon_stack import *
+from slicer.clipper_operations import SingleLineOffset
+from slicer.Polygon_stack import *
 
 class SingleLine():
     def __init__(self,contour, line_width):
-        if (isinstance(contour,list) and len(contour) ==0) or isinstance(contour[0][0], long) or isinstance(contour[0][0], int):
+        if (isinstance(contour,list) and len(contour) ==0) or isinstance(contour[0][0], int):
             self.contour = contour
             self.width = line_width
             self.inner_bound = None

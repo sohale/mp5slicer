@@ -1,7 +1,5 @@
 import numpy as np
-from collections import namedtuple
-from mpmath import fp
-import decimal
+
 
 class Plane:
     def __init__(self, normal, z):
@@ -116,7 +114,7 @@ class Plane:
         if len(line) == 1:
             return None
         if len(line) != 2:
-            raise StandardError
+            raise RuntimeError
 
 
         return line

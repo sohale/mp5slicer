@@ -1,15 +1,9 @@
-from clipper_operations import *
-from path_planner import *
-from utils import *
-from Polygon_stack import *
-from Line_stack import *
-from config import *
-from SingleLine import SingleLine
-from Line_group import *
-from Polynode import Polynode
-import Island
-import config
-import numpy as np
+from slicer.clipper_operations import *
+from slicer.Polygon_stack import *
+from slicer.SingleLine import SingleLine
+from slicer.Line_group import *
+import slicer.config as config
+
 
 
 

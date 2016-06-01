@@ -1,10 +1,8 @@
-from utils import *
-from Parts import Infill, Skin
-from Elements import Outline
-from Line_group import *
-from Polynode import *
-from clipper_operations import *
-from Polygon_stack import *
+from slicer.Parts import Infill, Skin
+from slicer.Elements import Outline
+from slicer.Line_group import *
+from slicer.Polynode import *
+from slicer.Polygon_stack import *
 
 class Island():
     def __init__(self,print_tree, polynode, layers,layer_index,BBox, layer ):
@@ -21,7 +19,7 @@ class Island():
         try:
             self.polygons.append(polynode.Contour)
         except:
-            raise StandardError
+            raise RuntimeError
         if len(polynode.Childs) != 0:
             self.polygons += [poly.Contour for poly in polynode.Childs]
         self.process_outlines(self.polygons)

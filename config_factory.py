@@ -9,7 +9,7 @@ class config_factory:
         json_file.close()
         arg_dictionnary = json.loads(json_str)
 
-        import config
+        import slicer.config as config
         for arg in arg_dictionnary:
             setattr(config,arg,arg_dictionnary[arg])
         setattr(config, "crossArea" ,((config.filamentDiameter/2.0)**2) * math.pi) #6.37939
@@ -20,4 +20,4 @@ class config_factory:
 
 class Printer_config():
     def __init__(self):
-        import printer_config
+        import slicer.printer_config as printer_config

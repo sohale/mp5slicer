@@ -1,10 +1,9 @@
-from gcode_writer import *
-from Line_group import *
-import config
+from slicer.gcode_writer import *
+import slicer.config as config
 import sys
-import printer_config
+import slicer.printer_config as printer_config
 import copy
-from utils import copy_module
+from slicer.utils import copy_module
 
 class G_buffer:
     layer_list = []

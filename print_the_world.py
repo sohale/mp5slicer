@@ -1,7 +1,7 @@
 
-from Print_pipeline import *
+from slicer.Print_pipeline import *
 import sys,getopt
-from config_factory import config_factory
+from slicer.config_factory import config_factory
 
 args = sys.argv
 args = args[1:]

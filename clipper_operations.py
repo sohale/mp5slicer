@@ -1,6 +1,5 @@
 import pyclipper
-import utils as util
-from Island_stack import *
+
 
 
 
@@ -12,7 +11,7 @@ def diff_layers( _subj,_clip,closed):
     try:
         pc.AddPaths(_subj, pyclipper.PT_SUBJECT, closed)
     except:
-        raise StandardError
+        raise RuntimeError
 
     if closed:
         solution = pc.Execute(pyclipper.CT_DIFFERENCE, pyclipper.PFT_EVENODD, pyclipper.PFT_EVENODD)
@@ -30,7 +29,7 @@ def union_layers( _subj,_clip,closed):
     try:
         pc.AddPaths(_subj, pyclipper.PT_SUBJECT, closed)
     except:
-        raise StandardError
+        raise RuntimeError
 
     if closed:
         solution = pc.Execute(pyclipper.CT_UNION, pyclipper.PFT_EVENODD, pyclipper.PFT_EVENODD)
@@ -48,7 +47,7 @@ def union_layers_polytree( _subj,_clip,closed):
     try:
         pc.AddPaths(_subj, pyclipper.PT_SUBJECT, closed)
     except:
-        raise StandardError
+        raise RuntimeError
 
     return pc.Execute2(pyclipper.CT_UNION, pyclipper.PFT_EVENODD, pyclipper.PFT_EVENODD)
 
@@ -60,7 +59,7 @@ def diff_layers_as_polytree( _subj,_clip,closed):
     try:
         pc.AddPaths(_subj, pyclipper.PT_SUBJECT, closed)
     except:
-        raise StandardError
+        raise RuntimeError
 
     solution = pc.Execute2(pyclipper.CT_DIFFERENCE, pyclipper.PFT_EVENODD, pyclipper.PFT_EVENODD)
 
@@ -75,12 +74,12 @@ def inter_layers( _subj,_clip,closed):
     try:
         pc.AddPaths(_clip, pyclipper.PT_CLIP, True)
     except:
-        raise StandardError
+        raise RuntimeError
 
     try:
         pc.AddPaths(_subj, pyclipper.PT_SUBJECT, closed)
     except:
-        raise StandardError
+        raise RuntimeError
 
     if closed:
         solution = pc.Execute(pyclipper.CT_INTERSECTION, pyclipper.PFT_EVENODD, pyclipper.PFT_EVENODD)
@@ -103,7 +102,7 @@ def inter_layers_as_polytree( _subj,_clip,closed):
     return solution
 
 def isPaths(paths):
-    assert(isinstance(paths[0][0][0], long))
+    assert(isinstance(paths[0][0][0], int))
 
 
 def offset_default(polygon_stack,val):
@@ -140,7 +139,7 @@ def SingleLineOffset(single_line,val):
     po.AddPath(path,pyclipper.JT_SQUARE,pyclipper.ET_CLOSEDPOLYGON)
 
 
-    offseted = po.Execute(pyclipper.scale_to_clipper(val))
+    offseted = po.Execute(pyclipper.scale_to_clipper(float(val)))
 
     return offseted
 

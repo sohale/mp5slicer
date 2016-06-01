@@ -1,6 +1,5 @@
-from clipper_operations import offset
-import pyclipper
-from Polygon_stack import *
+
+from slicer.Polygon_stack import *
 
 #Polyon are generaly stored as complex polygon types
 class Line():

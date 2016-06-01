@@ -1,6 +1,6 @@
 import math
-import config
-import printer_config
+import slicer.config as config
+import slicer.printer_config as printer_config
 
 ############################ GCodeEnvironment Taken from old slicer without any changes ###########################
 
@@ -89,7 +89,7 @@ class GCodeEnvironment:
         else:
             instruction = ""
         if isinstance(A,str):
-            raise StandardError
+            raise RuntimeError
         if speed == 0:
             self.F = self.settings.speedRate
         else:
@@ -104,7 +104,7 @@ class GCodeEnvironment:
             extrusion = self.calculE(currentPoint,A)
             self.E += extrusion
         except:
-            raise StandardError
+            raise RuntimeError
         instruction += "G1" + " X" +str(A[0]) + " Y" +str(A[1]) + " Z" +str(self.Z) + " E" +str(self.E) + " F" +str(self.F) + "\n"
         self.X = A[0]
         self.Y = A[1]

@@ -1,13 +1,13 @@
-from Island import Island
+from slicer.island import Island
 import pyclipper
-from Polynode import *
-from utils import *
-from Island_stack import *
-from Elements import Outline
-from Polygon_stack import *
-from Line_group import *
-from clipper_operations import union_layers_polytree
-import config
+from slicer.Polynode import *
+from slicer.utils import *
+from slicer.Island_stack import *
+from slicer.Elements import Outline
+from slicer.Polygon_stack import *
+from slicer.Line_group import *
+from slicer.clipper_operations import union_layers_polytree
+import slicer.config as config
 
 class Layer():
 

@@ -1,11 +1,11 @@
-from Layer import Layer
-from G_buffer import G_buffer
-from utils import *
-from clipper_operations import *
+from slicer.layer import Layer
+from slicer.G_buffer import G_buffer
+from slicer.utils import *
 import time
-from mesh_operations import mesh as MPmesh
+from slicer.mesh_operations import mesh as MPmesh
 import sys, getopt
-from config_factory import config_factory
+from slicer.config_factory import config_factory
+from slicer.slice import *
 
 global start_time
 global print_settings
@@ -38,7 +38,7 @@ def get_layer_list(polygon_layers,BBox):
     return layer_list
 
 def move_to_center(mesh):
-    import printer_config
+    import slicer.printer_config as printer_config
     bbox = mesh.bounding_box()
     platform_center = {}
     if printer_config.origin == "center":
@@ -64,7 +64,8 @@ def move_to_center(mesh):
 
 def get_polygon_layers(stl_file_name):
     from stl import mesh
-    import config
+    import slicer.config as config
+
 
     stl_mesh = mesh.Mesh.from_file(stl_file_name)
     sys.stderr.write("--- %s seconds ---\n" % (time.time() - start_time))

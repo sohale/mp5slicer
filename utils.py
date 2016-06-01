@@ -1,4 +1,4 @@
-from clipper_operations import *
+from slicer.clipper_operations import *
 from  slicer import *
 from math import sqrt,pow
 import sys
@@ -146,7 +146,7 @@ def polygonize_layers_from_trimed_dict(slice_layers):
                     slicekeys.remove(end)
                 except:
                     # pass
-                    raise StandardError
+                    raise RuntimeError
 
                 end = slicee[start][0]
                 if end == previous_neighbour:

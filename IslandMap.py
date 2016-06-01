@@ -1,4 +1,4 @@
-import IslandMapNode
+import slicer.IslandMapNode as IslandMapNode
 import pyclipper
 
 class IslandMap:
@@ -23,7 +23,7 @@ class IslandMap:
         for next_point in next_points:
             if not next_point in self.__graph_dict:
                 if pyclipper.PointInPolygon(next_point,self.bound): # check union
-                    print "compute"
+                    print("compute")
 
                 else:
-                    print 'not in bound // add point on poly + points on shells'
+                    print('not in bound // add point on poly + points on shells')

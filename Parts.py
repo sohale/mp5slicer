@@ -1,17 +1,12 @@
-from gcode_writer import *
-import pyclipper
-from infill_paterns import *
-from clipper_operations import *
-from path_planner import *
-from utils import *
-from Polygon_stack import *
-from Line_stack import *
-from config import *
-from Line import Line
-from Line_group import *
-from Polynode import Polynode
-import Island
-import config
+
+from slicer.infill_paterns import *
+from slicer.clipper_operations import *
+from slicer.path_planner import *
+from slicer.Polygon_stack import *
+from slicer.Line_stack import *
+
+from slicer.Line_group import *
+import slicer.config as config
 
 import numpy as np
 
@@ -299,7 +294,7 @@ class Infill:
         try:
             return pyclipper.scale_from_clipper(innerlines)
         except:
-            raise StandardError
+            raise RuntimeError
 
 
     def process_polyline(self,polygon):

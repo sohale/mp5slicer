@@ -1,5 +1,5 @@
-from clipper_operations import *
-from Island_stack import *
+from slicer.clipper_operations import *
+from slicer.Island_stack import *
 
 #Polygon stack are generally used when a clipper operation is made on a group of polygon
 class Polygon_stack():
@@ -12,23 +12,23 @@ class Polygon_stack():
             self.isEmpty = polygons.isEmpty
         elif isinstance(polygons, list) and len(polygons) == 0:
             self.polygons  = []
-        elif isinstance(polygons[0][0],long) or isinstance(polygons[0][0],int):
+        elif isinstance(polygons[0][0],int):
             self.polygons  = [polygons]
             self.isEmpty = False
-        elif isinstance(polygons[0][0][0],long) or isinstance(polygons[0][0][0],int):
+        elif isinstance(polygons[0][0][0],int):
             self.polygons = polygons
             self.isEmpty = False
         else: raise TypeError
 
     def add_polygons(self,polygons):
-        if isinstance(polygons[0][0][0],long) or isinstance(polygons[0][0][0],int):
+        if isinstance(polygons[0][0][0],int):
             self.polygons += polygons
             self.isEmpty = False
 
         else: raise TypeError
 
     def add_polygon(self,polygon):
-        if isinstance(polygon[0][0],long) or isinstance(polygon[0][0],int):
+        if isinstance(polygon[0][0],int):
             self.polygons.append(polygon)
             self.isEmpty = False
         else: raise TypeError
