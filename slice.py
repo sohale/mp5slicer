@@ -1,5 +1,5 @@
 import numpy as np
-
+# from slicer.slicer.slicerCyth  import *
 
 class Plane:
     def __init__(self, normal, z):
@@ -118,6 +118,9 @@ class Plane:
 
 
         return line
+
+
+
 
 def min_max_z(triangle):
     return [np.min(triangle[:,2]), np.max(triangle[:,2])]

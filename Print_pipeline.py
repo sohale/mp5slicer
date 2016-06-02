@@ -1,3 +1,6 @@
+import inspect, os
+import sys
+sys.path.append(os.path.split(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))))[0])
 from slicer.layer import Layer
 from slicer.G_buffer import G_buffer
 from slicer.utils import *

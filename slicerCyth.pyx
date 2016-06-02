@@ -1,10 +1,18 @@
 import numpy as np
 
+cimport numpy as np
 
 
 
 
-def intersection_with_line(z, vertice_0, vertice_1):
+
+
+def intersection_with_line(float z, float *vertice_0, float *vertice_1):
+    cdef:
+      float low[3]
+      float high[3]
+      float r
+      float S[3]
     if vertice_0[2]< vertice_1[2]:
         low = vertice_1
         high = vertice_0
@@ -21,7 +29,7 @@ def intersection_with_line(z, vertice_0, vertice_1):
     else :
         r = (z - low[2]) / (high[2] - low[2])
 
-        S = np.array([low[0] + (r * (high[0]- low[0])),
-                      low[1] + (r * (high[1] - low[1])),
-                     0])
+        S[0] = low[0] + (r * (high[0]- low[0]))
+        S[1] = low[1] + (r * (high[1] - low[1]))
+        S[2] = 0
         return S
