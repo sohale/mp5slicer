@@ -21,7 +21,7 @@ class GCodeEnvironment:
 
         self.X = 0
         self.Y = 0
-        self.Z = config.firstLayerOffset + config.layerThickness
+        self.Z = config.firstLayerOffset # need to change due to adative height
 
     def truncate(self,f, n):
         '''Truncates/pads a float f to n decimal places without rounding'''
@@ -33,9 +33,9 @@ class GCodeEnvironment:
 
 
     # Calculate the extrusion for a straight movement from A to B
-    def calculE(self,A,B):
+    def calculE(self, A, B, layerThickness=config.layerThickness):
         distance = math.sqrt( (pow((A[0]-B[0]),2)) + pow((A[1]-B[1]),2))
-        section_surface = self.settings.layerThickness * self.settings.line_width
+        section_surface = layerThickness * self.settings.line_width # layerThickness is possible to change for each layer
         volume = section_surface * distance * 1.1
         filament_length = volume / self.settings.crossArea
         # filament_length = self.truncate(filament_length, 4)
@@ -47,7 +47,7 @@ class GCodeEnvironment:
         return distance
 
     # go to point A without extruding filament
-    def goToNextPoint(self,A, retract,):
+    def goToNextPoint(self,A, retract):
         B = [0.1]*2
         for i in range(len(A)):
             B[i] = self.truncate(A[i],3)
@@ -79,7 +79,7 @@ class GCodeEnvironment:
 
 
     # draw to point A
-    def drawToNextPoint(self, A, speed = 0, fan_speed = 0):
+    def drawToNextPoint(self, A, layerThickness, speed = 0, fan_speed = 0):
         if fan_speed != self.fan_speed:
             self.fan_speed = fan_speed
             if printer_config.model == "r2x":
@@ -101,7 +101,7 @@ class GCodeEnvironment:
         A = B
         currentPoint = [self.X,self.Y,self.Z]
         try:
-            extrusion = self.calculE(currentPoint,A)
+            extrusion = self.calculE(currentPoint,A,layerThickness)
             self.E += extrusion
         except:
             raise RuntimeError

@@ -17,10 +17,11 @@ global print_settings
 
 
 
-def get_layer_list(polygon_layers,BBox):
+def get_layer_list(polygon_layers, BBox):
 
     layer_list = []
     sys.stderr.write("--- %s seconds ---\n" % (time.time() - start_time))
+
     for layer_index in range(len(polygon_layers)):
 
         layer = Layer(layer_list,polygon_layers,layer_index,BBox)
@@ -65,7 +66,7 @@ def move_to_center(mesh):
 
 
 
-def get_polygon_layers(stl_file_name):
+def get_polygon_layers(stl_file_name, does_adative_slice=False):
     from stl import mesh
     import slicer.config as config
 
@@ -80,9 +81,12 @@ def get_polygon_layers(stl_file_name):
     # this_mesh.translate([90,130,0])
     BBox = this_mesh.bounding_box()
 
+    if does_adative_slice:
+        adaptive_height_list, adaptive_thickness = adaptive_slicing(this_mesh, config.layerThickness, curvature_tol=0.6, cusp_height_tol=0.15, layer_thickness_choices=[0.2, 0.15, 0.1], does_visualize = False)
+        slice_layers = slicer_from_mesh_as_dict(this_mesh, slice_height_from=BBox.zmin, slice_height_to=BBox.zmax, slice_step= config.layerThickness, sliceplanes_height=adaptive_height_list)
+    else:
+        slice_layers = slicer_from_mesh_as_dict(this_mesh, slice_height_from=BBox.zmin, slice_height_to=BBox.zmax, slice_step= config.layerThickness)
 
-
-    slice_layers = slicer_from_mesh_as_dict(this_mesh, slice_height_from=BBox.zmin, slice_height_to=BBox.zmax, slice_step= config.layerThickness)
     sys.stderr.write("--- %s seconds ---\n" % (time.time() - start_time))
     layers_as_polygons = polygonize_layers_from_trimed_dict(slice_layers)
     sys.stderr.write("--- %s seconds ---\n" % (time.time() - start_time))
@@ -94,8 +98,10 @@ def get_polygon_layers(stl_file_name):
         # polygon_layers[layer_index] = pyclipper.CleanPolygons(polygon_layers[layer_index])
 
 
-
-    return layers_as_polygons,BBox
+    if does_adative_slice:
+        return layers_as_polygons, BBox, adaptive_thickness
+    else:
+        return layers_as_polygons, BBox
 
 
 
@@ -111,12 +117,12 @@ if __name__ == '__main__':
 
 
     start_time = time.time()
-    polygon_layers,BBox = get_polygon_layers(stl_file_name)
+    polygon_layers, BBox  = get_polygon_layers(stl_file_name, does_adative_slice=False)
     sys.stderr.write("--- %s seconds ---\n" % (time.time() - start_time))
     layer_list = get_layer_list(polygon_layers,BBox)
     sys.stderr.write("--- %s seconds ---\n" % (time.time() - start_time))
     name,dot,type = stl_file_name.partition('.')
-    g_buffer = G_buffer(True, name + ".gcode")
+    g_buffer = G_buffer(True, gcode_filename=name + ".gcode")
     for layer in layer_list:
         g_buffer.add_layer(layer.G_print())
     sys.stderr.write("--- %s seconds ---\n" % (time.time() - start_time))

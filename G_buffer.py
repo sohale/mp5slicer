@@ -10,7 +10,7 @@ class G_buffer:
 
 
 
-    def __init__(self,to_file, gcode_filename = ""):
+    def __init__(self,to_file, gcode_filename = "", layerThickness_list = []):
         self.to_file = to_file
         self.gcode_filename = gcode_filename
         self.skip_retraction = False
@@ -18,6 +18,7 @@ class G_buffer:
         self.layer_index = 0
         self.previousPos = None
         self.layerIslands = None
+        self.layerThickness_list = layerThickness_list 
 
     def add_layer(self,list):
         self.layer_list.append(list)
@@ -43,7 +44,8 @@ class G_buffer:
                 if len(line) > 0:
                     gcode_output.write(gcodeEnvironment.goToNextPoint(line[0],True))
                     for point_index in range(1,len(line)):
-                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index],self.config.boundarySpeed, 0.2))
+                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index], self.config.layerThickness, self.config.boundarySpeed, 0.2))
+
             self.skip_retraction = False
 
         def print_hole(boundary):
@@ -51,7 +53,7 @@ class G_buffer:
                 if len(line) > 0:
                     gcode_output.write(gcodeEnvironment.goToNextPoint(line[0], True))
                     for point_index in range(1, len(line)):
-                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index], self.config.holeSpeed, self.config.default_fan_speed))
+                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index], self.config.layerThickness, self.config.holeSpeed, self.config.default_fan_speed))
             self.skip_retraction = False
 
         def print_infill(leaf):
@@ -63,7 +65,7 @@ class G_buffer:
                     else:
                         gcode_output.write(gcodeEnvironment.goToNextPoint(line[0], True))
                     for point_index in range(1,len(line)):
-                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index], self.config.infillSpeed, 1))
+                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index], self.config.layerThickness, self.config.infillSpeed, 1))
 
         def print_skin(leaf):
             for line in leaf.sub_lines:
@@ -74,14 +76,14 @@ class G_buffer:
                     else:
                         gcode_output.write(gcodeEnvironment.goToNextPoint(line[0], True))
                     for point_index in range(1,len(line)):
-                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index], self.config.skinSpeed, 1))
+                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index], self.config.layerThickness, self.config.skinSpeed, 1))
 
         def print_inner_shell(shell):
             for line in shell.sub_lines:
                 if len(line) > 0:
                     gcode_output.write(gcodeEnvironment.goToNextPoint(line[0], True))
                     for point_index in range(1, len(line)):
-                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index],self.config.shellSpeed, 0.2))
+                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index], self.config.layerThickness, self.config.shellSpeed, 0.2))
             self.skip_retraction = False
 
         def print_skirt(skirt):
@@ -89,8 +91,7 @@ class G_buffer:
                 if len(line) > 0:
                     gcode_output.write(gcodeEnvironment.goToNextPoint(line[0], True))
                     for point_index in range(1, len(line)):
-                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index], self.config.shellSpeed,
-                                                                            self.config.default_fan_speed))
+                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index], self.config.layerThickness, self.config.shellSpeed, self.config.default_fan_speed))
                         self.previousPos = line[point_index]
             self.skip_retraction = False
 
@@ -122,9 +123,19 @@ class G_buffer:
                 self.config.holeSpeed = 1500
                 self.config.shellSpeed = 1500
 
+            # allow change of layerThickness for each layer
+            if self.layerThickness_list: # open happen if it is adaptive slicing
+                self.config.layerThickness = self.layerThickness_list[self.layer_index]
+            else:
+                pass
+
+            if self.layerThickness_list: # open happen if it is adaptive slicing
+                gcodeEnvironment.Z += self.layerThickness_list[self.layer_index]
+            else:
+                gcodeEnvironment.Z += self.config.layerThickness
+
             for node in node.sub_lines:
                 gotroughgroup(node)
-            gcodeEnvironment.Z += config.layerThickness
 
             self.config = copy_module(config)
 

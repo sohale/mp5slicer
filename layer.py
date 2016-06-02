@@ -11,7 +11,7 @@ import slicer.config as config
 
 class Layer():
 
-    def __init__(self,print_tree, layers, index,BBox):#layers are only passed as a reference to get an acces for skin processing
+    def __init__(self, print_tree, layers, index, BBox):#layers are only passed as a reference to get an acces for skin processing
         self.print_tree = print_tree
         self.layers = layers
         self.islands = []
