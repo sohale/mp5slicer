@@ -16,3 +16,4 @@ shellSpeed = 5000
 min_retraction_distance = 5
 default_fan_speed = 0.5
 hasControllableFanSpeed  = True
+useAdaptiveSlicing = False

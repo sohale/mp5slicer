@@ -1,5 +1,5 @@
 import numpy as np
-# from slicer.slicer.slicerCyth  import *
+from slicer.slicerCyth  import *
 
 class Plane:
     def __init__(self, normal, z):
@@ -112,7 +112,7 @@ class Plane:
             if not np.array_equal(intersection_point_2,intersection_point_0) and not np.array_equal(intersection_point_1,intersection_point_2):
                 line.append(intersection_point_2)
         if len(line) == 1:
-            return None
+            raise RuntimeError
         if len(line) != 2:
             raise RuntimeError
 
@@ -134,7 +134,14 @@ def truncate(f, n):
     i, p, d = s.partition('.')
     return float('.'.join([i, (d+'0'*n)[:n]]))
 
-def slicer_from_mesh_as_dict(mesh, slice_height_from=0, slice_height_to=10, slice_step=1, sliceplanes_height=[]):
+
+def slicer_from_mesh_as_dict_cy(mesh, slice_height_from=0, slice_height_to=100, slice_step=1):
+    return slicer_from_mesh_as_dict_cyth(mesh, slice_height_from, slice_height_to, slice_step, sliceplanes_height=[])
+
+
+
+def slicer_from_mesh_as_dict(mesh, slice_height_from=0, slice_height_to=100, slice_step=1, sliceplanes_height=[]):
+
 
     slice_height_from += 0.198768976
     slice_height_to += 0.198768976
@@ -163,9 +170,9 @@ def slicer_from_mesh_as_dict(mesh, slice_height_from=0, slice_height_to=10, slic
 
                 line[0] = line[0].tolist()
                 line[1] = line[1].tolist()
-                for point_index in range(len(line)):
-                    for val_index in range(len(line[point_index])):
-                        line[point_index][val_index] = truncate(line[point_index][val_index],8)
+                # for point_index in range(len(line)):
+                #     for val_index in range(len(line[point_index])):
+                #         line[point_index][val_index] = truncate(line[point_index][val_index],8)
 
                 point1 = tuple(line[0])
 
@@ -339,7 +346,7 @@ def adaptive_slicing(mesh, default_layer_thickness, curvature_tol=0.6, cusp_heig
             elif thickness == layer_thickness_choices[2]:
                 c.append('g')
             else:
-                raise StandardError
+                raise RuntimeError
 
         lc = mc.LineCollection(lines, color = c, linewidths=thickness_list)
         fig, ax = plt.subplots()

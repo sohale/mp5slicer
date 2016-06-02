@@ -66,7 +66,7 @@ def move_to_center(mesh):
 
 
 
-def get_polygon_layers(stl_file_name, does_adative_slice=False):
+def get_polygon_layers(stl_file_name):
     from stl import mesh
     import slicer.config as config
 
@@ -81,7 +81,7 @@ def get_polygon_layers(stl_file_name, does_adative_slice=False):
     # this_mesh.translate([90,130,0])
     BBox = this_mesh.bounding_box()
 
-    if does_adative_slice:
+    if config.useAdaptiveSlicing:
         adaptive_height_list, adaptive_thickness = adaptive_slicing(this_mesh, config.layerThickness, curvature_tol=0.6, cusp_height_tol=0.15, layer_thickness_choices=[0.2, 0.15, 0.1], does_visualize = False)
         slice_layers = slicer_from_mesh_as_dict(this_mesh, slice_height_from=BBox.zmin, slice_height_to=BBox.zmax, slice_step= config.layerThickness, sliceplanes_height=adaptive_height_list)
     else:
@@ -98,7 +98,7 @@ def get_polygon_layers(stl_file_name, does_adative_slice=False):
         # polygon_layers[layer_index] = pyclipper.CleanPolygons(polygon_layers[layer_index])
 
 
-    if does_adative_slice:
+    if config.useAdaptiveSlicing:
         return layers_as_polygons, BBox, adaptive_thickness
     else:
         return layers_as_polygons, BBox
@@ -117,7 +117,7 @@ if __name__ == '__main__':
 
 
     start_time = time.time()
-    polygon_layers, BBox  = get_polygon_layers(stl_file_name, does_adative_slice=False)
+    polygon_layers, BBox  = get_polygon_layers(stl_file_name)
     sys.stderr.write("--- %s seconds ---\n" % (time.time() - start_time))
     layer_list = get_layer_list(polygon_layers,BBox)
     sys.stderr.write("--- %s seconds ---\n" % (time.time() - start_time))
