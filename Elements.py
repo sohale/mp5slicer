@@ -14,6 +14,7 @@ class Outline:
         self.island = island
         self.polygons = polygons
         self.empty = True
+        self.orderedShells = []
         if(len(polygons[0])>0):
             self.empty = False
 
@@ -78,11 +79,8 @@ class Outline:
                 shell = pc.Execute(pyclipper.CT_DIFFERENCE, pyclipper.PFT_EVENODD, pyclipper.PFT_EVENODD)
                 if len(shell) == 0:
                     break
-
-                if i%2 == 0:
-                    self.boundaryShells.add_polygons(shell)
-                else:
-                    self.boundaryShells.add_polygons(shell[::-1])
+                self.boundaryShells.add_polygons(shell)
+                self.orderedShells.append(shell)
 
                 self.innerShells = Polygon_stack(shell)
 
