@@ -242,7 +242,8 @@ class Infill:
             skin_islands = skin.skins_as_polygon_stack
         else:
             skin_islands = []
-
+        self.startPoint = None
+        self.endPoint = None
         self.polylines = self.make_polyline(polygons,skin_islands, layer_index)
 
 
@@ -262,8 +263,9 @@ class Infill:
             innerlines = innerlines.difference_with(skin_islands)
         else:
             innerlines = self.pattern.intersect_with(polygons)
-
-
+        if len(innerlines) != 0:
+            self.startPoint = innerlines[0][0]
+            self.endPoint = innerlines[-1][-1]
         # if len(self.polygons[0]) == 0:
         #     raise StandardError
         # innerlines_as_tree = inter_layers(self.pattern,self.polygons[0],False)
@@ -332,6 +334,8 @@ class Skin:
         self.BBox = BBox
         self.XorY = (layer_index+1)%2
         self.pattern = None
+        self.startPoint = None
+        self.endPoint = None
 
         self.polylines = None
 
@@ -347,6 +351,9 @@ class Skin:
         innerlines = pyclipper.scale_from_clipper(innerlines)
 
         self.polylines = innerlines
+        if len(innerlines) != 0:
+            self.startPoint = innerlines[0][0]
+            self.endPoint = innerlines[-1][-1]
 
 
     def process_polyline(self,polygon):
