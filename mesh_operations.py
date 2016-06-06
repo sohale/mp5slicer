@@ -1,3 +1,7 @@
+import inspect, os
+import sys
+sys.path.append(os.path.split(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))))[0])
+
 import numpy as np
 from slicer.rotation import rotate as rotation
 import decimal
@@ -53,15 +57,18 @@ class mesh():
         normal_len = np.sqrt(self.normals[:,0]**2 + self.normals[:,1]**2 + self.normals[:,2]**2)
         self.normals = ((self.normals / normal_len[:,None]) * 1000).astype(int)
 
-    def sort_by_z(self):
+    def sort_by_z(self, reverse=False):
         # Sort the triangles (normals) in order of ascending z
         # It may be the case that the triangles will already be sorted this way,
         # but if not it will be useful to put them in this form.
 
         min_z_order = np.argsort(np.amin(self.triangles[:,:,2], axis=1))
         # index of minimum z coord of each triangle
-
+        if reverse:
+            min_z_order = min_z_order[::-1]
+            
         self.index_all(min_z_order)
+
 
     def remove_duplicates(self):
         # Remove any duplicate faces and their normals.
