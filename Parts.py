@@ -1,3 +1,6 @@
+import inspect, os
+import sys
+sys.path.append(os.path.split(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))))[0])
 
 from slicer.infill_paterns import *
 from slicer.clipper_operations import *
@@ -7,6 +10,8 @@ from slicer.Line_stack import *
 
 from slicer.Line_group import *
 import slicer.config as config
+
+import slicer.support as support
 
 import numpy as np
 
@@ -375,3 +380,7 @@ class Skin:
             polylines.add_chain(self.process_polyline(polyline))
         arrange_path(polylines)
         return polylines
+
+class Support_line:
+    def __init__(self):
+        pass

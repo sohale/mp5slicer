@@ -1,5 +1,5 @@
 import numpy as np
-from slicer.slicerCyth  import *
+# from slicer.slicerCyth  import *
 
 class Plane:
     def __init__(self, normal, z):

@@ -9,7 +9,7 @@ from slicer.mesh_operations import mesh as MPmesh
 import sys, getopt
 from slicer.config_factory import config_factory
 from slicer.slice import *
-
+import slicer.support as support
 global start_time
 global print_settings
 
@@ -17,14 +17,18 @@ global print_settings
 
 
 
-def get_layer_list(polygon_layers, BBox):
+def get_layer_list(polygon_layers, BBox, support_polylines_list = []):
+
+    import slicer.config as config
 
     layer_list = []
     sys.stderr.write("--- %s seconds ---\n" % (time.time() - start_time))
 
     for layer_index in range(len(polygon_layers)):
-
-        layer = Layer(layer_list,polygon_layers,layer_index,BBox)
+        if config.useSupport:
+            layer = Layer(layer_list,polygon_layers,layer_index,BBox,support_polylines_list[layer_index])
+        else:
+            layer = Layer(layer_list,polygon_layers,layer_index,BBox)
         layer_list.append(layer)
 
     sys.stderr.write("--- %s seconds ---\n" % (time.time() - start_time))
@@ -36,8 +40,6 @@ def get_layer_list(polygon_layers, BBox):
     for layer in layer_list:
         layer.process_skins()
         layer.process_infill()
-
-
 
     return layer_list
 
@@ -115,11 +117,26 @@ if __name__ == '__main__':
     config_factory(conf_file_name)
 
 
-
     start_time = time.time()
     polygon_layers, BBox  = get_polygon_layers(stl_file_name)
     sys.stderr.write("--- %s seconds ---\n" % (time.time() - start_time))
-    layer_list = get_layer_list(polygon_layers,BBox)
+
+    # generate support polylines from mesh directly
+
+    if config.useSupport:
+        from stl import mesh
+        stl_mesh = mesh.Mesh.from_file(stl_file_name)
+        this_mesh = MPmesh(stl_mesh.vectors, fix_mesh= True)
+        move_to_center(this_mesh)
+        support_sampling_distance = 2
+        support_polylines_list = support.get_support_polylines_list(this_mesh, support_sampling_distance)
+    ############## end of support polylines generation and feed to get_layer_list####################
+
+    sys.stderr.write("--- %s seconds ---\n" % (time.time() - start_time))
+    if config.useSupport:
+        layer_list = get_layer_list(polygon_layers,BBox, support_polylines_list = support_polylines_list)
+    else:
+        layer_list = get_layer_list(polygon_layers,BBox)
     sys.stderr.write("--- %s seconds ---\n" % (time.time() - start_time))
     name,dot,type = stl_file_name.partition('.')
     g_buffer = G_buffer(True, gcode_filename=name + ".gcode")

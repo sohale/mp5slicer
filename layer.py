@@ -11,13 +11,14 @@ import slicer.config as config
 
 class Layer():
 
-    def __init__(self, print_tree, layers, index, BBox):#layers are only passed as a reference to get an acces for skin processing
+    def __init__(self, print_tree, layers, index, BBox, support_polylines = []):#layers are only passed as a reference to get an acces for skin processing
         self.print_tree = print_tree
         self.layers = layers
         self.islands = []
         self.index = index
         self.BBox = BBox
         self.process_islands()
+        self.support_polylines = support_polylines
 
     def G_print(self):
         polylines = Line_group("layer")
@@ -37,6 +38,10 @@ class Layer():
         for island in self.islands:
             polylines.add_group(island.g_print())
 
+        support_line_group = Line_group('support', config.line_width)
+        for polyline in self.support_polylines:
+            support_line_group.add_chain(polyline)
+        polylines.add_group(support_line_group)
 
         return polylines
 
@@ -76,6 +81,7 @@ class Layer():
     def process_infill(self):
         for island in self.islands:
             island.process_infill()
+
 
     def poly1_in_poly2(self,poly1,poly2):
         point = poly1[0]
