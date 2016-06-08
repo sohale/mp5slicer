@@ -146,6 +146,32 @@ class mesh():
         self.triangles[:,:,1] += translation[1]
         self.triangles[:,:,2] += translation[2]
 
+    def max_z(self):
+        return np.max(self.triangles[:,:,2], axis=1)
+
+    def min_z(self):
+        return np.min(self.triangles[:,:,2], axis=1)
+
+    def min_x(self):
+        return np.min(self.triangles[:,:,0], axis=1)
+
+    def max_x(self):
+        return np.max(self.triangles[:,:,0], axis=1)
+
+    def min_y(self):
+        return np.min(self.triangles[:,:,1], axis=1)
+
+    def max_y(self):
+        return np.max(self.triangles[:,:,1], axis=1)
+
+    def dot_building_direction(self):
+        # this function assuming the building_direction = [[0],[0],[1]] since it save a lot of time
+        # for the dot product 
+        from numpy import linalg as LA
+        norms = np.apply_along_axis(LA.norm, 1, self.normals)
+        dot_product = self.normals[:,2] # faster than np.apply_along_axis(np.dot, 1, normals, [[0],[0],[1]])
+        return dot_product/norms
+
 class bounding_box():
     def __init__(self,xmin,xmax,ymin,ymax,zmin,zmax):
         self.xmin = xmin

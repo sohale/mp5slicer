@@ -9,12 +9,9 @@ from slicer.mesh_operations import mesh as MPmesh
 import sys, getopt
 from slicer.config_factory import config_factory
 from slicer.slice import *
-import slicer.support as support
+import slicer.Support as support
 global start_time
 global print_settings
-
-
-
 
 
 def get_layer_list(polygon_layers, BBox, support_polylines_list = []):
@@ -128,8 +125,7 @@ if __name__ == '__main__':
         stl_mesh = mesh.Mesh.from_file(stl_file_name)
         this_mesh = MPmesh(stl_mesh.vectors, fix_mesh= True)
         move_to_center(this_mesh)
-        support_sampling_distance = 2
-        support_polylines_list = support.get_support_polylines_list(this_mesh, support_sampling_distance)
+        support_polylines_list = support.Support(this_mesh).get_support_polylines_list()
     ############## end of support polylines generation and feed to get_layer_list####################
 
     sys.stderr.write("--- %s seconds ---\n" % (time.time() - start_time))

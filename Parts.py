@@ -11,8 +11,6 @@ from slicer.Line_stack import *
 from slicer.Line_group import *
 import slicer.config as config
 
-import slicer.support as support
-
 import numpy as np
 
 
