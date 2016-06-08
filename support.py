@@ -135,109 +135,6 @@ class Support():
         import datetime
         start_time = datetime.datetime.now()
 
-        support_triangles = self.mesh.triangles[self.support_required_mask]
-
-        print('number of triangles')
-        print(len(support_triangles))
-        triangle_index_and_its_neighbour = {}
-
-
-        for tri_index in range(len(support_triangles)):
-            neighbour = set()
-            triangle_index_and_its_neighbour[tri_index] = neighbour
-
-            triangle = support_triangles[tri_index]
-            x = list(triangle[0])
-            y = list(triangle[1])
-            z = list(triangle[2])
-
-            for tri_detect_index in range(len(support_triangles)):
-
-                if tri_detect_index in triangle_index_and_its_neighbour and tri_index in triangle_index_and_its_neighbour[tri_detect_index]:
-                    neighbour.add(tri_detect_index)
-                    continue
-
-                tri = support_triangles[tri_detect_index]
-
-                x_test = list(tri[0])
-                y_test = list(tri[1])
-                z_test = list(tri[2])
-
-                if x == x_test:
-                    neighbour.add(tri_detect_index)
-                    continue # check for next triangle, this triangle is already a neighbour, no need to check further
-                elif x == y_test:
-                    neighbour.add(tri_detect_index)
-                    continue
-                elif x == z_test:
-                    neighbour.add(tri_detect_index)
-                    continue
-                elif y == x_test:
-                    neighbour.add(tri_detect_index)
-                    continue
-                elif y == y_test:
-                    neighbour.add(tri_detect_index)
-                    continue
-                elif y == z_test:
-                    neighbour.add(tri_detect_index)
-                    continue
-                elif z == x_test:
-                    neighbour.add(tri_detect_index)
-                    continue
-                elif z == y_test:
-                    neighbour.add(tri_detect_index)
-                    continue
-                elif z == z_test:
-                    neighbour.add(tri_detect_index)
-                    continue
-                else:
-                    pass
-
-            neighbour.remove(tri_index)
-        # group them together by connected group component algorithm 
-        # from http://eddmann.com/posts/depth-first-search-and-breadth-first-search-in-python/
-
-        def dfs(graph, start):
-            visited, stack = set(), [start]
-            while stack:
-                vertex = stack.pop()
-                if vertex not in visited:
-                    visited.add(vertex)
-                    stack.extend(graph[vertex] - visited)
-            return visited
-
-        groups = []
-        support_indexs = set(triangle_index_and_its_neighbour)
-        while support_indexs:
-            start = support_indexs.pop()
-            visited = dfs(triangle_index_and_its_neighbour, start)
-
-            group = list(visited)
-            groups.append(group)
-
-            support_indexs = support_indexs - visited
-
-        print('-------len of group-----------')
-        print(len(groups))
-
-        print('------- grouping time -------------')
-        print(datetime.datetime.now() - start_time)
-
-        # local_group_index based on the index of the suppport_mask to based on global index
-        print(groups)
-        global_support_index = [i for i, elem in enumerate(self.support_required_mask, 1) if elem]
-        global_support_index = np.array(global_support_index)
-        groups = [list(global_support_index[group]) for group in groups]
-        print(len(groups))
-        print(groups)
-        raise Tiger
-        return groups
-
-    def group_support_area(self):
-
-        import datetime
-        start_time = datetime.datetime.now()
-
         support_triangles_index  = [i for i, elem in enumerate(self.support_required_mask, 1) if elem]
 
         triangle_index_and_its_neighbour = {}
@@ -323,7 +220,6 @@ class Support():
         print('------- grouping time -------------')
         print(datetime.datetime.now() - start_time)
         
-        print(groups)
         return groups
 
     def sampling_support_points(self):
@@ -509,10 +405,10 @@ class Support():
             for i in range(len(traverse_points) - 1):
                 point_start = traverse_points[i]
                 point_end = traverse_points[i+1]
-                if distance_between_two_point(point_start, point_end) < 2.1:
+                if distance_between_two_point(point_start, point_end) <=  np.sqrt(2*(config.supportSamplingDistance**2)):
                     polylines += [[point_start, point_end]]
                 else:
-                    print('here')
+                    pass
 
         if does_visualize:
             import numpy as np
