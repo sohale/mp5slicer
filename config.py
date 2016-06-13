@@ -24,3 +24,5 @@ exteriorFanSpeed = 0.4
 bridgeFanSpeed = 1
 interiorFanSpeed = 1
 supportFanSpeed = 1
+upSkinsCount = 4
+downSkinsCount = 3
