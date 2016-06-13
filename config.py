@@ -20,3 +20,7 @@ useAdaptiveSlicing = False
 useSupport = True
 supportSamplingDistance = 2
 supportOverhangangle = -0.9 # cos(155), 75 degree to building direction requires support
+exteriorFanSpeed = 0.4
+bridgeFanSpeed = 1
+interiorFanSpeed = 1
+supportFanSpeed = 1

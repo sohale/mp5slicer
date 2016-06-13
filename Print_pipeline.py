@@ -9,7 +9,7 @@ from slicer.mesh_operations import mesh as MPmesh
 import sys, getopt
 from slicer.config_factory import config_factory
 from slicer.slice import *
-import slicer.Support as support
+import slicer.support as support
 global start_time
 global print_settings
 

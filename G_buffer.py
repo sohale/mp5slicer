@@ -44,7 +44,7 @@ class G_buffer:
                 if len(line) > 0:
                     gcode_output.write(gcodeEnvironment.goToNextPoint(line[0],True))
                     for point_index in range(1,len(line)):
-                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index], self.config.layerThickness, self.config.boundarySpeed, 0.2))
+                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index], self.config.layerThickness, self.config.boundarySpeed, self.config.exteriorFanSpeed))
 
             self.skip_retraction = False
 
@@ -53,7 +53,7 @@ class G_buffer:
                 if len(line) > 0:
                     gcode_output.write(gcodeEnvironment.goToNextPoint(line[0], True))
                     for point_index in range(1, len(line)):
-                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index], self.config.layerThickness, self.config.holeSpeed, self.config.default_fan_speed))
+                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index], self.config.layerThickness, self.config.holeSpeed, self.config.exteriorFanSpeed))
             self.skip_retraction = False
 
         def print_infill(leaf):
@@ -65,7 +65,7 @@ class G_buffer:
                     else:
                         gcode_output.write(gcodeEnvironment.goToNextPoint(line[0], True))
                     for point_index in range(1,len(line)):
-                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index], self.config.layerThickness, self.config.infillSpeed, 1))
+                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index], self.config.layerThickness, self.config.infillSpeed, self.config.interiorFanSpeed))
 
         def print_skin(leaf):
             for line in leaf.sub_lines:
@@ -76,7 +76,7 @@ class G_buffer:
                     else:
                         gcode_output.write(gcodeEnvironment.goToNextPoint(line[0], True))
                     for point_index in range(1,len(line)):
-                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index], self.config.layerThickness, self.config.skinSpeed, 1))
+                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index], self.config.layerThickness, self.config.skinSpeed, self.config.interiorFanSpeed))
 
         def print_support(leaf):
             for line in leaf.sub_lines:
@@ -87,14 +87,14 @@ class G_buffer:
                     else:
                         gcode_output.write(gcodeEnvironment.goToNextPoint(line[0], True))
                     for point_index in range(1,len(line)):
-                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index], self.config.layerThickness, self.config.infillSpeed, 1))
+                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index], self.config.layerThickness, self.config.infillSpeed, self.config.supportFanSpeed))
 
         def print_inner_shell(shell):
             for line in shell.sub_lines:
                 if len(line) > 0:
                     gcode_output.write(gcodeEnvironment.goToNextPoint(line[0], True))
                     for point_index in range(1, len(line)):
-                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index], self.config.layerThickness, self.config.shellSpeed, 0.2))
+                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index], self.config.layerThickness, self.config.shellSpeed, self.config.interiorFanSpeed))
             self.skip_retraction = False
 
         def print_skirt(skirt):
