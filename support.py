@@ -89,21 +89,206 @@ def ray_triangle_intersection(ray_near, triangle):
 
 ############# function using for support generation #############
 
+def return_lr_offset_polyline(line,offset_value=0.4,does_visualize=False, end_point=None):
+    '''
+    This is an algorithm to offset lines with degrees between two consecutive line with degree 45*n, n integer.
+    '''
+    import numpy as np
+    assert end_point in [None, 'l', 'r']
+    line = np.array(line)
+    line_y_scale = np.linalg.norm(line[1] - line[0])
+    length = line_y_scale
+    length_half = length/2
+    
+    angle = np.arctan2(line[1][1] - line[0][1], line[1][0] - line[0][0])
+
+    line_start_x = line[0][0]
+    line_start_y = line[0][1]
+
+    line_end_x = line[1][0]
+    line_end_y = line[1][1]
+
+    center = [(line_end_x-line_start_x )/2, ( line_end_y-line_start_y)/2]
+    
+    line_off_set = [
+                    [-length_half-offset_value/2, -offset_value/2],
+                    [-length_half-offset_value/2, offset_value/2],
+                    [length_half+ offset_value/2, offset_value/2],
+                    [length_half+ offset_value/2, -offset_value/2]]
+    
+    line_off_set = np.array(line_off_set)
+
+    rotation_matrix = np.array([[np.cos(angle), -np.sin(angle)],[np.sin(angle), np.cos(angle)]])
+    res = []
+    for i in line_off_set:
+        res.append(list(np.dot(rotation_matrix,i)))  
+        
+    res = [[i[0]+center[0],i[1]+center[1] ] for i in res]
+    res = [[i[0]+line_start_x,i[1]+line_start_y ] for i in res]
+
+    polygon = [res[0],res[1],res[2],res[3]]
+    
+    if does_visualize:
+        point_off_set = polygon
+        plt.plot([line[0][0],line[1][0]],[line[0][1],line[1][1]],'b--')
+        for i in range(len(point_off_set)-1):
+            plt.plot([point_off_set[i][0],point_off_set[i+1][0]],[point_off_set[i][1], point_off_set[i+1][1]])
+        plt.plot([point_off_set[len(point_off_set)-1][0],point_off_set[0][0]],[point_off_set[len(point_off_set)-1][1], point_off_set[0][1]])
+        plt.show()
+    
+    
+    res = np.array(res)
+    
+    if end_point == 'l': # return the left offset line 
+        return (res[0], res[1])
+    elif end_point == 'r': # return the right offset line 
+        return (res[2], res[3])
+    elif end_point == None: # return the up and down offset line 
+        return ([res[1],res[2]], [res[3],res[0]])
+
+def seg_intersect(lines):
+
+    line1, line2 = lines
+
+    if np.allclose([line1[0][0], line1[1][0], line2[0][0], line2[1][0]],line1[0][0],atol=0.01): # horizontal
+        return line2[0]
+    if np.allclose([line1[1][1], line1[1][1], line2[0][1], line2[1][1]],line1[0][1],atol=0.01): # vertical
+        return line2[0]
+
+    xdiff = (line1[0][0] - line1[1][0], line2[0][0] - line2[1][0])
+    ydiff = (line1[0][1] - line1[1][1], line2[0][1] - line2[1][1]) #Typo was here
+
+    def det(a, b):
+        return a[0] * b[1] - a[1] * b[0]
+
+    div = det(xdiff, ydiff)
+    if div == 0:
+        return 'line', line1[1], line2[0]
+        # raise Exception('lines do not intersect')
+
+    d = (det(*line1), det(*line2))
+    x = det(d, xdiff) / div
+    y = det(d, ydiff) / div
+    return [x, y]
+
+def seg_intersect_bounding_box(lines):
+
+    line1, line2 = lines
+    if np.allclose([line1[0][0], line1[1][0], line2[0][0], line2[1][0]],line1[0][0],atol=0.01): # horizontal
+        return False
+    if np.allclose([line1[1][1], line1[1][1], line2[0][1], line2[1][1]],line1[0][1],atol=0.01): # vertical
+        return False
+
+    xdiff = (line1[0][0] - line1[1][0], line2[0][0] - line2[1][0])
+    ydiff = (line1[0][1] - line1[1][1], line2[0][1] - line2[1][1]) #Typo was here
+
+    def det(a, b):
+        return a[0] * b[1] - a[1] * b[0]
+
+    div = det(xdiff, ydiff)
+    if div == 0:
+        return False
+        raise Exception('lines do not intersect')
+
+    d = (det(*line1), det(*line2))
+    x = det(d, xdiff) / div
+    y = det(d, ydiff) / div
+
+    xmin = np.min([line1[0][0],line1[1][0]])
+    xmax = np.max([line1[0][0],line1[1][0]])
+    ymin = np.min([line1[0][1],line1[1][1]])
+    ymax = np.max([line1[0][1],line1[1][1]])
+    if (xmin+0.1<=x<=xmax-0.1) and (ymin+0.1<=y<=ymax-0.1):
+        return True
+    else:
+        return False
+
+def polylines_from_offset_polygon(lines, offset_value = 0.4):
+    result = []
+    for i in lines:
+        result.append(return_lr_offset_polyline(i, offset_value))
+
+    l_all = [i[0] for i in result]
+    left_end = return_lr_offset_polyline(lines[0],end_point='l')
+    right_end = return_lr_offset_polyline(lines[-1],end_point='r')
+    r_all = [i[1] for i in result]
+    
+    # import numpy as np
+    # import pylab as pl
+    # from matplotlib import collections  as mc
+    # import matplotlib.pyplot as plt
+
+    # lc = mc.LineCollection(l_all, linewidths=2)
+    # fig, ax = pl.subplots()
+    # ax.add_collection(lc)
+    # ax.autoscale()
+    # ax.margins(0.1)
+    # plt.show()
+
+    res =  [] 
+    res.append(left_end)
+    for i in l_all:
+        res.append(i)
+    res.append(right_end)
+    for i in r_all[::-1]:
+        res.append(i)
+    intersections = []
+    
+    for index in range(len(res)-1):
+        if index == len(res):
+            intersect = seg_intersect([res[index], res[0]])
+        else:
+            intersect = seg_intersect([res[index], res[index+1]])
+
+        if intersect == 'two_perpendicular_lines':
+            # print('=======================')
+            # print([res[index], res[index-1]])
+            # print(l_all[-1])
+            # print(l_all[-2])
+            # print(len(res))
+
+            raise Tiger
+
+        if intersect[0] == 'line':
+            intersections.append(intersect[1])
+            intersections.append(intersect[2])
+        else:
+            intersections.append(intersect)
+
+    polylines = [[intersections[index], intersections[index+1]] for index in range(len(intersections)-1)]
+    polylines.append([intersections[-1],left_end[0]])
+    polylines.append([left_end[0],left_end[1]])
+
+    # import numpy as np
+    # import pylab as pl
+    # from matplotlib import collections  as mc
+
+    # lc = mc.LineCollection(polylines, linewidths=2)
+    # fig, ax = pl.subplots()
+    # ax.add_collection(lc)
+    # ax.autoscale()
+    # ax.margins(0.1)
+    # pl.show()
+
+    return polylines
+
+def get_center(mesh_triangles):
+    return (mesh_triangles[:,0] + mesh_triangles[:,1] + mesh_triangles[:,2])/3
 
 class Support():
     """class for all the support logic"""
     def __init__(self, mesh):
         self.mesh = mesh
         self.mesh.bbox = mesh.bounding_box()
-        self.mesh.min_x = mesh.min_x()
-        self.mesh.max_x = mesh.max_x()
-        self.mesh.min_y = mesh.min_y()
-        self.mesh.max_y = mesh.max_y()
-        self.mesh.min_z = mesh.min_z()
-        self.mesh.max_z = mesh.max_z()
+        self.mesh.min_x = mesh.min_x() # numpy array
+        self.mesh.max_x = mesh.max_x() # numpy array
+        self.mesh.min_y = mesh.min_y() # numpy array
+        self.mesh.max_y = mesh.max_y() # numpy array
+        self.mesh.min_z = mesh.min_z() # numpy array
+        self.mesh.max_z = mesh.max_z() # numpy array
         self.mesh.bed_z = self.mesh.bbox.zmin
         self.support_required_mask = self.detect_support_requiring_facet()
-        self.groups = self.group_support_area()
+        self.groups = self.group_support_area(save_cache=True, use_cache=True)
         
 
     def detect_support_requiring_facet(self):
@@ -125,19 +310,32 @@ class Support():
         exceed_threshold_mask = (normal_cos_theta<config.supportOverhangangle) # boolean list indicating which triangle requires support 
 
         # also ignore the facet too close to the bed
-        not_too_close_to_bed_mask = (self.mesh.max_z > self.mesh.bed_z + support_starts_height)
-        support_required_mask = np.logical_and(exceed_threshold_mask, not_too_close_to_bed_mask)
+        # not_too_close_to_bed_mask = (self.mesh.max_z > self.mesh.bed_z + support_starts_height)
+        # support_required_mask = np.logical_and(exceed_threshold_mask, not_too_close_to_bed_mask)
 
-        return support_required_mask # returns a boolen list indicated which triangles require support
+        return exceed_threshold_mask # returns a boolen list indicated which triangles require support
 
-    def group_support_area(self):
+    def group_support_area(self, save_cache = False, use_cache=False):
+
+        if use_cache:
+            import os.path
+            if os.path.isfile(self.mesh.name + '.txt'):
+                import json
+                with open(self.mesh.name+'.txt') as data_file:   
+                     data = json.load(data_file)
+                if data['supportOverhangangle'] == config.supportOverhangangle:
+                    print('using cache groups')
+                    return data['groups']
+                else:
+                    print('computing groups because of different supportOverhangangle to Cache')
 
         import datetime
         start_time = datetime.datetime.now()
 
-        support_triangles_index  = [i for i, elem in enumerate(self.support_required_mask, 1) if elem]
+        support_triangles_index  = np.where(self.support_required_mask)[0]
 
         triangle_index_and_its_neighbour = {}
+
 
         for tri_index in support_triangles_index:
             neighbour = set()
@@ -220,26 +418,44 @@ class Support():
         print('------- grouping time -------------')
         print(datetime.datetime.now() - start_time)
         
+        if save_cache:
+            groups = [[int(j) for j in i] for i in groups]
+            data = {}
+            data['supportOverhangangle'] = config.supportOverhangangle
+            data['groups'] = groups
+            import json
+            with open(self.mesh.name+'.txt', 'w') as outfile:
+                json.dump(data, outfile)
+
         return groups
 
-    def sampling_support_points(self):
-
+    def sampling_support_points(self, offset_boundingbox = config.layerThickness): 
+        '''
+        by equal distance sampling point on the bounding box and raytrace these points onto the grouped area, 
+        if it hits then take it as a support point
+        '''
         support_points_by_group = []
 
-        counter = 0 # debug
         for group in self.groups:
-            counter += 1 # debug
             support_points = []
             support_points_by_group.append(support_points)
 
             group_tri = self.mesh.triangles[group]
+################################################# revisit this #################################################################
+            # min_x = np.min(self.mesh.min_x[group] + config.layerThickness*3)
+            # max_x = np.max(self.mesh.max_x[group] - config.layerThickness*3)
+            # min_y = np.min(self.mesh.min_y[group] + config.layerThickness*3)
+            # max_y = np.max(self.mesh.max_y[group] - config.layerThickness*3)
+            # min_z = np.min(self.mesh.min_z[group] + config.layerThickness*3)
+            # max_z = np.max(self.mesh.max_z[group] - config.layerThickness*3)            
 
-            min_x = np.min(self.mesh.min_x[group])
-            max_x = np.max(self.mesh.max_x[group])
-            min_y = np.min(self.mesh.min_y[group])
-            max_y = np.max(self.mesh.max_y[group])
-            min_z = np.min(self.mesh.min_z[group])
-            max_z = np.max(self.mesh.max_z[group])
+
+            min_x = np.min(self.mesh.min_x[group] + offset_boundingbox)
+            max_x = np.max(self.mesh.max_x[group] - offset_boundingbox)
+            min_y = np.min(self.mesh.min_y[group] + offset_boundingbox)
+            max_y = np.max(self.mesh.max_y[group] - offset_boundingbox)
+            min_z = np.min(self.mesh.min_z[group] + offset_boundingbox)
+            max_z = np.max(self.mesh.max_z[group] - offset_boundingbox)
 
             # sampling in x, y plane
             x_sample = np.arange(min_x, max_x, config.supportSamplingDistance)
@@ -268,6 +484,21 @@ class Support():
             support_points_by_group = []
         else:
             pass
+
+        return support_points_by_group
+
+    def random_sampling_support_points(self, point_support_area = 1):
+        import random
+
+        support_points_by_group = []
+        for group in self.groups:
+
+            group_tri = self.mesh.triangles[group]
+            centers = get_center(group_tri)
+            sum_area = np.sum(self.mesh.areas[group])
+            number_of_support_points = int(np.ceil(sum_area/point_support_area))
+            support_points = np.random.choice(range(len(centers)), number_of_support_points)
+            support_points_by_group.append(centers[support_points])
 
         return support_points_by_group
 
@@ -335,7 +566,7 @@ class Support():
 
         return support_line_starts_list_by_group, support_line_ends_list_by_group
 
-    def arranged_polyline_from_support(self, support_line_starts_list_by_group, support_line_ends_list_by_group, height, does_visualize = False):
+    def arranged_polyline_from_support(self, support_line_starts_list_by_group, support_line_ends_list_by_group, height, does_visualize = False, first_layer=False):
 
         def vertical_line_intersect_horizontal_plane(line_start, line_end, plane_height):
             if line_start < plane_height < line_end:
@@ -393,22 +624,52 @@ class Support():
                     vertical_order = True
                 for y in y_list:
                     traverse_points.append([x, y]) 
-        polylines = []
 
-        import numpy as np
         def distance_between_two_point(point_start, point_end):
+            import numpy as np
             point_start = np.array(point_start)
             point_end = np.array(point_end)
             return np.linalg.norm(point_start - point_end)
 
+        polylines_connected = []
         for traverse_points in traverse_points_by_groups:
+            polylines_connected.append([])
             for i in range(len(traverse_points) - 1):
                 point_start = traverse_points[i]
                 point_end = traverse_points[i+1]
+                # polylines += [[point_start, point_end]]
+                import numpy as np
                 if distance_between_two_point(point_start, point_end) <=  np.sqrt(2*(config.supportSamplingDistance**2)):
-                    polylines += [[point_start, point_end]]
+                    polylines_connected[-1].append([point_start, point_end]) # coneected polylines
+                    
                 else:
-                    pass
+                    # import numpy as np
+                    # import pylab as pl
+                    # from matplotlib import collections  as mc
+                    # import matplotlib.pyplot as plt
+
+                    # lc = mc.LineCollection(polylines_connected[-1], linewidths=2)
+                    # fig, ax = pl.subplots()
+                    # ax.add_collection(lc)
+                    # ax.autoscale()
+                    # ax.margins(0.1)
+                    # plt.show()
+
+                    polylines_connected.append([])
+
+
+        polylines = []
+        for each_connected_polylines in polylines_connected:
+            if len(each_connected_polylines) != 0:
+                polylines += each_connected_polylines
+                polyline = polylines_from_offset_polygon(each_connected_polylines)
+                polylines += polyline
+                if first_layer:
+                    polyline = polylines_from_offset_polygon(each_connected_polylines, 0.8)
+                    polylines += polyline
+                    polyline = polylines_from_offset_polygon(each_connected_polylines, 1.2)
+                    polylines += polyline
+                # print([return_offset_polygon(p) for p in each_polylines])
 
         if does_visualize:
             import numpy as np
@@ -422,33 +683,99 @@ class Support():
             ax.margins(0.1)
             pl.show()
 
+
         return polylines
 
-    def get_support_polylines_list(self, sliceplanes_height = []):
+    def arranged_polyline_from_random_support_points(self, support_line_starts_list_by_group, support_line_ends_list_by_group, height, does_visualize = False, first_layer=False):
 
-        BBox = self.mesh.bounding_box()
-        slice_height_from = BBox.zmin
-        slice_height_to = BBox.zmax
+        def vertical_line_intersect_horizontal_plane(line_start, line_end, plane_height):
+            if line_start < plane_height < line_end:
+                return True
+            else:
+                return False
 
-        slice_height_from += 0.198768976
-        slice_height_to += 0.198768976
-        normal = np.array([[0.],[0.],[1.]])
+        intersect_points_by_groups = []
 
-        if sliceplanes_height != []: # if empty
-            sliceplanes_height = sliceplanes_height
-            sliceplanes_height = np.array(sliceplanes_height)
-        else:
-            sliceplanes_height = np.arange(slice_height_from, slice_height_to, config.layerThickness)
+        for support_line_starts_list, support_line_ends_list in zip(support_line_starts_list_by_group, support_line_ends_list_by_group):
 
- 
-        s, e = self.support_lines()
+            intersect_points = []
+            intersect_points_by_groups.append(intersect_points)
 
-        polylines = [self.arranged_polyline_from_support(s, e, height, False) for height in sliceplanes_height]
+            for point_start, point_end in zip(support_line_starts_list, support_line_ends_list):
+                point_start_x = point_start[0]
+                point_start_y = point_start[1]
+
+                point_start_z = point_start[2]
+                point_end_z = point_end[2]
+
+                intersection = vertical_line_intersect_horizontal_plane(point_start_z, point_end_z, height)
+                if intersection:
+                    intersect_points.append([point_start_x, point_start_y])
+
+        def distance(a, b):
+            import numpy as np
+            a = np.array(a)
+            b = np.array(b)
+            return np.linalg.norm(b-a)
+
+        import numpy as np
+        min_x_y_bbox = [self.mesh.bounding_box().xmin, self.mesh.bounding_box().ymin]
+        start_point_all = [] # for visulisation
+        connected_line_segments = []
+        for intersect_points in intersect_points_by_groups:
+
+            connected_line_segments.append([])
+
+            lines_segments = []
+            if intersect_points: # if non empty
+                start_point = sorted(intersect_points, key = lambda i:distance(i,min_x_y_bbox))[0]
+                start_point_all.append(start_point) # for visulisation 
+                point_set = intersect_points[:]
+                point_set.remove(start_point)
+                init_point = start_point
+
+                while point_set:
+                    next_point = sorted(point_set, key = lambda i:distance(i, init_point))[0]
+                    if distance(init_point, next_point) < 2:
+
+                        if next_point != [] and not np.any([seg_intersect_bounding_box([[init_point, next_point], i]) for i in lines_segments]):
+                            # polylines.append([init_point, next_point])
+                            lines_segments.append([init_point, next_point])
+                            connected_line_segments[-1].append([init_point, next_point])
+                    else:
+                        connected_line_segments.append([])
+                    point_set.remove(next_point)
+                    init_point = next_point
+
+        polylines = []
+
+        for each_c_line in connected_line_segments:
+            polylines += each_c_line
+            # first_layer = False
+            if first_layer:
+                if each_c_line != []:
+                    polyline = polylines_from_offset_polygon(each_c_line, 0.8)
+                    polylines += polyline
+                    polyline = polylines_from_offset_polygon(each_c_line, 1.2)
+                    polylines += polyline
+
+        if does_visualize:
+            import numpy as np
+            import pylab as pl
+            from matplotlib import collections  as mc
+
+            lc = mc.LineCollection(polylines, linewidths=2)
+            fig, ax = pl.subplots()
+            for start_point in start_point_all:
+                pl.plot(start_point[0],start_point[1], 'o')
+            ax.add_collection(lc)
+            ax.autoscale()
+            ax.margins(0.1)
+            pl.show()
+
         return polylines
 
-    def visulisation(self):
-        support_points = self.sampling_support_points()
-        self_support_z_values = self.self_support_detection(support_points)
+    def visulisation(self, require_group = False, require_support_lines = False):
 
         ############# visulisation ####################
         from mpl_toolkits import mplot3d
@@ -464,56 +791,92 @@ class Support():
         from matplotlib import colors
         cname = iter(colors.cnames)
 
-        colors = ['r' if i else (0,1,0,0.1) for i in self.support_required_mask]
-        for group in self.groups:
-            c_n = next(cname)
-            for index in group:
-                colors[index] = c_n
+        colors = [(0,1,0,0.1) for i in range(len(self.mesh.triangles))]
+        for index in np.where(self.support_required_mask)[0]:
+            colors[index] = 'r'
 
-
-        # if len(self.support_required_mask) != 0: # if support_required_mask is not empty, change facet requiring support to be green
-        #         for i in range(len(self.support_required_mask)):
-        #             if self.support_required_mask[i]:
-        #                 if colors[i] == 'r':
-        #                     # print('warning this facet requires support and self-supporting!!!!!!!')
-        #                     pass
-        #                 else:
-        #                     colors[i] = 'green'
+        if require_group:
+            for group in self.groups:
+                c_n = next(cname)
+                for index in group:
+                    colors[index] = c_n
 
         axes.add_collection3d(mplot3d.art3d.Poly3DCollection(self.mesh.triangles, color=colors))
-        # axes.add_collection3d(mplot3d.art3d.Poly3DCollection(mesh.triangles))
         # Auto scale to the mesh size
         scale = np.array([self.mesh.triangles[:,0], self.mesh.triangles[:,1], self.mesh.triangles[:,2]]).flatten(-1)
         axes.auto_scale_xyz(scale, scale, scale)
 
-        red_patch = mpatches.Patch(color='r', label='self-supporting facet')
-        green_patch = mpatches.Patch(color='green', label='support-require facet')
-        plt.legend(handles=[red_patch, green_patch])
+        if require_support_lines:
+            support_points_by_groups = self.sampling_support_points()
+            self_support_z_by_groups = self.self_support_detection(support_points_by_groups)
 
-        support_points_by_groups = self.sampling_support_points()
-        self_support_z_by_groups = self.self_support_detection(support_points)
-
-        for support_points, self_support_z_values in zip(support_points_by_groups, self_support_z_by_groups):
-            c_n = next(cname)
-            for support_point, self_support_z in zip(support_points, self_support_z_values):
-                print(self_support_z)
-                x = support_point[0]
-                y = support_point[1]
-                z = support_point[2]
-                plt.plot([x,x],[y,y],[z,self_support_z], color = c_n)
+            for support_points, self_support_z_values in zip(support_points_by_groups, self_support_z_by_groups):
+                c_n = next(cname)
+                for support_point, self_support_z in zip(support_points, self_support_z_values):
+                    x = support_point[0]
+                    y = support_point[1]
+                    z = support_point[2]
+                    plt.plot([x,x],[y,y],[z,self_support_z], color = c_n)
 
         plt.show()
+
+    def get_support_polylines_list(self):
+
+        BBox = self.mesh.bounding_box()
+        slice_height_from=BBox.zmin
+        slice_height_to=BBox.zmax
+        slice_step= config.layerThickness
+
+        slice_height_from += 0.198768976
+        slice_height_to += 0.198768976
+        normal = np.array([[0.],[0.],[1.]])
+
+        sliceplanes_height = np.arange(slice_height_from, slice_height_to, slice_step)
+
+        s,e = self.support_lines()
+        polylines_all = []
+
+        layer_count = 0
+        for height in sliceplanes_height:
+            if layer_count <= 5:
+                polylines_all += [self.arranged_polyline_from_support(s, e, height, first_layer=True)]
+                # print('first layer')
+            else:
+                polylines_all += [self.arranged_polyline_from_support(s, e, height)]
+            layer_count += 1
+        return polylines_all
 
 def main():
     from stl import mesh as np_mesh
     import mesh_operations
     import numpy as np
 
-    stl_mesh = np_mesh.Mesh.from_file("15_to_45_degree_overhang_test.stl")
-    our_mesh = mesh_operations.mesh(stl_mesh.vectors, fix_mesh=True)
+    import datetime
+    start_time = datetime.datetime.now()
+    mesh_name = "bunny_half_foot_only.stl"
+    stl_mesh = np_mesh.Mesh.from_file(mesh_name)
+    our_mesh = mesh_operations.mesh(stl_mesh.vectors, fix_mesh=True, name=mesh_name)
+    our_mesh.name = mesh_name
     sup = Support(our_mesh)
     # a = sup.get_support_polylines_list()
-    sup.get_support_polylines_list()
-    # sup.visulisation()
+    # polylines = sup.get_support_polylines_list()
+    sup.visulisation(require_group = True, require_support_lines = True)
+
+
+def main():
+    from stl import mesh as np_mesh
+    import mesh_operations
+    import numpy as np
+
+    import datetime
+    start_time = datetime.datetime.now()
+    mesh_name = "bunny_half_foot_only.stl"
+    stl_mesh = np_mesh.Mesh.from_file(mesh_name)
+    our_mesh = mesh_operations.mesh(stl_mesh.vectors, fix_mesh=True, name=mesh_name)
+    our_mesh.name = mesh_name
+    sup = Support(our_mesh)
+    # s,e = sup.support_lines()
+    # sup.arranged_polyline_from_random_support_points(s,e,0.5,does_visualize=True)
+    sup.visulisation(require_support_lines=True)
 if __name__ == '__main__':
     main()

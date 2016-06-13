@@ -123,7 +123,7 @@ if __name__ == '__main__':
     if config.useSupport:
         from stl import mesh
         stl_mesh = mesh.Mesh.from_file(stl_file_name)
-        this_mesh = MPmesh(stl_mesh.vectors, fix_mesh= True)
+        this_mesh = MPmesh(stl_mesh.vectors, fix_mesh= True, name=stl_file_name)
         move_to_center(this_mesh)
         support_polylines_list = support.Support(this_mesh).get_support_polylines_list()
     ############## end of support polylines generation and feed to get_layer_list####################

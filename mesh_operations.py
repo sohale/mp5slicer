@@ -9,7 +9,7 @@ import decimal
 
 class mesh():
 
-    def __init__(self, input_triangles=[], input_normals=[], input_areas=[], fix_mesh=False):
+    def __init__(self, input_triangles=[], input_normals=[], input_areas=[], fix_mesh=False, name=None):
         if len(input_triangles) == 0:
             raise ValueError
 
@@ -30,9 +30,15 @@ class mesh():
             self.remove_badtriangles()
             self.remove_duplicates()
 
+        if name != None:
+            self.name = name
+        else:
+            pass
+
         self.normalise_normals()
         self.sort_by_z()
         self.scale_to_int()
+
     #
     # def add_noise(self):
     #     noise = np.random.uniform(-1,0,self.triangles[:,:,0].size /3)
