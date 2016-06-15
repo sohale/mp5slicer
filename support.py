@@ -149,6 +149,41 @@ def return_lr_offset_polyline(line,offset_value,does_visualize=False, end_point=
     elif end_point == None: # return the up and down offset line 
         return ([res[1],res[2]], [res[3],res[0]])
 
+def single_point_offset(point,offset_value,does_visualize=False):
+    '''
+    This is an algorithm to offset lines with degrees between two consecutive line with degree 45*n, n integer.
+    '''
+    import numpy as np
+        
+    line_off_set = [
+                    [-offset_value/2, -offset_value/2],
+                    [-offset_value/2, offset_value/2],
+                    [+ offset_value/2, offset_value/2],
+                    [+ offset_value/2, -offset_value/2]]
+        
+    res = [[i[0]+point[0],i[1]+point[1] ] for i in line_off_set]
+
+
+    if does_visualize:
+        import matplotlib.pyplot as plt
+        point_off_set = polygon
+        plt.plot([line[0][0],line[1][0]],[line[0][1],line[1][1]],'b--')
+        for i in range(len(point_off_set)-1):
+            plt.plot([point_off_set[i][0],point_off_set[i+1][0]],[point_off_set[i][1], point_off_set[i+1][1]])
+        plt.plot([point_off_set[len(point_off_set)-1][0],point_off_set[0][0]],[point_off_set[len(point_off_set)-1][1], point_off_set[0][1]])
+        plt.show()
+        for i in range(len(res)):
+            plt.plot(res[i][0],res[i][1],'ro')
+
+    polyline = [
+                [res[0], res[1]],
+                [res[1], res[2]],
+                [res[2], res[3]], 
+                [res[3], res[0]],
+                ]
+
+    return polyline
+
 def seg_intersect(lines):
 
     line1, line2 = lines
@@ -165,7 +200,7 @@ def seg_intersect(lines):
         return a[0] * b[1] - a[1] * b[0]
 
     div = det(xdiff, ydiff)
-    if div == 0:
+    if np.isclose(div, 0, atol=0.01):
         return 'line', line1[1], line2[0]
         # raise Exception('lines do not intersect')
 
@@ -189,7 +224,7 @@ def seg_intersect_bounding_box(lines):
         return a[0] * b[1] - a[1] * b[0]
 
     div = det(xdiff, ydiff)
-    if div == 0:
+    if np.isclose(div, 0, atol=0.01):
         return False
         raise Exception('lines do not intersect')
 
@@ -206,7 +241,7 @@ def seg_intersect_bounding_box(lines):
     else:
         return False
 
-def polylines_from_offset_polygon(lines, offset_value):
+def polylines_from_offset_polygon(lines, offset_value, does_visualize=False):
     result = []
     for i in lines:
         result.append(return_lr_offset_polyline(i, offset_value))
@@ -258,20 +293,22 @@ def polylines_from_offset_polygon(lines, offset_value):
         else:
             intersections.append(intersect)
 
+
     polylines = [[intersections[index], intersections[index+1]] for index in range(len(intersections)-1)]
     polylines.append([intersections[-1],left_end[0]])
     polylines.append([left_end[0],left_end[1]])
 
-    # import numpy as np
-    # import pylab as pl
-    # from matplotlib import collections  as mc
+    if does_visualize:
+        import numpy as np
+        import pylab as pl
+        from matplotlib import collections  as mc
 
-    # lc = mc.LineCollection(polylines, linewidths=2)
-    # fig, ax = pl.subplots()
-    # ax.add_collection(lc)
-    # ax.autoscale()
-    # ax.margins(0.1)
-    # pl.show()
+        lc = mc.LineCollection(polylines, linewidths=2)
+        fig, ax = pl.subplots()
+        ax.add_collection(lc)
+        ax.autoscale()
+        ax.margins(0.1)
+        pl.show()
 
     return polylines
 
@@ -621,7 +658,9 @@ class Support():
             return np.linalg.norm(point_start - point_end)
 
         polylines_connected = []
+        missed_single_point_counts = [] # testing
         for traverse_points in traverse_points_by_groups:
+            points_added = set()
             polylines_connected.append([])
             for i in range(len(traverse_points) - 1):
                 point_start = traverse_points[i]
@@ -630,7 +669,8 @@ class Support():
                 import numpy as np
                 if distance_between_two_point(point_start, point_end) <=  np.sqrt(2*(config.supportSamplingDistance**2)):
                     polylines_connected[-1].append([point_start, point_end]) # coneected polylines
-                    
+                    points_added.add(i) # testing
+                    points_added.add(i+1) # testing
                 else:
                     # import numpy as np
                     # import pylab as pl
@@ -645,6 +685,17 @@ class Support():
                     # plt.show()
 
                     polylines_connected.append([])
+
+            # testing
+            single_point_sup = set(range(len(traverse_points))).difference(points_added)
+            print(list(single_point_sup))
+            import numpy as np
+            if single_point_sup:
+                single_point_sup = list(single_point_sup)
+                traverse_points = np.array(traverse_points)
+                for i in single_point_sup:
+                    missed_single_point_counts.append(traverse_points[i])
+
 
         def reorder(polylines_connected): # sorted by starting point, first by x then y
             import numpy as np
@@ -675,12 +726,13 @@ class Support():
                     new_order += group_index
                     flip_counter = True
 
-            print(new_order)
             return polylines_connected[new_order]
 
         polylines_connected = reorder(polylines_connected)
 
         polylines = []
+        print(list(polylines_connected))
+        raise Tiger
         for each_connected_polylines in polylines_connected:
             if len(each_connected_polylines) != 0:
                 polylines += each_connected_polylines
@@ -693,6 +745,10 @@ class Support():
                     # polylines += polyline
 
                 # print([return_offset_polygon(p) for p in each_polylines])
+        for point in missed_single_point_counts:
+            print(single_point_offset(point, 0.4))
+            # point = traverse_points[single_p_index]
+            polylines += single_point_offset(point, 0.4)
 
         if does_visualize:
             import numpy as np
@@ -805,13 +861,13 @@ def main():
 
     import datetime
     start_time = datetime.datetime.now()
-    mesh_name = "bunny_half.stl"
+    mesh_name = "bunny_0.7.stl"
     stl_mesh = np_mesh.Mesh.from_file(mesh_name)
     our_mesh = mesh_operations.mesh(stl_mesh.vectors, fix_mesh=True, name=mesh_name)
     our_mesh.name = mesh_name
     sup = Support(our_mesh)
     s,e = sup.support_lines()
-    sup.arranged_polyline_from_support(s,e,0.5,does_visualize=False)
+    sup.arranged_polyline_from_support(s,e,1,does_visualize=True)
     # sup.visulisation(require_support_lines=True)
 
 if __name__ == '__main__':
