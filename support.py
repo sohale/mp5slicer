@@ -89,7 +89,7 @@ def ray_triangle_intersection(ray_near, triangle):
 
 ############# function using for support generation #############
 
-def return_lr_offset_polyline(line,offset_value=0.4,does_visualize=False, end_point=None):
+def return_lr_offset_polyline(line,offset_value,does_visualize=False, end_point=None):
     '''
     This is an algorithm to offset lines with degrees between two consecutive line with degree 45*n, n integer.
     '''
@@ -127,16 +127,19 @@ def return_lr_offset_polyline(line,offset_value=0.4,does_visualize=False, end_po
     res = [[i[0]+line_start_x,i[1]+line_start_y ] for i in res]
 
     polygon = [res[0],res[1],res[2],res[3]]
-    
+
     if does_visualize:
+        import matplotlib.pyplot as plt
         point_off_set = polygon
         plt.plot([line[0][0],line[1][0]],[line[0][1],line[1][1]],'b--')
         for i in range(len(point_off_set)-1):
             plt.plot([point_off_set[i][0],point_off_set[i+1][0]],[point_off_set[i][1], point_off_set[i+1][1]])
         plt.plot([point_off_set[len(point_off_set)-1][0],point_off_set[0][0]],[point_off_set[len(point_off_set)-1][1], point_off_set[0][1]])
         plt.show()
-    
-    
+        for i in range(len(res)):
+            plt.plot(res[i][0],res[i][1],'ro')
+
+
     res = np.array(res)
     
     if end_point == 'l': # return the left offset line 
@@ -203,14 +206,14 @@ def seg_intersect_bounding_box(lines):
     else:
         return False
 
-def polylines_from_offset_polygon(lines, offset_value = 0.4):
+def polylines_from_offset_polygon(lines, offset_value):
     result = []
     for i in lines:
         result.append(return_lr_offset_polyline(i, offset_value))
 
     l_all = [i[0] for i in result]
-    left_end = return_lr_offset_polyline(lines[0],end_point='l')
-    right_end = return_lr_offset_polyline(lines[-1],end_point='r')
+    left_end = return_lr_offset_polyline(lines[0],offset_value,end_point='l')
+    right_end = return_lr_offset_polyline(lines[-1],offset_value,end_point='r')
     r_all = [i[1] for i in result]
     
     # import numpy as np
@@ -487,20 +490,6 @@ class Support():
 
         return support_points_by_group
 
-    def random_sampling_support_points(self, point_support_area = 1):
-        import random
-
-        support_points_by_group = []
-        for group in self.groups:
-
-            group_tri = self.mesh.triangles[group]
-            centers = get_center(group_tri)
-            sum_area = np.sum(self.mesh.areas[group])
-            number_of_support_points = int(np.ceil(sum_area/point_support_area))
-            support_points = np.random.choice(range(len(centers)), number_of_support_points)
-            support_points_by_group.append(centers[support_points])
-
-        return support_points_by_group
 
     def self_support_detection(self, support_points_by_groups):
 
@@ -657,18 +646,52 @@ class Support():
 
                     polylines_connected.append([])
 
+        def reorder(polylines_connected): # sorted by starting point, first by x then y
+            import numpy as np
+            polylines_connected = np.array(polylines_connected)
+            order_recorder = [] # index, starting point
+            counter = 0
+            for i in polylines_connected:
+                if i: # if not empty 
+                    order_recorder.append([counter, i[0][0]])
+                counter += 1
+            import itertools 
+
+
+            res = []
+            for _,grouped_result in itertools.groupby(order_recorder,  key=lambda item: item[1][0]):
+                res.append([_,list(grouped_result)])
+            res = sorted(res, key=lambda item:item[0])
+    
+            flip_counter = True
+
+            new_order = []
+            for _, group in res:
+                group_index = [i[0] for i in group]
+                if flip_counter:
+                    new_order += group_index[::-1]
+                    flip_counter = False
+                else:
+                    new_order += group_index
+                    flip_counter = True
+
+            print(new_order)
+            return polylines_connected[new_order]
+
+        polylines_connected = reorder(polylines_connected)
 
         polylines = []
         for each_connected_polylines in polylines_connected:
             if len(each_connected_polylines) != 0:
                 polylines += each_connected_polylines
-                polyline = polylines_from_offset_polygon(each_connected_polylines)
+                polyline = polylines_from_offset_polygon(each_connected_polylines, 0.4)
                 polylines += polyline
                 if first_layer:
                     polyline = polylines_from_offset_polygon(each_connected_polylines, 0.8)
                     polylines += polyline
-                    polyline = polylines_from_offset_polygon(each_connected_polylines, 1.2)
-                    polylines += polyline
+                    # polyline = polylines_from_offset_polygon(each_connected_polylines, 1.2)
+                    # polylines += polyline
+
                 # print([return_offset_polygon(p) for p in each_polylines])
 
         if does_visualize:
@@ -686,94 +709,6 @@ class Support():
 
         return polylines
 
-    def arranged_polyline_from_random_support_points(self, support_line_starts_list_by_group, support_line_ends_list_by_group, height, does_visualize = False, first_layer=False):
-
-        def vertical_line_intersect_horizontal_plane(line_start, line_end, plane_height):
-            if line_start < plane_height < line_end:
-                return True
-            else:
-                return False
-
-        intersect_points_by_groups = []
-
-        for support_line_starts_list, support_line_ends_list in zip(support_line_starts_list_by_group, support_line_ends_list_by_group):
-
-            intersect_points = []
-            intersect_points_by_groups.append(intersect_points)
-
-            for point_start, point_end in zip(support_line_starts_list, support_line_ends_list):
-                point_start_x = point_start[0]
-                point_start_y = point_start[1]
-
-                point_start_z = point_start[2]
-                point_end_z = point_end[2]
-
-                intersection = vertical_line_intersect_horizontal_plane(point_start_z, point_end_z, height)
-                if intersection:
-                    intersect_points.append([point_start_x, point_start_y])
-
-        def distance(a, b):
-            import numpy as np
-            a = np.array(a)
-            b = np.array(b)
-            return np.linalg.norm(b-a)
-
-        import numpy as np
-        min_x_y_bbox = [self.mesh.bounding_box().xmin, self.mesh.bounding_box().ymin]
-        start_point_all = [] # for visulisation
-        connected_line_segments = []
-        for intersect_points in intersect_points_by_groups:
-
-            connected_line_segments.append([])
-
-            lines_segments = []
-            if intersect_points: # if non empty
-                start_point = sorted(intersect_points, key = lambda i:distance(i,min_x_y_bbox))[0]
-                start_point_all.append(start_point) # for visulisation 
-                point_set = intersect_points[:]
-                point_set.remove(start_point)
-                init_point = start_point
-
-                while point_set:
-                    next_point = sorted(point_set, key = lambda i:distance(i, init_point))[0]
-                    if distance(init_point, next_point) < 2:
-
-                        if next_point != [] and not np.any([seg_intersect_bounding_box([[init_point, next_point], i]) for i in lines_segments]):
-                            # polylines.append([init_point, next_point])
-                            lines_segments.append([init_point, next_point])
-                            connected_line_segments[-1].append([init_point, next_point])
-                    else:
-                        connected_line_segments.append([])
-                    point_set.remove(next_point)
-                    init_point = next_point
-
-        polylines = []
-
-        for each_c_line in connected_line_segments:
-            polylines += each_c_line
-            # first_layer = False
-            if first_layer:
-                if each_c_line != []:
-                    polyline = polylines_from_offset_polygon(each_c_line, 0.8)
-                    polylines += polyline
-                    polyline = polylines_from_offset_polygon(each_c_line, 1.2)
-                    polylines += polyline
-
-        if does_visualize:
-            import numpy as np
-            import pylab as pl
-            from matplotlib import collections  as mc
-
-            lc = mc.LineCollection(polylines, linewidths=2)
-            fig, ax = pl.subplots()
-            for start_point in start_point_all:
-                pl.plot(start_point[0],start_point[1], 'o')
-            ax.add_collection(lc)
-            ax.autoscale()
-            ax.margins(0.1)
-            pl.show()
-
-        return polylines
 
     def visulisation(self, require_group = False, require_support_lines = False):
 
@@ -870,13 +805,14 @@ def main():
 
     import datetime
     start_time = datetime.datetime.now()
-    mesh_name = "bunny_half_foot_only.stl"
+    mesh_name = "bunny_half.stl"
     stl_mesh = np_mesh.Mesh.from_file(mesh_name)
     our_mesh = mesh_operations.mesh(stl_mesh.vectors, fix_mesh=True, name=mesh_name)
     our_mesh.name = mesh_name
     sup = Support(our_mesh)
-    # s,e = sup.support_lines()
-    # sup.arranged_polyline_from_random_support_points(s,e,0.5,does_visualize=True)
-    sup.visulisation(require_support_lines=True)
+    s,e = sup.support_lines()
+    sup.arranged_polyline_from_support(s,e,0.5,does_visualize=False)
+    # sup.visulisation(require_support_lines=True)
+
 if __name__ == '__main__':
     main()
