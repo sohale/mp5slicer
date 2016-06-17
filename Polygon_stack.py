@@ -76,3 +76,24 @@ class Polygon_stack():
         if other.isEmpty:
             return self
         return  Polygon_stack(diff_layers(self.polygons, other.polygons, True))
+
+    def offset(self, val):
+        return Polygon_stack(offset(self,val))
+
+    # //protoype
+    def get_print_line(self):
+        polylines = []
+        for polygon in self.polygons:
+            if len(polygon) == 0:
+                break
+            polygon = pyclipper.scale_from_clipper(polygon)
+
+            polyline = []
+            start_point = polygon[0]  # frist vertex of the polygon
+            polyline.append(start_point)
+            for point in polygon[1:]:  # the rest of the vertices
+                polyline.append(point)
+            # goes back to the start point since the polygon does not repeat the start (end) vertice twice
+            polyline.append(start_point)
+            polylines.append(polyline)
+        return polylines

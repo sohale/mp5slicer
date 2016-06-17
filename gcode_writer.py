@@ -47,6 +47,7 @@ class GCodeEnvironment:
         return distance
 
     # go to point A without extruding filament
+    # @profile
     def goToNextPoint(self,A, retract):
         B = [0.1]*2
         for i in range(len(A)):
@@ -79,6 +80,7 @@ class GCodeEnvironment:
 
 
     # draw to point A
+    # @profile
     def drawToNextPoint(self, A, layerThickness, speed = 0, fan_speed = 0):
         if fan_speed != self.fan_speed:
             self.fan_speed = fan_speed

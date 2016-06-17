@@ -1,12 +1,7 @@
 from slicer.island import Island
-import pyclipper
-from slicer.Polynode import *
-from slicer.utils import *
-from slicer.Island_stack import *
 from slicer.Elements import Outline
 from slicer.Polygon_stack import *
 from slicer.Line_group import *
-from slicer.clipper_operations import union_layers_polytree
 import slicer.config as config
 
 class Layer():
@@ -22,17 +17,16 @@ class Layer():
 
     def G_print(self):
         polylines = Line_group("layer")
-        skirtPolylines = Line_group("skirt",config.line_width)
-        skirts = Polygon_stack()
-        if self.index == 0:
-            for island in self.islands:
-                skirts.add_polygon_stack(island.get_skirt())
 
-            unionskirts = union_layers_polytree(skirts.polygons, skirts.polygons+[skirts.polygons[0]], True)
-            for skirt in unionskirts.Childs:
-                skirtPolylines.add_chain(Outline.process_polyline(skirt.Contour))
-                for offsetskirt in offset(Polygon_stack(skirt.Contour),-config.line_width):
-                    skirtPolylines.add_chain(Outline.process_polyline(offsetskirt))
+        if self.index == 0:
+            skirtPolylines = Line_group("skirt", config.line_width)
+            skirts = Polygon_stack()
+            for island in self.islands:
+                skirts = skirts.union_with(island.get_platform_bound())
+            skirtPolylines.add_chains(skirts.get_print_line())
+            for count in range(config.platform_bound_count):
+                skirts = skirts.offset(config.line_width)
+                skirtPolylines.add_chains(skirts.get_print_line())
             polylines.add_group(skirtPolylines)
 
         for island in self.islands:
@@ -101,36 +95,6 @@ class Layer():
         return  islandStack.get_islands()
 
 
-    #DO NOT delete: this might be faster than detecting islands with pyclipper only
-    # def detect_islands_old(self):
-    #     islands = Polynode([])
-    #     polygons = self.layers[self.index]
-    #     # make a polynode for every polygon
-    #     for poly_index in range(len(polygons)):
-    #         islands.childs.append(Polynode(polygons[poly_index]))
-    #     # make the three of polynodes
-    #     for node1_index in range(len(islands.childs)):
-    #         for node2_index in range(len(islands.childs)):
-    #             if islands.childs[node1_index] != islands.childs[node2_index]:
-    #                 if islands.childs[node1_index] != None and islands.childs[node2_index] != None:
-    #                     if self.poly1_in_poly2(islands.childs[node1_index].contour,islands.childs[node2_index].contour):
-    #                         # vizz_2d_multi([islands.childs[node1_index].contour,islands.childs[node2_index].contour])
-    #                         islands.childs[node2_index].depth = max(islands.childs[node2_index].depth,islands.childs[node1_index].depth +1 )
-    #                         islands.childs[node2_index].childs.append(islands.childs[node1_index])
-    #                         islands.childs[node1_index] = None
-    #     # split polynodes containing an island in multiple islands
-    #     # for node_index in range(len(islands.childs)):
-    #     #     if islands.childs[node1_index].depth > 1:
-    #     #         #todo:split
-    #     #         pass
-    #     # remove every empty polynode
-    #     i = 0
-    #     while i < len( islands.childs):
-    #         if islands.childs[i] == None:
-    #             del islands.childs[i]
-    #         else:
-    #             i += 1
-    #     return islands
 
 
     def process_islands(self):

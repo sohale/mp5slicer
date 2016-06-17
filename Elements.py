@@ -30,15 +30,22 @@ class Outline:
             self.holePolylines = Line_group("hole", config.line_width)
 
             self.innerBoundaryPolylines = Line_group("inner_boundary", config.line_width)
-            self.skirt = Polygon_stack()
             self.holeShells = Polygon_stack()
             self.boundaryShells = Polygon_stack()
             self.innerShells = Polygon_stack()
 
-    def get_skirt(self):
-        if self.island.layer_index == 0:
-            self.skirt = self.boundary.line.offset(config.line_width * 7)
-        return self.skirt
+    def get_platform_bound(self):
+        platform_bound = Polygon_stack()
+        if config.platform_bound == "brim":
+            platform_bound = Polygon_stack(self.boundary.line.offset(config.line_width))
+
+        else:
+            platform_bound = Polygon_stack(self.boundary.line.offset(config.line_width * 5))
+
+
+
+
+        return platform_bound
 
     def g_print(self):
         polylines = Line_group("outline")
@@ -89,6 +96,7 @@ class Outline:
             return Polygon_stack()
         return self.innerShells
 
+    # @profile
     def get_inner_bounds(self):
         if self.empty:
             return Polygon_stack()

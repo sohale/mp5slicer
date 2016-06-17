@@ -6,4 +6,4 @@ build_platformY = 160
 print_box_X = 150
 print_box_Y = 150
 print_box_Z = 150
-origin = "corner"
+origin = "origin"

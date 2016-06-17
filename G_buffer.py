@@ -25,7 +25,6 @@ class G_buffer:
 
 
 
-
     def print_Gcode(self):
         gcodeEnvironment = GCodeEnvironment()
         # create the gcode_output
@@ -34,28 +33,31 @@ class G_buffer:
         else:
             gcode_output = sys.stdout
 
+        instruction = gcodeEnvironment.startcode(printer_config.model)
+        gcode_output.write(instruction)
 
-        gcode_output.write(gcodeEnvironment.startcode(printer_config.model))
-
-
-
+        # @profile
         def print_boundary(boundary):
             for line in boundary.sub_lines:
                 if len(line) > 0:
                     gcode_output.write(gcodeEnvironment.goToNextPoint(line[0],True))
                     for point_index in range(1,len(line)):
-                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index], self.config.layerThickness, self.config.boundarySpeed, self.config.exteriorFanSpeed))
+                        instruction = gcodeEnvironment.drawToNextPoint(line[point_index], self.config.layerThickness, self.config.boundarySpeed, self.config.exteriorFanSpeed)
+                        gcode_output.write(instruction)
 
             self.skip_retraction = False
 
+        # @profile
         def print_hole(boundary):
             for line in boundary.sub_lines:
                 if len(line) > 0:
                     gcode_output.write(gcodeEnvironment.goToNextPoint(line[0], True))
                     for point_index in range(1, len(line)):
-                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index], self.config.layerThickness, self.config.holeSpeed, self.config.exteriorFanSpeed))
+                        instruction = gcodeEnvironment.drawToNextPoint(line[point_index], self.config.layerThickness, self.config.holeSpeed, self.config.exteriorFanSpeed)
+                        gcode_output.write(instruction)
             self.skip_retraction = False
 
+        # @profile
         def print_infill(leaf):
             for line in leaf.sub_lines:
                 if len(line) > 0:
@@ -65,8 +67,10 @@ class G_buffer:
                     else:
                         gcode_output.write(gcodeEnvironment.goToNextPoint(line[0], True))
                     for point_index in range(1,len(line)):
-                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index], self.config.layerThickness, self.config.infillSpeed, self.config.interiorFanSpeed))
+                        instruction = gcodeEnvironment.drawToNextPoint(line[point_index], self.config.layerThickness, self.config.infillSpeed, self.config.interiorFanSpeed)
+                        gcode_output.write(instruction)
 
+        # @profile
         def print_skin(leaf):
             for line in leaf.sub_lines:
                 if len(line) > 0:
@@ -76,7 +80,8 @@ class G_buffer:
                     else:
                         gcode_output.write(gcodeEnvironment.goToNextPoint(line[0], True))
                     for point_index in range(1,len(line)):
-                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index], self.config.layerThickness, self.config.skinSpeed, self.config.interiorFanSpeed))
+                        instruction = gcodeEnvironment.drawToNextPoint(line[point_index], self.config.layerThickness, self.config.skinSpeed, self.config.interiorFanSpeed)
+                        gcode_output.write(instruction)
 
         def print_support(leaf):
             for line in leaf.sub_lines:
@@ -87,14 +92,16 @@ class G_buffer:
                     else:
                         gcode_output.write(gcodeEnvironment.goToNextPoint(line[0], True))
                     for point_index in range(1,len(line)):
-                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index], self.config.layerThickness, self.config.infillSpeed, self.config.supportFanSpeed))
+                        instruction = gcodeEnvironment.drawToNextPoint(line[point_index], self.config.layerThickness, self.config.infillSpeed, self.config.supportFanSpeed)
+                        gcode_output.write(instruction)
 
         def print_inner_shell(shell):
             for line in shell.sub_lines:
                 if len(line) > 0:
                     gcode_output.write(gcodeEnvironment.goToNextPoint(line[0], True))
                     for point_index in range(1, len(line)):
-                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index], self.config.layerThickness, self.config.shellSpeed, self.config.interiorFanSpeed))
+                        instruction = gcodeEnvironment.drawToNextPoint(line[point_index], self.config.layerThickness, self.config.shellSpeed, self.config.interiorFanSpeed)
+                        gcode_output.write(instruction)
             self.skip_retraction = False
 
         def print_skirt(skirt):
@@ -102,10 +109,12 @@ class G_buffer:
                 if len(line) > 0:
                     gcode_output.write(gcodeEnvironment.goToNextPoint(line[0], True))
                     for point_index in range(1, len(line)):
-                        gcode_output.write(gcodeEnvironment.drawToNextPoint(line[point_index], self.config.layerThickness, self.config.shellSpeed, self.config.default_fan_speed))
+                        instruction = gcodeEnvironment.drawToNextPoint(line[point_index], self.config.layerThickness, self.config.shellSpeed, self.config.default_fan_speed)
+                        gcode_output.write(instruction)
                         self.previousPos = line[point_index]
             self.skip_retraction = False
 
+        # @profile
         def switch_leaf(leaf):
             switch = {
                 "skin": print_skin,
@@ -119,6 +128,7 @@ class G_buffer:
             }
             switch[leaf.type](leaf)
 
+        # @profile
         def swith_node(node):
             switch = {
                 "outline": print_node,
@@ -127,6 +137,7 @@ class G_buffer:
             }
             switch[node.type](node)
 
+        # @profile
         def print_layer(node):
             if self.layer_index < 2:
                 self.config.infillSpeed  = 1500
@@ -151,11 +162,12 @@ class G_buffer:
 
             self.config = copy_module(config)
 
+        # @profile
         def print_node(node):
             for node in node.sub_lines:
                 gotroughgroup(node)
 
-
+        # @profile
         def gotroughgroup(group):
             if (group.isLeaf):
                 switch_leaf(group)

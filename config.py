@@ -26,3 +26,5 @@ upSkinsCount = 4
 downSkinsCount = 3
 supportSamplingDistance = 2
 supportOverhangangle = -0.7 # cos(155), 75 degree to building direction requires support
+platform_bound = "skirt"
+platform_bound_count = 4

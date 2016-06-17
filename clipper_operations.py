@@ -41,17 +41,17 @@ def union_layers( _subj,_clip,closed):
 
     return solution
 
-def union_layers_polytree( _subj,_clip,closed):
-
-
-    pc = pyclipper.Pyclipper()
-    pc.AddPaths(_clip, pyclipper.PT_CLIP, True)
-    try:
-        pc.AddPaths(_subj, pyclipper.PT_SUBJECT, closed)
-    except:
-        raise RuntimeError
-
-    return pc.Execute2(pyclipper.CT_UNION, pyclipper.PFT_EVENODD, pyclipper.PFT_EVENODD)
+# def union_layers_polytree( _subj,_clip,closed):
+#
+#
+#     pc = pyclipper.Pyclipper()
+#     pc.AddPaths(_clip, pyclipper.PT_CLIP, True)
+#     try:
+#         pc.AddPaths(_subj, pyclipper.PT_SUBJECT, closed)
+#     except:
+#         raise RuntimeError
+#
+#     return pc.Execute2(pyclipper.CT_UNION, pyclipper.PFT_EVENODD, pyclipper.PFT_EVENODD)
 
 
 def diff_layers_as_polytree( _subj,_clip,closed):
@@ -117,6 +117,7 @@ def offset_default(polygon_stack,val):
 
     return offseted
 
+# @profile
 def offset(polygon_stack,val):
     path = polygon_stack.polygons
     # path = pyclipper.ReversePaths(polygon_stack.polygons)
@@ -124,7 +125,7 @@ def offset(polygon_stack,val):
     #     if not pyclipper.Orientation(path[polygon_index]):
     #         path[polygon_index] = pyclipper.ReversePath(path[polygon_index])
     po = pyclipper.PyclipperOffset()
-    po.AddPaths(path,pyclipper.JT_SQUARE,pyclipper.ET_CLOSEDPOLYGON)
+    po.AddPaths(path,pyclipper.JT_MITER,pyclipper.ET_CLOSEDPOLYGON)
 
 
     offseted = po.Execute(pyclipper.scale_to_clipper(val))

@@ -18,6 +18,10 @@ class Line_group():
         assert (self.isLeaf)
         self.sub_lines.append(line)
 
+    def add_chains(self, lines):
+        assert (self.isLeaf)
+        self.sub_lines += lines
+
     def add_group(self, group):
         assert(self.isLeaf == False)
         assert (isinstance(group, Line_group))

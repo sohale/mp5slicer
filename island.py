@@ -4,12 +4,12 @@ from slicer.Line_group import *
 from slicer.Polynode import *
 from slicer.Polygon_stack import *
 import slicer.config as config
+import pyclipper
 
 class Island():
     def __init__(self,print_tree, polynode, layers,layer_index,BBox, layer ):
         self.layer = layer
         self.print_tree = print_tree
-        self.type = None # object/support/enclosure/ raft
         self.outline = None
         self.skins = None
         self.infill = None
@@ -25,10 +25,9 @@ class Island():
             self.polygons += [poly.Contour for poly in polynode.Childs]
         self.process_outlines(self.polygons)
         self.process_shells()
-        # self.process_infill()
 
-    def get_skirt(self):
-        return self.outline.get_skirt()
+    def get_platform_bound(self):
+        return self.outline.get_platform_bound()
 
     def process_outlines(self, polygons):
         self.outline = Outline(self, polygons)
@@ -59,7 +58,7 @@ class Island():
         return outterbounds
 
 
-
+    # @profile
     def prepare_skins(self):
 
         # if self.layer_index != 0 and self.layer_index != len(self.layers)-2 and self.layer_index != len(self.layers)-1:
@@ -90,18 +89,10 @@ class Island():
         downskins = this_shells.difference_with(down_shells)
 
         upskins = this_shells.difference_with(up_shells)
-        # if self.layer_index == 7 or self.layer_index == 15 or self.layer_index == 8 or self.layer_index == 16:
-        #     vizz_2d_multi(pyclipper.scale_from_clipper(up_shells.polygons),"iiup.png")
-        #     vizz_2d_multi(pyclipper.scale_from_clipper(down_shells.polygons ), "iidown.png")
-        #     vizz_2d_multi(pyclipper.scale_from_clipper(this_shells.polygons), "iithis.png")
-        #     vizz_2d_multi(pyclipper.scale_from_clipper(upskins.polygons), "iiupskin.png")
-        #     vizz_2d_multi(pyclipper.scale_from_clipper(downskins.polygons), "iidownskin.png")
-        #     print "skin"
 
 
         self.skins = Skin(downskins, upskins, self.layers, self.layer_index,self.BBox)
 
-        #self.skins = Skin(Polygon_stack(), Polygon_stack(), self.layers, self.layer_index, self.BBox)
 
 
 
