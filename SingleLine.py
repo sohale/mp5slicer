@@ -1,4 +1,4 @@
-from slicer.clipper_operations import SingleLineOffset
+from slicer.clipper_operations import SinglePolygonOffset
 from slicer.Polygon_stack import *
 
 class SingleLine():
@@ -17,13 +17,13 @@ class SingleLine():
 
     def get_inner_bound(self):
         if self.inner_bound == None:
-            self.inner_bound = Polygon_stack(SingleLineOffset(self.contour, -self.width/2))
+            self.inner_bound = Polygon_stack(SinglePolygonOffset(self.contour, -self.width/2))
         return self.inner_bound
 
     def get_outter_bound(self):
         if self.outter_bound == None:
-            self.outter_bound = Polygon_stack(SingleLineOffset(self.contour, self.width/2))
+            self.outter_bound = Polygon_stack(SinglePolygonOffset(self.contour, self.width/2))
         return self.outter_bound
 
     def offset(self,value):
-        return Polygon_stack(SingleLineOffset(self.contour, value))
+        return Polygon_stack(SinglePolygonOffset(self.contour, value))

@@ -1,5 +1,7 @@
 import pyclipper
-
+import inspect, os
+import sys
+sys.path.append(os.path.split(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))))[0])
 
 
 
@@ -198,14 +200,14 @@ def SinglePolygonOffset(single_line,val):
 #
 #     return solution
 
-def LinesOffset(lines, offset_value, does_visualize=False):
+def LinesOffset(lines, offset_value,does_visualize=False):
     # lines = [[[0,0],[1,1]],[[5,5],[6,6]]]
     scaled_lines = pyclipper.scale_to_clipper(lines)
 
     pc = pyclipper.PyclipperOffset()
     pc.AddPaths(scaled_lines, pyclipper.JT_SQUARE, pyclipper.ET_OPENSQUARE)
 
-    solution = pc.Execute(pyclipper.scale_to_clipper(5))
+    solution = pc.Execute(pyclipper.scale_to_clipper(offset_value))
     solution = pyclipper.scale_from_clipper(solution)
 
     if does_visualize:
@@ -241,9 +243,27 @@ def main():
     for two_point in paths:
         lines.append([i[0] for i in two_point])
         lines[-1].append(two_point[-1][1])
-    lines.append([[500,500]])
-    
-    LinesOffset(lines,5, True)
+    lines.append([500])
+    print(lines)
+    # lines = [[[0,0],[1,1]],[[5,5],[6,6]]]
+    print(lines)
+    # paths = [[[1,1],[5,5],[6,6]]]
+    import matplotlib.pyplot as plt 
+    for line in paths:
+        plt.plot([i[0][0] for i in line], [i[0][1] for i in line])
+
+    res = pyclipper.scale_to_clipper(lines)
+
+    pc = pyclipper.PyclipperOffset()
+    pc.AddPaths(res, pyclipper.JT_SQUARE, pyclipper.ET_OPENSQUARE)
+
+    solution = pc.Execute(pyclipper.scale_to_clipper(5))
+    res = pyclipper.scale_from_clipper(solution)
+    print(res)
+    for line in res:
+        plt.plot([i[0] for i in line], [i[1] for i in line])
+        plt.plot([line[-1][0],line[0][0]],[line[-1][1],line[0][1]])
+    plt.show()
 if __name__ == '__main__':
     main()
 
