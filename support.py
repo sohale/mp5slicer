@@ -302,7 +302,7 @@ class Support():
         self.mesh.max_z = mesh.max_z() # numpy array
         self.mesh.bed_z = self.mesh.bbox.zmin
         self.support_required_mask = self.detect_support_requiring_facet()
-        self.groups = self.group_support_area(save_cache=True, use_cache=True)
+        self.groups = self.group_support_area()
 
     def detect_support_requiring_facet(self, support_starts_height = 0.1):
         
@@ -319,7 +319,7 @@ class Support():
 
         return support_required_mask # returns a boolen list indicated which triangles require support
 
-    def group_support_area(self, save_cache = False, use_cache=False):
+    def group_support_area(self):
 
         def connect_connected_component(graph):
             def dfs(graph, start):
@@ -341,22 +341,13 @@ class Support():
                 support_indexs = support_indexs - visited
             return groups
 
-        if use_cache:
-            import os.path
-            if os.path.isfile(self.mesh.name + '.txt'):
-                import json
-                with open(self.mesh.name+'.txt') as data_file:   
-                     data = json.load(data_file)
-                if data['supportOverhangangle'] == config.supportOverhangangle:
-                    print('using cache groups')
-                    return data['groups']
-                else:
-                    print('computing groups because of different supportOverhangangle to Cache')
-
         import datetime
+        from numpy.linalg import norm
         start_time = datetime.datetime.now()
 
+        ## use global index 
         support_triangles_index  = np.where(self.support_required_mask)[0]
+        centers = get_center(self.mesh.triangles[support_triangles_index])
 
         triangle_index_and_its_neighbour = {}
 
@@ -365,15 +356,20 @@ class Support():
             triangle_index_and_its_neighbour[tri_index] = neighbour
 
             triangle = self.mesh.triangles[tri_index]
+            this_trangle_center = np.array([triangle[0]+triangle[1]+triangle[2]])/3
+
+
+            # if center within sampling distance check whether they are next to each other
+            # todo: think about the close limit on the next line
+            close_triangles_index = support_triangles_index[norm(centers - this_trangle_center, axis=1)<config.supportSamplingDistance]
+            # need to think about how to deal with large area triangles
+            # now the triangle with large area will be in its own group
+
             x = list(triangle[0])
             y = list(triangle[1])
             z = list(triangle[2])
 
-            for tri_detect_index in support_triangles_index:
-
-                if tri_detect_index in triangle_index_and_its_neighbour and tri_index in triangle_index_and_its_neighbour[tri_detect_index]:
-                    neighbour.add(tri_detect_index)
-                    continue
+            for tri_detect_index in close_triangles_index:
 
                 tri = self.mesh.triangles[tri_detect_index]
 
@@ -415,23 +411,13 @@ class Support():
         # group them together by connected group component algorithm 
         # from http://eddmann.com/posts/depth-first-search-and-breadth-first-search-in-python/
 
-        print('-------len of group-----------')
-        print(len(groups))
-
         print('------- grouping time -------------')
         print(datetime.datetime.now() - start_time)
         
         groups = connect_connected_component(triangle_index_and_its_neighbour)
 
-        if save_cache:
-            groups = [[int(j) for j in i] for i in groups]
-            data = {}
-            data['supportOverhangangle'] = config.supportOverhangangle
-            data['groups'] = groups
-            import json
-            with open(self.mesh.name+'.txt', 'w') as outfile:
-                json.dump(data, outfile)
-
+        print('-------len of group-----------')
+        print(len(groups))
 
         return groups
 
@@ -440,6 +426,10 @@ class Support():
         by equal distance sampling point on the bounding box and raytrace these points onto the grouped area, 
         if it hits then take it as a support point
         '''
+
+        import datetime
+        start_time = datetime.datetime.now()
+
         support_points_by_group = []
 
         for group in self.groups:
@@ -462,7 +452,14 @@ class Support():
             epsilon = 0.3
             for x in x_sample:
                 for y in y_sample:
-                    res = ray_trace_mesh([x, y, max_z + epsilon], group_tri)
+                    down_sampling_ray_trace_triangle_mask = np.logical_and(min_x <= x <= max_x, 
+                                                                           min_y <= y <= max_y)
+                    x_mask = np.logical_and(self.mesh.min_x[group] <= x, x <= self.mesh.max_x[group])
+                    y_mask = np.logical_and(self.mesh.min_y[group] <= y, y <= self.mesh.max_y[group])
+                    all_mask = np.logical_and(x_mask, y_mask)
+                    
+                    ray_trace_tri = group_tri[all_mask]
+                    res = ray_trace_mesh([x, y, max_z + epsilon], ray_trace_tri)
                     if res != None:
                         z = res[0]
                         support_points.append([x, y, z])
@@ -475,10 +472,14 @@ class Support():
         else:
             pass
 
+        print('time for sampling support point')
+        print(datetime.datetime.now() - start_time)
         return support_points_by_group
 
-
     def self_support_detection(self, support_points_by_groups):
+
+        import datetime
+        start_time = datetime.datetime.now()
 
         epsilon = 0.1
 
@@ -515,7 +516,9 @@ class Support():
                         if res[1] > z_triangle_selfsupport[index]:
                             z_triangle_selfsupport[index] = res[1]
 
-        return z_triangle_selfsupport_by_groups   
+        print('time for self-detection')
+        print(datetime.datetime.now() - start_time)
+        return z_triangle_selfsupport_by_groups
 
     def support_lines(self):
 
@@ -575,8 +578,8 @@ class Support():
 
         polylines = []
         polylines += pl.return_polylines()
-        polylines += pl.offset(0.2, True)
-        polylines += pl.offset(0.4, True)
+        polylines += pl.offset(0.2, point=True) # offset point
+        polylines += pl.offset(0.4, point=True) # offset point
         if first_layer:
             polylines += pl.offset(0.2)
             polylines += pl.offset(0.4)
@@ -597,7 +600,6 @@ class Support():
             pl.show()
 
         return polylines
-
 
     def visulisation(self, require_group = False, require_support_lines = False):
 
@@ -670,23 +672,6 @@ class Support():
             layer_count += 1
         return polylines_all
 
-# def main():
-#     from stl import mesh as np_mesh
-#     import mesh_operations
-#     import numpy as np
-
-#     import datetime
-#     start_time = datetime.datetime.now()
-#     mesh_name = "Support_test.stl"
-#     stl_mesh = np_mesh.Mesh.from_file(mesh_name)
-#     our_mesh = mesh_operations.mesh(stl_mesh.vectors, fix_mesh=True, name=mesh_name)
-#     our_mesh.name = mesh_name
-#     sup = Support(our_mesh)
-#     # a = sup.get_support_polylines_list()
-#     # polylines = sup.get_support_polylines_list()
-#     sup.visulisation(require_group = True, require_support_lines = True)
-
-
 def main():
     from stl import mesh as np_mesh
     import mesh_operations
@@ -696,12 +681,13 @@ def main():
     start_time = datetime.datetime.now()
     mesh_name = "bunny_0.7.stl"
     stl_mesh = np_mesh.Mesh.from_file(mesh_name)
-    our_mesh = mesh_operations.mesh(stl_mesh.vectors, fix_mesh=True, name=mesh_name)
-    our_mesh.name = mesh_name
+    our_mesh = mesh_operations.mesh(stl_mesh.vectors, fix_mesh=True)
     sup = Support(our_mesh)
-    s,e = sup.support_lines()
-    sup.arranged_polyline_from_support(s,e,1,does_visualize=False,first_layer=False)
+    # s,e = sup.support_lines()
+    # sup.arranged_polyline_from_support(s,e,1,does_visualize=False,first_layer=False)
     # sup.visulisation(require_support_lines=True)
+
+    sup.get_support_polylines_list()
 
 if __name__ == '__main__':
     main()

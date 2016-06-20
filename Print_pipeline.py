@@ -113,9 +113,13 @@ def main():
     if config.useSupport:
         from stl import mesh
         stl_mesh = mesh.Mesh.from_file(stl_file_name)
-        this_mesh = MPmesh(stl_mesh.vectors, fix_mesh= True, name=stl_file_name)
+        this_mesh = MPmesh(stl_mesh.vectors, fix_mesh= True)
         move_to_center(this_mesh)
+        import datetime
+        support_start_time = datetime.datetime.now()
         support_polylines_list = support.Support(this_mesh).get_support_polylines_list()
+        print('time for support')
+        print(datetime.datetime.now() - support_start_time)
     ############## end of support polylines generation and feed to get_layer_list####################
 
     if config.useSupport:

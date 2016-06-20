@@ -9,7 +9,7 @@ import decimal
 
 class mesh():
 
-    def __init__(self, input_triangles=[], input_normals=[], input_areas=[], fix_mesh=False, name=None):
+    def __init__(self, input_triangles=[], input_normals=[], input_areas=[], fix_mesh=False):
         if len(input_triangles) == 0:
             raise ValueError
 
@@ -29,11 +29,6 @@ class mesh():
         if fix_mesh:
             self.remove_badtriangles()
             self.remove_duplicates()
-
-        if name != None:
-            self.name = name
-        else:
-            pass
 
         self.normalise_normals()
         self.sort_by_z()
