@@ -452,8 +452,6 @@ class Support():
             epsilon = 0.3
             for x in x_sample:
                 for y in y_sample:
-                    down_sampling_ray_trace_triangle_mask = np.logical_and(min_x <= x <= max_x, 
-                                                                           min_y <= y <= max_y)
                     x_mask = np.logical_and(self.mesh.min_x[group] <= x, x <= self.mesh.max_x[group])
                     y_mask = np.logical_and(self.mesh.min_y[group] <= y, y <= self.mesh.max_y[group])
                     all_mask = np.logical_and(x_mask, y_mask)
