@@ -3,6 +3,7 @@ from slicer.Elements import Outline
 from slicer.Polygon_stack import *
 from slicer.Line_group import *
 import slicer.config as config
+from slicer.Line_stack import *
 
 class Layer():
 
@@ -13,7 +14,8 @@ class Layer():
         self.index = index
         self.BBox = BBox
         self.process_islands()
-        self.support_polylines = support_polylines
+        self.support_open_path, self.support_boundary_ps = support_polylines
+        self.support_polylines = self.support_polygon_union_with_outline(support_polylines)
 
     def G_print(self):
         polylines = Line_group("layer")
@@ -23,6 +25,8 @@ class Layer():
             skirts = Polygon_stack()
             for island in self.islands:
                 skirts = skirts.union_with(island.get_platform_bound())
+                if not self.support_boundary_ps.isEmpty:
+                    skirts = skirts.union_with(self.support_boundary_ps.offset(config.line_width))
             skirtPolylines.add_chains(skirts.get_print_line())
             for count in range(config.platform_bound_count):
                 skirts = skirts.offset(config.line_width)
@@ -106,5 +110,27 @@ class Layer():
                 isle = Island(self.print_tree,island, self.layers,self.index,self.BBox,self)
                 self.islands.append(isle)
 
+    def outline(self):
+        ps = Polygon_stack()
+        for island in self.islands:
+            ps.add_polygons(island.get_outterbounds().polygons)
+        ps = ps.union_self()
+        # if len(ps.polygons) == 2:
+        #     ps.visualize()
+        return ps
 
+    def support_polygon_union_with_outline(self, support_polylines):
 
+        outline = self.outline()
+        offseted_outline = outline.offset(config.line_width*2)
+
+        polylines = []
+        # polygons
+        solution_polygons_ps = self.support_boundary_ps.difference_with(offseted_outline)
+        polylines += solution_polygons_ps.get_print_line()
+
+        # open_path
+        solution_open_path_ps = Line_stack(self.support_open_path.difference_with(offseted_outline))
+        polylines += solution_open_path_ps.get_print_line()
+
+        return polylines

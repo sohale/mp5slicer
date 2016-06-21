@@ -69,6 +69,12 @@ class Polygon_stack():
         else:
             return Polygon_stack(union_layers(self.polygons, other.polygons, True))
 
+    def union_self(self):
+        if self.isEmpty:
+            return Polygon_stack()
+        else:
+            return Polygon_stack(union_itself(self.polygons, True))
+
     def difference_with(self, other):
         if self.isEmpty :
             return Polygon_stack()
@@ -97,3 +103,11 @@ class Polygon_stack():
             polyline.append(start_point)
             polylines.append(polyline)
         return polylines
+
+    def visualize(self):
+        import matplotlib.pyplot as plt
+        for each_polygon in self.polygons:
+            for this_vertex, next_vertex in zip(each_polygon, each_polygon[1:]):
+                plt.plot([this_vertex[0],next_vertex[0]], [this_vertex[1],next_vertex[1]])
+            plt.plot([each_polygon[-2][0],each_polygon[-1][0]],[each_polygon[-2][1],each_polygon[-1][1]])
+        plt.show()

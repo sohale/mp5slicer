@@ -5,8 +5,11 @@ sys.path.append(os.path.split(os.path.dirname(os.path.abspath(inspect.getfile(in
 import numpy as np
 import slicer.config as config
 import slicer.clipper_operations as clipper_operations
+from slicer.Polygon_stack import *
+from slicer.Line_stack import *
 
 class PolyLines: # using pyclipper paths format
+    # distinguish between point and line
     def __init__(self):
         self.line_points = []
     def __len__(self):
@@ -573,18 +576,6 @@ class Support():
         sample_point = SupportSamplingPoint(intersect_points_by_groups)
         pl = sample_point.polyline_generation(does_visualize=False)
 
-
-        polylines = []
-        polylines += pl.return_polylines()
-        polylines += pl.offset(0.2, point=True) # offset point
-        polylines += pl.offset(0.4, point=True) # offset point
-        if first_layer:
-            polylines += pl.offset(0.2)
-            polylines += pl.offset(0.4)
-            polylines += pl.offset(0.6)
-            polylines += pl.offset(0.8)
-            polylines += pl.offset(1.0)
-
         if does_visualize:
             import numpy as np
             import pylab as pl
@@ -597,7 +588,24 @@ class Support():
             ax.margins(0.1)
             pl.show()
 
-        return polylines
+        import pyclipper
+        pyclipper_formatting = []
+        pyclipper_formatting += pl.offset(0.2)
+        if first_layer:
+            pyclipper_formatting += pl.offset(0.4)
+            pyclipper_formatting += pl.offset(0.6)
+            pyclipper_formatting += pl.offset(0.8)
+        pyclipper_formatting = pyclipper.scale_to_clipper(pyclipper_formatting)
+        pyclipper_formatting = Polygon_stack(pyclipper_formatting)
+
+        open_path = []
+        lines =  pyclipper.scale_to_clipper(pl.line_points)
+        for each_line in lines:
+            if each_line != [] and len(each_line)>1:
+                open_path.append(each_line)       
+        open_path = Line_stack(open_path)
+
+        return [open_path, pyclipper_formatting]
 
     def visulisation(self, require_group = False, require_support_lines = False):
 
@@ -677,15 +685,16 @@ def main():
 
     import datetime
     start_time = datetime.datetime.now()
-    mesh_name = "bunny_0.7.stl"
+    mesh_name = "elephant.stl"
     stl_mesh = np_mesh.Mesh.from_file(mesh_name)
     our_mesh = mesh_operations.mesh(stl_mesh.vectors, fix_mesh=True)
     sup = Support(our_mesh)
-    # s,e = sup.support_lines()
-    # sup.arranged_polyline_from_support(s,e,1,does_visualize=False,first_layer=False)
+    s,e = sup.support_lines()
+    sup.arranged_polyline_from_support(s,e,20,does_visualize=False,first_layer=False)
     # sup.visulisation(require_support_lines=True)
 
-    sup.get_support_polylines_list()
+    # sup.get_support_polylines_list()
+
 
 if __name__ == '__main__':
     main()

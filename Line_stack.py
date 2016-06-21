@@ -1,5 +1,5 @@
 from slicer.clipper_operations import *
-
+import pyclipper
 
 class Line_stack():
     def __init__(self, lines = None):
@@ -45,3 +45,8 @@ class Line_stack():
             return diff_layers(self.lines,other.polygons , False)
         except:
             raise RuntimeError
+
+    def get_print_line(self):
+        if not self.isEmpty:
+            return pyclipper.scale_from_clipper(self.lines)
+        return []
