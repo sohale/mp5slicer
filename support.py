@@ -34,6 +34,24 @@ class PolyLines: # using pyclipper paths format
             for each_line in self.line_points:
                 polylines += zip(each_line, each_line[1:])
         return polylines
+    def clean_rearrange(self):
+        self.line_points = [i for i in self.line_points if i!=[]]     
+        # for i in self.line_points:
+        #     print(i[0][0])
+        # self.line_points = sorted(self.line_points, key=lambda x:x[0][0], reverse=True)
+
+        # import itertools
+        # groups = []
+        # for _, g in itertools.groupby(self.line_points, key=lambda x:x[0][0]):
+        #     groups.append(list(g))      # Store group iterator as a list
+        # self.line_points = []
+        # for each_data in groups:
+        #     self.line_points += each_data
+        # print('---------------------')
+        # for i in self.line_points:
+        #     print(i[0][0])
+
+
     def offset(self, offset_value, point=False):
 
         if point: # hack
@@ -42,24 +60,24 @@ class PolyLines: # using pyclipper paths format
                 if len(each_line) == 1:
                     points.append(each_line)
 
-            sol = clipper_operations.LinesOffset(points, offset_value+0.2)
+            sol = clipper_operations.LinesOffset(points, offset_value)
             for each_line_index in range(len(sol)): 
                 sol[each_line_index].append(sol[each_line_index][0])
 
             return sol
 
-        sol = clipper_operations.LinesOffset(self.line_points, offset_value)
-        
-        # extra offset for points 
-        points = []
+        # sol = clipper_operations.LinesOffset(self.line_points, offset_value)
+        sol = []
+        #  offset for lines only
+        lines = []
         for each_line in self.line_points:
-            if len(each_line) == 1:
-                points.append(each_line)
+            if len(each_line) != 1:
+                lines.append(each_line)
 
-        sol += clipper_operations.LinesOffset(points, offset_value+0.2)
+        sol += clipper_operations.LinesOffset(lines, offset_value)
 
-        for each_line_index in range(len(sol)): 
-            sol[each_line_index].append(sol[each_line_index][0])
+        # for each_line_index in range(len(sol)): 
+        #     sol[each_line_index].append(sol[each_line_index][0])
 
         return sol
     def non_empty(self):
@@ -441,12 +459,19 @@ class Support():
 
             group_tri = self.mesh.triangles[group]        
 
-            min_x = np.min(self.mesh.min_x[group] + offset_boundingbox)
-            max_x = np.max(self.mesh.max_x[group] - offset_boundingbox)
-            min_y = np.min(self.mesh.min_y[group] + offset_boundingbox)
-            max_y = np.max(self.mesh.max_y[group] - offset_boundingbox)
-            min_z = np.min(self.mesh.min_z[group] + offset_boundingbox)
-            max_z = np.max(self.mesh.max_z[group] - offset_boundingbox)
+            # min_x = np.min(self.mesh.min_x[group] + offset_boundingbox)
+            # max_x = np.max(self.mesh.max_x[group] - offset_boundingbox)
+            # min_y = np.min(self.mesh.min_y[group] + offset_boundingbox)
+            # max_y = np.max(self.mesh.max_y[group] - offset_boundingbox)
+            # min_z = np.min(self.mesh.min_z[group] + offset_boundingbox)
+            # max_z = np.max(self.mesh.max_z[group] - offset_boundingbox)
+
+            min_x = np.min(self.mesh.min_x[group])
+            max_x = np.max(self.mesh.max_x[group])
+            min_y = np.min(self.mesh.min_y[group])
+            max_y = np.max(self.mesh.max_y[group])
+            min_z = np.min(self.mesh.min_z[group])
+            max_z = np.max(self.mesh.max_z[group])
 
             # sampling in x, y plane
             x_sample = np.arange(min_x, max_x, config.supportSamplingDistance)
@@ -575,6 +600,7 @@ class Support():
 
         sample_point = SupportSamplingPoint(intersect_points_by_groups)
         pl = sample_point.polyline_generation(does_visualize=False)
+        # pl.clean_rearrange()
 
         if does_visualize:
             import numpy as np
@@ -590,20 +616,26 @@ class Support():
 
         import pyclipper
         pyclipper_formatting = []
-        pyclipper_formatting += pl.offset(0.2)
+        
+        pyclipper_formatting += pl.offset(config.line_width)
         if first_layer:
-            pyclipper_formatting += pl.offset(0.4)
-            pyclipper_formatting += pl.offset(0.6)
-            pyclipper_formatting += pl.offset(0.8)
+            pyclipper_formatting += pl.offset(config.line_width*2)
+            # pyclipper_formatting += pl.offset(0.6)
+            # pyclipper_formatting += pl.offset(0.8)
+
+        # pyclipper_formatting += pl.offset(0.2, point=True)
+        pyclipper_formatting += pl.offset(config.line_width, point=True)
+        pyclipper_formatting += pl.offset(config.line_width*2, point=True)
+        # pyclipper_formatting += pl.offset(0.8, point=True)
+
         pyclipper_formatting = pyclipper.scale_to_clipper(pyclipper_formatting)
         pyclipper_formatting = Polygon_stack(pyclipper_formatting)
 
-        open_path = []
+        open_path = Line_stack()
         lines =  pyclipper.scale_to_clipper(pl.line_points)
         for each_line in lines:
-            if each_line != [] and len(each_line)>1:
-                open_path.append(each_line)       
-        open_path = Line_stack(open_path)
+            if len(each_line)>1:
+                open_path.add_line(each_line)       
 
         return [open_path, pyclipper_formatting]
 

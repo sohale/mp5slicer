@@ -16,7 +16,6 @@ class Layer():
         self.process_islands()
         self.support_open_path, self.support_boundary_ps = support_polylines
         self.support_polylines = self.support_polygon_union_with_outline(support_polylines)
-
     def G_print(self):
         polylines = Line_group("layer")
 
@@ -25,8 +24,8 @@ class Layer():
             skirts = Polygon_stack()
             for island in self.islands:
                 skirts = skirts.union_with(island.get_platform_bound())
-                if not self.support_boundary_ps.isEmpty:
-                    skirts = skirts.union_with(self.support_boundary_ps.offset(config.line_width))
+            if not self.support_boundary_ps.isEmpty:
+                skirts = skirts.union_with(self.support_boundary_ps.offset(config.line_width))
             skirtPolylines.add_chains(skirts.get_print_line())
             for count in range(config.platform_bound_count):
                 skirts = skirts.offset(config.line_width)
@@ -114,15 +113,13 @@ class Layer():
         ps = Polygon_stack()
         for island in self.islands:
             ps.add_polygons(island.get_outterbounds().polygons)
-        ps = ps.union_self()
-        # if len(ps.polygons) == 2:
-        #     ps.visualize()
-        return ps
+        return ps.union_self()
 
     def support_polygon_union_with_outline(self, support_polylines):
 
         outline = self.outline()
-        offseted_outline = outline.offset(config.line_width*2)
+        # offseted_outline = outline.offset(config.line_width)
+        offseted_outline = outline # testing
 
         polylines = []
         # polygons
@@ -130,7 +127,44 @@ class Layer():
         polylines += solution_polygons_ps.get_print_line()
 
         # open_path
-        solution_open_path_ps = Line_stack(self.support_open_path.difference_with(offseted_outline))
-        polylines += solution_open_path_ps.get_print_line()
+        # offseted_outline.visualize()
+        solution_open_path_ls = Line_stack(self.support_open_path.difference_with(offseted_outline))
+        polylines += solution_open_path_ls.get_print_line()
 
-        return polylines
+        # solution_open_path_ls.visualize()
+        def distance(x, y):
+            import numpy as np 
+            x = np.array(x)
+            y = np.array(y)
+            return np.linalg.norm(x-y)
+        from collections import namedtuple        
+
+        if polylines != []:
+            data_dict = [] # integer key: {start:,end:,line:}
+            Line_Data = namedtuple('Line_Data', 'start end line')
+            for each_line in polylines:
+                data_dict.append(Line_Data(each_line[0], each_line[-1], each_line))
+
+            # start at first element
+            arranged_line = Line_stack() 
+            first_line = data_dict.pop()
+            end = pyclipper.scale_from_clipper(first_line.end)
+            arranged_line.add_line(first_line.line)
+            while data_dict:
+                shortest_distance = 999999999999999
+                delete_index = None
+                for i in range(len(data_dict)):
+                    start_point = pyclipper.scale_from_clipper(data_dict[i].start)
+                    if distance(start_point, end) < shortest_distance:
+                        shortest_distance = distance(start_point, end)
+                        delete_index = i
+
+                
+                arranged_line.add_line(data_dict[delete_index].line)
+                end = pyclipper.scale_from_clipper(data_dict[delete_index].end)
+                del data_dict[delete_index]
+            # arranged_line.visualize()
+            return arranged_line.lines
+
+        else:
+            return []
