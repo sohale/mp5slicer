@@ -33,8 +33,8 @@ class Line_stack():
 
     def intersect_with(self, other):
         if self.isEmpty or other.isEmpty:
-            return []
-        return inter_layers(self.lines,other.polygons , False)
+            return Line_stack([])
+        return Line_stack(inter_layers(self.lines,other.polygons , False))
 
     def union_with(self, other):
         pass
@@ -43,55 +43,22 @@ class Line_stack():
         if other.isEmpty:
             return self.lines # same return format
         if self.isEmpty:
-            return []
-        # if self.isEmpty or other.isEmpty:
-            # return []
+            return Line_stack([])
         try:
-            return diff_layers(self.lines,other.polygons , False)
+            return Line_stack(diff_layers(self.lines,other.polygons , False))
         except:
             raise RuntimeError
 
     def get_print_line(self):
-        # def distance(x, y):
-        #     import numpy as np 
-        #     x = np.array(x)
-        #     y = np.array(y)
-        #     return np.linalg.norm(x-y)
-        # from collections import namedtuple
-        # if not self.isEmpty:
-        #     data_dict = [] # integer key: {start:,end:,line:}
-        #     Line_Data = namedtuple('Line_Data', 'start end line')
-        #     for each_line in self.lines:
-        #         data_dict.append(Line_Data(each_line[0], each_line[-1], each_line))
-
-        #     # start at first element
-        #     arranged_line = Line_stack()
-        #     end = pyclipper.scale_from_clipper(data_dict.pop().end)
-        #     while data_dict:
-        #         shortest_distance = 999999999999999
-        #         delete_index = None
-        #         for i in range(len(data_dict)):
-        #             print(i)
-        #             start_point = pyclipper.scale_from_clipper(data_dict[i].start)
-        #             if distance(start_point, end) < shortest_distance:
-        #                 shortest_distance = distance(start_point, end)
-        #                 delete_index = i
-        #         # if delete_index == None:
-        #         #     print(data_dict)
-        #         #     assert len(data_dict) == 1
-        #         #     delete_index = 0
-                
-        #         arranged_line.add_line(data_dict[delete_index].line)
-        #         end = pyclipper.scale_from_clipper(data_dict[delete_index].end)
-        #         print('delete ' + str(i))
-        #         del data_dict[delete_index]
-            # return pyclipper.scale_from_clipper(arranged_line.lines)
-        # return []
-
         if not self.isEmpty:
             return pyclipper.scale_from_clipper(self.lines)
         else:
             return []
+    def return_start_end_point(self):
+        if self.isEmpty:
+            return [None, None]
+        else:
+            return [self.lines[0][0], self.lines[-1][-1]]
 
     def visualize(self):
         import matplotlib.pyplot as plt

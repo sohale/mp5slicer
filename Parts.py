@@ -256,17 +256,43 @@ class Infill:
         self.pattern = Line_stack(pyclipper.scale_to_clipper(linear_infill2(10,teta,self.BBox)))
 
         if not skin_islands.isEmpty:
-            innerlines = Line_stack(self.pattern.intersect_with(polygons))
+            innerlines = self.pattern.intersect_with(polygons)
             innerlines = innerlines.difference_with(skin_islands)
         else:
             innerlines = self.pattern.intersect_with(polygons)
-        if len(innerlines) != 0:
-            self.startPoint = innerlines[0][0]
-            self.endPoint = innerlines[-1][-1]
-        try:
-            return pyclipper.scale_from_clipper(innerlines)
-        except:
-            raise RuntimeError
+            self.startPoint, self.endPoint = innerlines.return_start_end_point()
+        # if len(self.polygons[0]) == 0:
+        #     raise StandardError
+        # innerlines_as_tree = inter_layers(self.pattern,self.polygons[0],False)
+        # for interline in innerlines_as_tree.Childs:
+        #     innerlines.append(interline.Contour)
+        # # innerlines = pyclipper.scale_from_clipper(innerlines)
+        #
+        #
+        # for hole_index in range(1, len(self.polygons)):
+        #     if len(self.polygons[hole_index]) != 0:
+        #         innerlines_as_tree = diff_layers(innerlines,self.polygons[hole_index],False)
+        #         innerlines =[]
+        #
+        #         for interline in innerlines_as_tree.Childs:
+        #             innerlines.append(interline.Contour)
+        #         # innerlines = pyclipper.scale_from_clipper(innerlines)
+        #
+        #
+        # for skin_index in range(len(skin_islands)):
+        #     if  len(innerlines) != 0:
+        #         # innerlines_as_tree = diff_layers(innerlines,pyclipper.scale_from_clipper(skin_polygons[skin_index]),False)
+        #         innerlines_as_tree = diff_layers(innerlines,skin_islands[skin_index].Contour,False)
+        #         innerlines =[]
+        #
+        #         for interline in innerlines_as_tree.Childs:
+        #             innerlines.append(interline.Contour)
+        #         # innerlines = pyclipper.scale_from_clipper(innerlines)
+        return innerlines.get_print_line()
+        # try:
+        #     return pyclipper.scale_from_clipper(innerlines)
+        # except:
+        #     raise RuntimeError
 
 
     def process_polyline(self,polygon):
@@ -318,14 +344,14 @@ class Skin:
             teta = self.orientation
         self.pattern = Line_stack(pyclipper.scale_to_clipper(linear_infill2(config.line_width,teta,self.BBox)))
         innerlines =  Line_stack(self.pattern.intersect_with(self.skins_as_polygon_stack))
+
         innerlines = innerlines.intersect_with(perimeter)
 
-        innerlines = pyclipper.scale_from_clipper(innerlines)
+        # innerlines = pyclipper.scale_from_clipper(innerlines)
 
-        self.polylines = innerlines
-        if len(innerlines) != 0:
-            self.startPoint = innerlines[0][0]
-            self.endPoint = innerlines[-1][-1]
+        self.polylines = innerlines.get_print_line()
+        self.startPoint, self.endPoint = innerlines.return_start_end_point()
+
 
 
     def process_polyline(self,polygon):
