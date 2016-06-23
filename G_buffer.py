@@ -80,7 +80,7 @@ class G_buffer:
                     else:
                         gcode_output.write(gcodeEnvironment.goToNextPoint(line[0], True))
                     for point_index in range(1,len(line)):
-                        instruction = gcodeEnvironment.drawToNextPoint(line[point_index], self.config.layerThickness, self.config.skinSpeed, self.config.interiorFanSpeed)
+                        instruction = gcodeEnvironment.drawToNextPoint(line[point_index], self.config.layerThickness , self.config.skinSpeed, self.config.interiorFanSpeed)
                         gcode_output.write(instruction)
 
         def print_support(leaf):
@@ -100,7 +100,7 @@ class G_buffer:
                 if len(line) > 0:
                     gcode_output.write(gcodeEnvironment.goToNextPoint(line[0], True))
                     for point_index in range(1, len(line)):
-                        instruction = gcodeEnvironment.drawToNextPoint(line[point_index], self.config.layerThickness, self.config.shellSpeed, self.config.interiorFanSpeed)
+                        instruction = gcodeEnvironment.drawToNextPoint(line[point_index], self.config.layerThickness , self.config.shellSpeed, self.config.interiorFanSpeed)
                         gcode_output.write(instruction)
             self.skip_retraction = False
 
@@ -109,9 +109,35 @@ class G_buffer:
                 if len(line) > 0:
                     gcode_output.write(gcodeEnvironment.goToNextPoint(line[0], True))
                     for point_index in range(1, len(line)):
-                        instruction = gcodeEnvironment.drawToNextPoint(line[point_index], self.config.layerThickness, self.config.shellSpeed, self.config.default_fan_speed)
+                        instruction = gcodeEnvironment.drawToNextPoint(line[point_index], self.config.layerThickness, self.config.raftSpeed, 0.2)
                         gcode_output.write(instruction)
                         self.previousPos = line[point_index]
+            self.skip_retraction = False
+
+        def print_raft(raft):
+            for line in raft.sub_lines:
+                if len(line) > 0:
+                    gcode_output.write(gcodeEnvironment.goToNextPoint(line[0], True))
+                    for point_index in range(1, len(line)):
+                        instruction = gcodeEnvironment.drawToNextPoint(line[point_index], self.config.raftLayerThickness, self.config.raftSpeed, 0)
+                        gcode_output.write(instruction)
+                        self.previousPos = line[point_index]
+            self.skip_retraction = False
+
+        def print_top_raft(raft):
+            for line in raft.sub_lines:
+                if len(line) > 0:
+                    gcode_output.write(gcodeEnvironment.goToNextPoint(line[0], True))
+                    for point_index in range(1, len(line)):
+                        instruction = gcodeEnvironment.drawToNextPoint(line[point_index],
+                                                                       self.config.raftLayerThickness,
+                                                                       self.config.raftSpeed, 0)
+                        gcode_output.write(instruction)
+                        self.previousPos = line[point_index]
+            self.wait_point = raft.sub_lines[0][0]
+            gcode_output.write(gcodeEnvironment.goToNextPoint(self.wait_point, True))
+            gcode_output.write(gcodeEnvironment.wait_for_cooling(210, 60000))
+
             self.skip_retraction = False
 
         # @profile
@@ -124,7 +150,9 @@ class G_buffer:
                 "inner_hole": print_inner_shell,
                 "boundary": print_boundary,
                 "skirt" : print_skirt,
-                "support" : print_support
+                "support" : print_support,
+                "raft" : print_raft,
+                "top_raft" : print_top_raft
             }
             switch[leaf.type](leaf)
 
@@ -134,8 +162,40 @@ class G_buffer:
                 "outline": print_node,
                 "layer": print_layer,
                 "island": print_node,
+                "raft_layer": print_raft_layer,
+                "contact_layer" : print_contact_layer
+
             }
             switch[node.type](node)
+
+        def print_raft_layer(node):
+            self.config.extrusion_multiplier = 0.8
+            gcodeEnvironment.Z += self.config.raftLayerThickness
+            for node in node.sub_lines:
+                gotroughgroup(node)
+
+            self.config = copy_module(config)
+
+        def print_contact_layer(node):
+            self.config.infillSpeed = 1200
+            self.config.skinSpeed = 700
+            self.config.boundarySpeed = 700
+            self.config.holeSpeed = 1000
+            self.config.shellSpeed = 700
+            self.config.exteriorFanSpeed = 0.6
+            self.config.interiorFanSpeed = 0.6
+            self.config.extrusion_multiplier = 2
+
+            gcodeEnvironment.Z += self.config.layerThickness
+
+            for node in node.sub_lines:
+                gotroughgroup(node)
+
+            # gcode_output.write("M104 S220 \n")
+            gcode_output.write(gcodeEnvironment.goToNextPoint(self.wait_point, True))
+            gcode_output.write(gcodeEnvironment.wait_for_cooling(config.temperature, 25000))
+
+            self.config = copy_module(config)
 
         # @profile
         def print_layer(node):

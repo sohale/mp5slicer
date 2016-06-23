@@ -6,7 +6,7 @@ def dist(point1, point2):
 
 def arrange_path(line_group):
     assert (isinstance(line_group, Line_group))
-    assert (line_group.type == "skin" or line_group.type == "infill")
+    # assert (line_group.type == "skin" or line_group.type == "infill" or line_group.type == "raft")
     lines = line_group.sub_lines
 
 

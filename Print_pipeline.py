@@ -10,6 +10,7 @@ import sys, getopt
 from slicer.config_factory import config_factory
 from slicer.slice import *
 import slicer.support as support
+from slicer.raft_layer import *
 global start_time
 global print_settings
 
@@ -19,6 +20,8 @@ def get_layer_list(polygon_layers, BBox, support_polylines_list = []):
     import slicer.config as config
 
     layer_list = []
+
+
 
     for layer_index in range(len(polygon_layers)):
         if config.useSupport:
@@ -35,6 +38,19 @@ def get_layer_list(polygon_layers, BBox, support_polylines_list = []):
     for layer in layer_list:
         layer.process_skins()
         layer.process_infill()
+
+    if config.raft == True:
+        raft_base = layer_list[0].get_raft_base()
+
+        raft_layer = Raft_layer(True,False, BBox, raft_base)
+        layer_list.insert(0, raft_layer)
+        raft_layer = Raft_layer(False,False, BBox, raft_base)
+        layer_list.insert(0, raft_layer)
+        raft_layer = Raft_layer(False, True, BBox, raft_base)
+        layer_list.insert(0, raft_layer)
+        layer_list.insert(0, raft_layer)
+        # layer_list.insert(0, raft_layer)
+
 
     return layer_list
 
@@ -104,6 +120,8 @@ def main():
     stl_file_name = args[0]
     conf_file_name = args[1]
     config_factory(conf_file_name)
+    import slicer.config as config
+    config.reset()
 
     start_time = time.time()
     polygon_layers, BBox = get_polygon_layers(stl_file_name)

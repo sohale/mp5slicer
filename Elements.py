@@ -27,15 +27,17 @@ class Outline:
             for poly_index in range(1, len(polygons)):
                 self.holes.append(self.Hole(self, SingleLine(polygons[poly_index], config.line_width)))
 
-            self.holePolylines = Line_group("hole", config.line_width)
+            self.holePolylines = Line_group("hole", True, config.line_width)
 
-            self.innerBoundaryPolylines = Line_group("inner_boundary", config.line_width)
+            self.innerBoundaryPolylines = Line_group("inner_boundary", True, config.line_width)
             self.holeShells = Polygon_stack()
             self.boundaryShells = Polygon_stack()
             self.innerShells = Polygon_stack()
 
+    def get_raft_base(self):
+        return Polygon_stack(self.boundary.line.offset(config.line_width * 5))
+
     def get_platform_bound(self):
-        platform_bound = Polygon_stack()
         if config.platform_bound == "brim":
             platform_bound = Polygon_stack(self.boundary.line.offset(config.line_width))
 
@@ -48,7 +50,7 @@ class Outline:
         return platform_bound
 
     def g_print(self):
-        polylines = Line_group("outline")
+        polylines = Line_group("outline", False)
 
         for boundary_shell in reversed(self.boundaryShells.polygons):
             self.innerBoundaryPolylines.add_chain(Outline.process_polyline(boundary_shell))
@@ -130,7 +132,7 @@ class Outline:
         def __init__(self,outline, line):
             self.outline = outline
             self.line = line
-            self.polylines = Line_group("hole", config.line_width)
+            self.polylines = Line_group("hole", True, config.line_width)
 
         def g_print(self):
 
@@ -148,7 +150,7 @@ class Outline:
         def __init__(self,outline, line):
             self.outline = outline
             self.line = line
-            self.polylines = Line_group("boundary", config.line_width)
+            self.polylines = Line_group("boundary", True, config.line_width)
 
 
         def g_print(self):

@@ -2,12 +2,12 @@
 
 class Line_group():
 
-    def __init__(self,type, width = 0):
+    def __init__(self,type, isLeaf, width = 0):
         self.sub_lines = []
         self.type = type
         self.print_time = 0
-        if (type == "skin" or type == "infill" or type == "boundary" or type == "hole" or type == "inner_boundary" or type == "inner_hole" or type == "skirt" or type == "support"):
-            self.isLeaf = True
+        self.isLeaf = isLeaf
+        if self.isLeaf:
             assert (width != 0)
             self.width = width
         else:
@@ -20,7 +20,7 @@ class Line_group():
 
     def add_chains(self, lines):
         assert (self.isLeaf)
-        self.sub_lines += lines
+        self.sub_lines.extend(lines)
 
     def add_group(self, group):
         assert(self.isLeaf == False)

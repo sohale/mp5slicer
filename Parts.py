@@ -244,7 +244,7 @@ class Infill:
         if isinstance(skin, Skin):
             skin_islands = skin.skins_as_polygon_stack
         else:
-            skin_islands = []
+            skin_islands = Polygon_stack()
         self.startPoint = None
         self.endPoint = None
         self.polylines = self.make_polyline(polygons,skin_islands, layer_index)
@@ -317,7 +317,7 @@ class Infill:
 
 
     def g_print(self):
-        polylines = Line_group("infill", config.line_width)
+        polylines = Line_group("infill", True, config.line_width)
         for polyline in self.polylines:
             polylines.add_chain(self.process_polyline(polyline))
         arrange_path(polylines)
@@ -373,7 +373,7 @@ class Skin:
 
 
     def g_print(self):
-        polylines = Line_group("skin", config.line_width)
+        polylines = Line_group("skin", True, config.line_width)
         for polyline in self.polylines:
             polylines.add_chain(self.process_polyline(polyline))
         arrange_path(polylines)

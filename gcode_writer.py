@@ -36,7 +36,7 @@ class GCodeEnvironment:
     def calculE(self, A, B, layerThickness=config.layerThickness):
         distance = math.sqrt( (pow((A[0]-B[0]),2)) + pow((A[1]-B[1]),2))
         section_surface = layerThickness * self.settings.line_width # layerThickness is possible to change for each layer
-        volume = section_surface * distance * 1.1
+        volume = section_surface * distance * config.extrusion_multiplier
         filament_length = volume / self.settings.crossArea
         # filament_length = self.truncate(filament_length, 4)
         return filament_length
@@ -120,6 +120,18 @@ class GCodeEnvironment:
 
     def volumeInLinear(self, A, B):
         return (self.calculE(A,B)*self.settings.crossArea) * self.settings.volFactor
+
+    def wait_for_cooling(self, temp, time):
+        instruction = self.retract()
+        self.fan_speed = 1
+        if printer_config.model == "r2x":
+            instruction += "M126 S" + str(self.fan_speed) + "\n"
+        else:
+            instruction += "M106 S" + str(int(math.floor(self.fan_speed * 255))) + "\n"
+        instruction += "M104 S"+ str(temp) +" \n"
+        instruction += "G4 P" + str(time) +" \n"
+        instruction += self.unretract()
+        return instruction
 
 
 

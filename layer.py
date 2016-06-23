@@ -13,14 +13,28 @@ class Layer():
         self.islands = []
         self.index = index
         self.BBox = BBox
+        if self.index == 0 and config.raft == True:
+            config.line_width = 0.27
         self.process_islands()
         self.support_open_path, self.support_boundary_ps = support_polylines
         self.support_polylines = self.support_polygon_union_with_outline(support_polylines)
-    def G_print(self):
-        polylines = Line_group("layer")
+        config.reset()
 
-        if self.index == 0:
-            skirtPolylines = Line_group("skirt", config.line_width)
+    def get_raft_base(self):
+        raft_base = Polygon_stack()
+        for island in self.islands:
+            raft_base = raft_base.union_with(island.get_raft_base())
+        return raft_base
+
+    def G_print(self):
+        if self.index == 0 and config.raft == True:
+            polylines = Line_group("contact_layer", False)
+
+        else:
+            polylines = Line_group("layer", False)
+
+        if self.index == 0 and (config.platform_bound == "brim" or config.platform_bound == "skirts"):
+            skirtPolylines = Line_group("skirt", True, config.line_width)
             skirts = Polygon_stack()
             for island in self.islands:
                 skirts = skirts.union_with(island.get_platform_bound())
@@ -35,7 +49,7 @@ class Layer():
         for island in self.islands:
             polylines.add_group(island.g_print())
 
-        support_line_group = Line_group('support', config.line_width)
+        support_line_group = Line_group('support', True, config.line_width)
         for polyline in self.support_polylines:
             support_line_group.add_chain(polyline)
         polylines.add_group(support_line_group)
@@ -47,12 +61,18 @@ class Layer():
             island.process_shells()
 
     def process_skins(self):
+        if self.index == 0 and config.raft == True:
+            config.line_width = 0.27
         for island in self.islands:
             island.process_skins()
+        config.reset()
 
     def prepare_skins(self):
+        if self.index == 0 and config.raft == True:
+            config.line_width = 0.27
         for island in self.islands:
             island.prepare_skins()
+        config.reset()
 
     # def get_skins(self):
     #     skins = Polygon_stack()
@@ -64,20 +84,23 @@ class Layer():
     def get_downskins(self):
         skins = Polygon_stack()
         for island in self.islands:
-            if island.skins is not None:
-                skins.add_polygon_stack(island.skins.downskins)
+            if not island.downskins.isEmpty:
+                skins.add_polygon_stack(island.downskins)
         return skins
 
     def get_upskins(self):
         skins = Polygon_stack()
         for island in self.islands:
-            if island.skins is not None:
-                skins.add_polygon_stack(island.skins.upskins)
+            if not island.upskins.isEmpty:
+                skins.add_polygon_stack(island.upskins)
         return skins
 
     def process_infill(self):
+        if self.index == 0 and config.raft == True:
+            config.line_width = 0.27
         for island in self.islands:
             island.process_infill()
+        config.reset()
 
 
     def poly1_in_poly2(self,poly1,poly2):
