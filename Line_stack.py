@@ -1,6 +1,7 @@
 from slicer.clipper_operations import *
 import pyclipper
 
+# A Line stack is equivalent to a polygon stack but its polygons are open
 class Line_stack():
     def __init__(self, lines = None):
         self.isEmpty = True

@@ -252,14 +252,9 @@ class Infill:
 
     def make_polyline(self,polygons,skin_islands, layer_index):
 
-        polylines = []
-        # slice_min = np.min(self.BBox)
-        # slice_max = np.max(self.BBox)
-        # first two layers and last two layers are set to be fully filled
-        # if layer_index == 1 or layer_index == 2 or layer_index == len(self.layers) - 2 or layer_index == len(self.layers)-1:
-        #      self.pattern = Line_stack(pyclipper.scale_to_clipper(linear_infill(settings.line_width,self.XorY,self.BBox)))
-        # else: # low infill density
-        self.pattern = Line_stack(pyclipper.scale_to_clipper(linear_infill(6,self.XorY,self.BBox)))
+        teta = 45 if self.XorY else 135
+        top = pyclipper.scale_to_clipper(linear_infill2(10,teta,self.BBox))
+        self.pattern = Line_stack(top)
 
         if not skin_islands.isEmpty:
             innerlines = Line_stack(self.pattern.intersect_with(polygons))
@@ -269,33 +264,6 @@ class Infill:
         if len(innerlines) != 0:
             self.startPoint = innerlines[0][0]
             self.endPoint = innerlines[-1][-1]
-        # if len(self.polygons[0]) == 0:
-        #     raise StandardError
-        # innerlines_as_tree = inter_layers(self.pattern,self.polygons[0],False)
-        # for interline in innerlines_as_tree.Childs:
-        #     innerlines.append(interline.Contour)
-        # # innerlines = pyclipper.scale_from_clipper(innerlines)
-        #
-        #
-        # for hole_index in range(1, len(self.polygons)):
-        #     if len(self.polygons[hole_index]) != 0:
-        #         innerlines_as_tree = diff_layers(innerlines,self.polygons[hole_index],False)
-        #         innerlines =[]
-        #
-        #         for interline in innerlines_as_tree.Childs:
-        #             innerlines.append(interline.Contour)
-        #         # innerlines = pyclipper.scale_from_clipper(innerlines)
-        #
-        #
-        # for skin_index in range(len(skin_islands)):
-        #     if  len(innerlines) != 0:
-        #         # innerlines_as_tree = diff_layers(innerlines,pyclipper.scale_from_clipper(skin_polygons[skin_index]),False)
-        #         innerlines_as_tree = diff_layers(innerlines,skin_islands[skin_index].Contour,False)
-        #         innerlines =[]
-        #
-        #         for interline in innerlines_as_tree.Childs:
-        #             innerlines.append(interline.Contour)
-        #         # innerlines = pyclipper.scale_from_clipper(innerlines)
         try:
             return pyclipper.scale_from_clipper(innerlines)
         except:

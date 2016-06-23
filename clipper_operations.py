@@ -88,7 +88,6 @@ def diff_layers_as_polytree( _subj,_clip,closed):
 def inter_layers( _subj,_clip,closed):
     if len(_clip) == 0 :
         return []
-
     pc = pyclipper.Pyclipper()
     try:
         pc.AddPaths(_clip, pyclipper.PT_CLIP, True)
