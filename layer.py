@@ -132,7 +132,7 @@ class Layer():
                 isle = Island(self.print_tree,island, self.layers,self.index,self.BBox,self)
                 self.islands.append(isle)
 
-    def outline(self):
+    def get_outline(self):
         ps = Polygon_stack()
         for island in self.islands:
             ps.add_polygons(island.get_outterbounds().polygons)
@@ -140,7 +140,7 @@ class Layer():
 
     def support_polygon_union_with_outline(self, support_polylines):
 
-        outline = self.outline()
+        outline = self.get_outline()
         # offseted_outline = outline.offset(config.line_width)
         offseted_outline = outline # testing
 

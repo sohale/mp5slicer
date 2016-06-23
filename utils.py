@@ -14,6 +14,11 @@ class conf_module:
     def __init__(self):
         pass
 
+def get_center(BBox):
+    x = BBox[2] - BBox[0]
+    y = BBox[1] - BBox[3]
+    return (x,y)
+
 
 def getPath(bound, holes,path):
     pc = pyclipper.Pyclipper()
@@ -234,6 +239,9 @@ def reord_layers_multi_islands ( layers):
                     island.insert(0,island.pop(len(island)-1))
 
     return layers
+
+def distance(point1, point2):
+    return sqrt(pow((point1[0]-point2[0]),2) + pow((point1[1]-point2[1]),2))
 
 def reord_layers ( layers):
     for layer in layers:

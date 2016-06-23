@@ -1,6 +1,6 @@
 import numpy
+from slicer.utils import distance
 import math
-import random
 
 def linear_infill(spacing,XorY,BBox):
     _min = min(BBox.xmin,BBox.ymin)
@@ -32,7 +32,7 @@ def linear_infill2(spacing,teta,BBox):
 
     lines = []
 
-    radius = dist((BBox.xmax,BBox.ymax), (BBox.xmin, BBox.ymin)) / 2.0
+    radius = distance((BBox.xmax,BBox.ymax), (BBox.xmin, BBox.ymin)) / 2.0
     center = (BBox.xmin + (BBox.xmax - BBox.xmin)/float(2)), (BBox.ymin + (BBox.ymax - BBox.ymin)/2.0)
 
     # first we get an horizontal
@@ -80,5 +80,4 @@ def linear_infill2(spacing,teta,BBox):
 
 
 
-def dist(point1, point2):
-    return math.sqrt(pow((point1[0]-point2[0]),2) + pow((point1[1]-point2[1]),2))
+

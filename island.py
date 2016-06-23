@@ -5,6 +5,8 @@ from slicer.Polynode import *
 from slicer.Polygon_stack import *
 import slicer.config as config
 import pyclipper
+from slicer.utils import get_center
+from slicer.utils import distance
 
 class Island():
     def __init__(self,print_tree, polynode, layers,layer_index,BBox, layer ):
@@ -115,10 +117,26 @@ class Island():
             other_skins = self.print_tree[layer_index].get_downskins()
             downskins = downskins.union_with(other_skins)
 
-        # if self.skins is not None:
-        #     self.skins.process(skins, perimeter)
-        # elif not downskins.isEmpty or :
-        self.skins = Skin(downskins, upskins, self.layers, self.layer_index,self.BBox)
+        middle_points = []
+
+        orientation = None
+        pc = pyclipper.Pyclipper()
+        if not self.downskins.isEmpty:
+            from math import acos
+            for skin in downskins.polygons:
+                skin = Polygon_stack(skin)
+                if self.layer_index != 0:
+                    anchors = skin.intersect_with(self.print_tree[self.layer_index-1].get_outline())
+                    if len(anchors.polygons) == 2:
+                        for anchor in anchors.polygons:
+                            pc.AddPath(anchor, pyclipper.PT_SUBJECT)
+                            bbox = pc.GetBounds()
+                            middle_points.append(get_center(bbox))
+                        dx = middle_points[1][0] - middle_points[0][0]
+                        d= distance(middle_points[0], middle_points[1])
+                        orientation = acos(dx/d)
+
+        self.skins = Skin(downskins, upskins, self.layers, self.layer_index,self.BBox, orientation)
         self.skins.process(Polygon_stack(), perimeter)
 
 
