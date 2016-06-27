@@ -19,6 +19,14 @@ def get_center(BBox):
     y = BBox[1] - BBox[3]
     return (x,y)
 
+# clipper gives the following format for bounding box
+# rectangle[0] : left
+# rectangle[1] : top
+# rectangle[2] : right
+# rectangle[3] : bottom
+def overlap(bb1, bb2):
+    return not ( bb2[0] > bb1[2] or bb2[2] < bb1[0] or bb2[1] > bb1[3] or bb2[3] < bb1[1])
+
 
 def getPath(bound, holes,path):
     pc = pyclipper.Pyclipper()

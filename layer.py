@@ -4,6 +4,7 @@ from slicer.Polygon_stack import *
 from slicer.Line_group import *
 import slicer.config as config
 from slicer.Line_stack import *
+from slicer.utils import overlap
 
 class Layer():
 
@@ -136,6 +137,13 @@ class Layer():
         ps = Polygon_stack()
         for island in self.islands:
             ps.add_polygons(island.get_outterbounds().polygons)
+        return ps.union_self()
+
+    def get_restricted_outline(self, bbox):
+        ps = Polygon_stack()
+        for island in self.islands:
+            if overlap(island.obb, bbox):
+                ps.add_polygons(island.get_outterbounds().polygons)
         return ps.union_self()
 
     def support_polygon_union_with_outline(self, support_polylines):

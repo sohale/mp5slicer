@@ -7,39 +7,40 @@ def reset():
     for atr in attributes:
         setattr(this_config,atr, getattr(base_config,atr))
 
-
-layerThickness = 0.2
-line_width = 0.4
-temperature =  220
-inAirSpeed = 9000
-retractionSpeed = 2400
-retractionLength = 4.5
-speedRate =  3000
-filamentDiameter = 2.85
-shellSize = 3
-firstLayerOffset = 0
-infillSpeed  = 3000
-supportSpeed = 2400
-skinSpeed = 2400
-raftSpeed = 2000
-boundarySpeed = 2400
-holeSpeed = 2400
-shellSpeed = 2400
-min_retraction_distance = 5
-default_fan_speed = 0.5
-hasControllableFanSpeed  = True
-useAdaptiveSlicing = False
-useSupport = True
-exteriorFanSpeed = 0.4
-bridgeFanSpeed = 1
-interiorFanSpeed = 0.4
-supportFanSpeed = 0.4
-upSkinsCount = 4
-downSkinsCount = 3
-supportSamplingDistance = 2
-supportOverhangangle = -0.7 # cos(155), 75 degree to building direction requires support
-platform_bound = "skirts"
-platform_bound_count = 1
-raft = False
-raftLayerThickness = 0.2
-extrusion_multiplier = 1.2
+# these parameters are here only for autocompletion,
+#  they will be overwritten with default configuration and personnal configuration
+layerThickness = None
+line_width = None
+temperature =  None
+inAirSpeed = None
+retractionSpeed = None
+retractionLength = None
+speedRate =  None
+filamentDiameter = None
+shellSize = None
+firstLayerOffset = None
+infillSpeed  = None
+supportSpeed = None
+skinSpeed = None
+raftSpeed = None
+boundarySpeed = None
+holeSpeed = None
+shellSpeed = None
+min_retraction_distance = None
+default_fan_speed = None
+hasControllableFanSpeed  = None
+useAdaptiveSlicing = None
+useSupport = None
+exteriorFanSpeed = None
+bridgeFanSpeed = None
+interiorFanSpeed = None
+supportFanSpeed = None
+upSkinsCount = None
+downSkinsCount = None
+supportSamplingDistance = None
+supportOverhangangle = None # cos(155), 75 degree to building direction requires support
+platform_bound = None
+platform_bound_count = None
+raft = None
+raftLayerThickness = None
+extrusion_multiplier = None

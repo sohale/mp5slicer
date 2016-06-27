@@ -21,10 +21,20 @@ class Island():
         self.polygons = []
         try:
             self.polygons.append(polynode.Contour)
+
         except:
             raise RuntimeError
+        pc = pyclipper.Pyclipper()
+        try:
+
+            pc.AddPath(polynode.Contour,pyclipper.PT_SUBJECT, True)
+            self.obb = pc.GetBounds()
+        except:
+            self.obb = [0,0,0,0]
         if len(polynode.Childs) != 0:
             self.polygons += [poly.Contour for poly in polynode.Childs]
+
+
         self.process_outlines(self.polygons)
         self.process_shells()
 
@@ -100,7 +110,7 @@ class Island():
 
 
 
-
+    # @profile
     def process_skins(self):
         # if self.layer_index != 0 and self.layer_index != len(self.layers)-2 and self.layer_index != len(self.layers)-1:
         top_layers_indexes_to_agregate = range(self.layer_index , min(self.layer_index + config.upSkinsCount, len(self.layers)))
@@ -124,11 +134,15 @@ class Island():
         if not self.downskins.isEmpty:
             from math import acos
             for skin in downskins.polygons:
-                skin = Polygon_stack(skin)
+                skin_ps = Polygon_stack(skin)
                 if self.layer_index != 0:
-                    anchors = skin.intersect_with(self.print_tree[self.layer_index-1].get_outline())
+                    pc.Clear()
+                    pc.AddPath(skin, pyclipper.PT_SUBJECT)
+                    skin_bbox = pc.GetBounds()
+                    anchors = skin_ps.intersect_with(self.print_tree[self.layer_index-1].get_restricted_outline(skin_bbox))
                     if len(anchors.polygons) == 2:
                         for anchor in anchors.polygons:
+                            pc.Clear()
                             pc.AddPath(anchor, pyclipper.PT_SUBJECT)
                             bbox = pc.GetBounds()
                             middle_points.append(get_center(bbox))
