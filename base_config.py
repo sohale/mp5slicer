@@ -1,4 +1,4 @@
-
+import numpy as np
 
 layerThickness = 0.2
 line_width = 0.4
@@ -27,12 +27,11 @@ interiorFanSpeed = 0
 supportFanSpeed = 1
 upSkinsCount = 4
 downSkinsCount = 3
-supportSamplingDistance = 2
+supportSamplingDistance = 1.5
+link_threshold = np.sqrt(2*(supportSamplingDistance**2))
 supportOverhangangle = -0.7 # cos(155), 75 degree to building direction requires support
 platform_bound = "skirts"
 platform_bound_count = 1
 raft = False
 raftLayerThickness = 0.2
 extrusion_multiplier = 1.2
-
-

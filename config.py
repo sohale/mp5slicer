@@ -1,4 +1,3 @@
-<<<<<<< 6d6de46bb3d2d3d466b6454f4043183da3c96cf5
 import slicer.base_config as base_config
 import sys
 
@@ -45,39 +44,4 @@ platform_bound_count = None
 raft = None
 raftLayerThickness = None
 extrusion_multiplier = None
-=======
-import numpy as np
 
-layerThickness = 0.2
-line_width = 0.4
-temperature =  210
-inAirSpeed = 9000
-retractionSpeed = 2400
-retractionLength = 4.5
-speedRate =  3000
-filamentDiameter = 2.85
-shellSize = 3
-firstLayerOffset = 0
-infillSpeed  = 1800
-supportSpeed = 1800
-skinSpeed = 1800
-boundarySpeed = 1800
-holeSpeed = 1800
-shellSpeed = 1800
-min_retraction_distance = 5
-default_fan_speed = 0.5
-hasControllableFanSpeed  = True
-useAdaptiveSlicing = False
-useSupport = True
-exteriorFanSpeed = 0.4
-bridgeFanSpeed = 1
-interiorFanSpeed = 1
-supportFanSpeed = 0.4
-upSkinsCount = 4
-downSkinsCount = 3
-supportSamplingDistance = 1.5
-link_threshold = np.sqrt(2*(supportSamplingDistance**2))
-supportOverhangangle = -0.7 # cos(155), 75 degree to building direction requires support
-platform_bound = "skirt"
-platform_bound_count = 4
->>>>>>> sup
