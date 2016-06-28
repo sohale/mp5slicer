@@ -66,3 +66,42 @@ class Line_stack():
             for this_vertex, next_vertex in zip(each_polygon, each_polygon[1:]):
                 plt.plot([this_vertex[0],next_vertex[0]], [this_vertex[1],next_vertex[1]])
         plt.show()
+
+
+    def new_line(self):
+        self.lines.append([])
+    def add_point_in_last_line(self, point):
+        if self.lines[-1] == []:
+            self.lines[-1].append(point)
+        elif self.lines[-1][-1] == point:
+            pass
+        else:
+            self.lines[-1].append(point)
+        self.isEmpty = False
+    def offset_point(self, offset_value):
+        points = []
+        for each_line in self.lines:
+            if len(each_line) == 1:
+                points.append(each_line)
+
+        sol = LinesOffset(points, offset_value)
+        for each_line_index in range(len(sol)): 
+            sol[each_line_index].append(sol[each_line_index][0])
+
+        return sol
+    def offset_line(self, offset_value):
+        sol = []
+        #  offset for lines only
+        lines = []
+        for each_line in self.lines:
+            if len(each_line) != 1:
+                lines.append(each_line)
+
+        sol += LinesOffset(lines, offset_value)
+        return sol
+    def clean(self):
+        lines = []
+        for each_line in self.lines:
+            if len(each_line) > 0:
+                lines.append(each_line)
+        self.lines = lines

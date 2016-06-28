@@ -218,14 +218,13 @@ def SinglePolygonOffset(single_line,val):
 #     return solution
 
 def LinesOffset(lines, offset_value,does_visualize=False):
-    # lines = [[[0,0],[1,1]],[[5,5],[6,6]]]
-    scaled_lines = pyclipper.scale_to_clipper(lines)
+    # scaled_lines = pyclipper.scale_to_clipper(lines)
 
     pc = pyclipper.PyclipperOffset()
-    pc.AddPaths(scaled_lines, pyclipper.JT_SQUARE, pyclipper.ET_OPENSQUARE)
+    pc.AddPaths(lines, pyclipper.JT_SQUARE, pyclipper.ET_OPENSQUARE)
 
     solution = pc.Execute(pyclipper.scale_to_clipper(offset_value))
-    solution = pyclipper.scale_from_clipper(solution)
+    # solution = pyclipper.scale_from_clipper(solution)
 
     if does_visualize:
         import matplotlib.pyplot as plt 

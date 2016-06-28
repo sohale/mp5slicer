@@ -17,7 +17,7 @@ class Layer():
         if self.index == 0 and config.raft == True:
             config.line_width = 0.27
         self.process_islands()
-        self.support_open_path, self.support_boundary_ps = [Line_stack(), Polygon_stack()]
+        self.support_open_path, self.support_boundary_ps = support_polylines
         self.support_polylines = self.support_polygon_union_with_outline(support_polylines)
         config.reset()
 
@@ -149,8 +149,8 @@ class Layer():
     def support_polygon_union_with_outline(self, support_polylines):
 
         outline = self.get_outline()
-        # offseted_outline = outline.offset(config.line_width)
-        offseted_outline = outline # testing
+        offseted_outline = outline.offset(config.line_width)
+        # offseted_outline = outline # testing
 
         polylines = []
         # polygons
