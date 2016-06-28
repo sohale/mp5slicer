@@ -34,4 +34,5 @@ platform_bound = "skirts"
 platform_bound_count = 1
 raft = False
 raftLayerThickness = 0.2
-extrusion_multiplier = 1.2
+extrusion_multiplier = 1
+initial_extrusion = 0.2

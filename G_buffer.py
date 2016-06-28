@@ -34,6 +34,7 @@ class G_buffer:
             gcode_output = sys.stdout
 
         instruction = gcodeEnvironment.startcode(printer_config.model)
+        instruction += "G1 F200 E" + str(config.initial_extrusion)
         gcode_output.write(instruction)
 
         # @profile

@@ -6,7 +6,7 @@ G28 X0 Y0  ;move X/Y to min endstops
 G28 Z0     ;move Z to min endstops
 G1 Z15.0 F{travel_speed} ;move the platform down 15mm
 G92 E0                  ;zero the extruded length
-G1 F200 E3              ;extrude feed stock
+G1 F200 E0.2              ;extrude feed stock
 G92 E0                  ;zero the extruded length again
 G1 F{travel_speed}
 ;Put printing message on LCD screen
