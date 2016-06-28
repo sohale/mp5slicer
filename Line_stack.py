@@ -41,7 +41,7 @@ class Line_stack():
 
     def difference_with(self, other):
         if other.isEmpty:
-            return self.lines # same return format
+            return Line_stack(self.lines) # same return format
         if self.isEmpty:
             return Line_stack([])
         try:

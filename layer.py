@@ -40,7 +40,7 @@ class Layer():
             for island in self.islands:
                 skirts = skirts.union_with(island.get_platform_bound())
             if not self.support_boundary_ps.isEmpty:
-                skirts = skirts.union_with(self.support_boundary_ps.offset(config.line_width))
+                skirts = skirts.union_with(self.support_boundary_ps.offset(config.line_width*3))
             skirtPolylines.add_chains(skirts.get_print_line())
             for count in range(config.platform_bound_count):
                 skirts = skirts.offset(config.line_width)
@@ -159,7 +159,7 @@ class Layer():
 
         # open_path
         # offseted_outline.visualize()
-        solution_open_path_ls = Line_stack(self.support_open_path.difference_with(offseted_outline))
+        solution_open_path_ls = self.support_open_path.difference_with(offseted_outline)
         polylines += solution_open_path_ls.get_print_line()
 
         # solution_open_path_ls.visualize()
@@ -173,11 +173,13 @@ class Layer():
         if polylines != []:
             data_dict = [] # integer key: {start:,end:,line:}
             Line_Data = namedtuple('Line_Data', 'start end line')
+            # print(len(polylines))
             for each_line in polylines:
                 data_dict.append(Line_Data(each_line[0], each_line[-1], each_line))
 
             # start at first element
             arranged_line = Line_stack() 
+            # print(len(data_dict))
             first_line = data_dict.pop()
             end = pyclipper.scale_from_clipper(first_line.end)
             arranged_line.add_line(first_line.line)
@@ -194,8 +196,8 @@ class Layer():
                 arranged_line.add_line(data_dict[delete_index].line)
                 end = pyclipper.scale_from_clipper(data_dict[delete_index].end)
                 del data_dict[delete_index]
-            # arranged_line.visualize()
             return arranged_line.lines
+        return polylines
 
-        else:
-            return []
+        # else:
+        #     return []

@@ -92,8 +92,9 @@ class G_buffer:
                     else:
                         gcode_output.write(gcodeEnvironment.goToNextPoint(line[0], True))
                     for point_index in range(1,len(line)):
-                        instruction = gcodeEnvironment.drawToNextPoint(line[point_index], self.config.layerThickness, self.config.infillSpeed, self.config.supportFanSpeed)
+                        instruction = gcodeEnvironment.drawToNextPoint(line[point_index], self.config.layerThickness, self.config.supportSpeed, self.config.supportFanSpeed)
                         gcode_output.write(instruction)
+            self.skip_retraction = False
 
         def print_inner_shell(shell):
             for line in shell.sub_lines:
@@ -205,6 +206,7 @@ class G_buffer:
                 self.config.boundarySpeed = 1500
                 self.config.holeSpeed = 1500
                 self.config.shellSpeed = 1500
+                self.config.supportSpeed = 1500
 
             # allow change of layerThickness for each layer
             if self.layerThickness_list: # open happen if it is adaptive slicing

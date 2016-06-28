@@ -25,7 +25,7 @@ class mesh():
             self.areas   = self.compute_areas()
         else:
             self.areas   = np.asarray(input_areas)
-
+            
         if fix_mesh:
             self.remove_badtriangles()
             self.remove_duplicates()
@@ -173,6 +173,25 @@ class mesh():
         dot_product = self.normals[:,2] # faster than np.apply_along_axis(np.dot, 1, normals, [[0],[0],[1]])
         return dot_product/norms
 
+    def visualize(self):
+        from matplotlib import pyplot
+        from mpl_toolkits import mplot3d
+        import numpy as np
+        # Create a new plot
+        figure = pyplot.figure()
+        axes = mplot3d.Axes3D(figure)
+
+        # Render the cube faces
+        # for m in meshes:
+        axes.add_collection3d(mplot3d.art3d.Poly3DCollection(self.triangles))
+
+        # Auto scale to the mesh size
+        scale = np.concatenate([i for i in self.triangles]).flatten(-1)
+        axes.auto_scale_xyz(scale, scale, scale)
+
+        # Show the plot to the screen
+        # pyplot.show()
+
 class bounding_box():
     def __init__(self,xmin,xmax,ymin,ymax,zmin,zmax):
         self.xmin = xmin
@@ -194,3 +213,5 @@ if __name__ == '__main__':
     stl_mesh = np_mesh.Mesh.from_file("elephant.stl")
 
     our_mesh = mesh(stl_mesh.vectors, fix_mesh=True)
+
+    our_mesh.visualize()
