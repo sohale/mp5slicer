@@ -10,10 +10,32 @@ import requests
 """
     This is the API communication wrapper for the MP5 slicer. Workflow:
 
-    - Endlessly looping until SIGINT is catched. Then cleanly aborts running task and report reason to API.
-    - Fetches arguments and MP5 tree from the API service.
-    - 
+    - Endlessly looping until SIGINT is catched,
+      then cleanly aborts running task and report reason to API.
+        - Blocks until a pk is retrieved from task list on Redis.
+        - Fetches arguments and MP5 tree from the API service.
+        - Forks and calls slicer with the retrieved settings as cmd args.
 
+        -       Main process         Fork                Slicer
+          ===============================================================
+                                      ||stdin
+        -  writes actual object in  =====>
+                                      ||
+                                      ||stderr
+        -  broadcasts progress and  <=====     print formatted progress
+          store debug logs in memory  ||             and debug logs
+                                      ||
+                                      ||stdout
+        -                           <=====    writes final sliced object
+          ===============================================================
+                      /                                   \/
+                    \/                                    /\
+                 continues                               dies
+
+        - Main process then continues and check for the slicer's exit code,
+           if exited with != 0, generates traceback and uploads it to django.
+           Otherwise, it uploads the file to Django API and inform subscribed
+           users task have finished.
 
 """
 
@@ -92,7 +114,7 @@ def execute(task, broadcast):
         os.close(w_stdin)
         for line in errs:
             if line.startswith(WRAPPER_SETTINGS['progress_mark']):
-                broadcast(line[4:])
+                broadcast(line[len(WRAPPER_SETTINGS['progress_mark']):])
             err.append(line)
         errs.close()
         pid, status = os.waitpid(father, 0)
@@ -100,8 +122,9 @@ def execute(task, broadcast):
             ok.close()
             raise Exception(status, err)
         else:
-            print(ok.read())
+            sliced = ok.read()
             ok.close()
+            return sliced
     else:
         for fd in [w_stdin, r_stderr, r_stdout]:
             os.close(fd)
@@ -157,20 +180,20 @@ def main():
     signal.signal(signal.SIGINT, gracefully_exit)
 
     while not should_quit:
+
         r = Redis()
         pk = r.pop() # blocking until a task is actually retrieved
         url = WRAPPER_SETTINGS['django_host'] + pk
-        task = requests.post(url + '/start/', data = {}) # /!\ FIX ME: Need to authenticate
-        task['obj'] = Storage.get_object(task.storage_ID)
+        task = requests.get(url + '/start/', data = {}) # /!\ FIX ME: Need to authenticate
+        traceback = None
         try:
             sliced = execute(task, lambda x: r.broadcast_progress(pk, x))
-            Storage.put_slice(task, sliced)
-            ret = requests.post(url + '/end/', data = {'status':0, 'logs':''})
-            r.broadcast_progress(pk, 100)
         except Exception as inst:
             print('ERROR: process exited with status code {}, printing full error log:'.format(inst.args[0]))
             print(inst.args[1])
-            ret = requests.post(url + '/end/', data = {'status':inst.args[0], 'logs':inst.args[1]})
+            traceback = inst.args[1]
+        ret = requests.patch(url + '/end/', data = {'status':0, 'logs':''})
+        r.broadcast_progress(pk, 100)
 
 
 if __name__ == '__main__':
