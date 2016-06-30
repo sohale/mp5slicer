@@ -40,7 +40,7 @@ class Layer():
             for island in self.islands:
                 skirts = skirts.union_with(island.get_platform_bound())
             if not self.support_boundary_ps.isEmpty:
-                skirts = skirts.union_with(self.support_boundary_ps.offset(config.line_width*3))
+                skirts = skirts.union_with(self.support_boundary_ps.offset(config.line_width*4))
             skirtPolylines.add_chains(skirts.get_print_line())
             for count in range(config.platform_bound_count):
                 skirts = skirts.offset(config.line_width)
@@ -175,7 +175,8 @@ class Layer():
             Line_Data = namedtuple('Line_Data', 'start end line')
             # print(len(polylines))
             for each_line in polylines:
-                data_dict.append(Line_Data(each_line[0], each_line[-1], each_line))
+                if len(each_line) >1:
+                    data_dict.append(Line_Data(each_line[0], each_line[-1], each_line))
 
             # start at first element
             arranged_line = Line_stack() 

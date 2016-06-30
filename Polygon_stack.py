@@ -103,7 +103,8 @@ class Polygon_stack():
             polyline.append(start_point)
             polylines.append(polyline)
         return polylines
-
+    def is_empty(self):
+        return self.isEmpty
     def visualize(self):
         import matplotlib.pyplot as plt
         for each_polygon in self.polygons:

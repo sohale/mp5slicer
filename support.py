@@ -6,33 +6,52 @@ import numpy as np
 import slicer.config as config
 import slicer.clipper_operations as clipper_operations
 from slicer.Polygon_stack import *
-from slicer.Line_stack import *
+from slicer.Line_stack import Support_Line_Stack
 from itertools import groupby
 from collections import namedtuple
 
-class group:
-    pass
+class Group:
+    def __init__(self, data = []):
+        self.data_grouped = data
+    def apply_function_on_group(self, func):
+        result_group = Group()
+        for each_group in self.data_grouped:
+            func_iter_group(each_group)
+            func(each_group)
+            func_finish_group(each_group)
+
+    def append_data_in_new_group(self, data):
+        self.data_grouped.append(data)
+    def new_group(self):
+        self.data_grouped.append([])
+
+
+class Last_point:
+    def __init__(self,point):
+        self.point = point #[x, y]
+    def return_point_as_new_line(self): # pyclipper formatting
+        return [self.point]
+    @staticmethod
+    def offset_value():
+        return 0.1
+
 
 class SupportVerticallines:
     def __init__(self, svl_data_group):
         self.svl_data_group = svl_data_group
         self.reorder()
         self.line_x_y_group = self.get_x_y()
-        
+        # self.last_height = self.get_last_layer()
+
     def get_x_y(self):
-        x_y = []
-        for each_group in self.svl_data_group:
-            x_y.append([])
-            for each_svl_data in each_group:
-                x_y[-1].append([each_svl_data.x, each_svl_data.y])
+        def get_x_y_each_group(each_group):
+            return [[each_svl_data.x, each_svl_data.y] for each_svl_data in each_group]
+        x_y = list(map(get_x_y_each_group, self.svl_data_group))
         return x_y
 
     def reorder(self):
-        data = []
-        
-        for each_group in self.svl_data_group:
-            data.append([])
-            
+        def reorder_each_group(each_group):
+            res = []
             each_group = sorted(each_group, key = lambda d:d.x)
 
             groups = []
@@ -43,10 +62,12 @@ class SupportVerticallines:
             for each_data in groups:
                 flip_flop += 1
                 if flip_flop % 2:
-                    data[-1] += each_data
+                    res += each_data
                 else:
-                    data[-1] += each_data[::-1]
-        self.svl_data_group = data
+                    res += each_data[::-1]
+            return res
+        res = list(map(reorder_each_group, self.svl_data_group))
+        self.svl_data_group = res
 
     def index_list_intersect_with_plane(self, plane_height):
 
@@ -67,13 +88,24 @@ class SupportVerticallines:
 
         return sample_point_group # or mask
 
-    def return_polylines(self, sampled_point):
-        pl = Line_stack()
+    def return_polylines(self, sampled_point, plane_height):
+        pl = Support_Line_Stack()
+        group_counter = 0
         for each_group in sampled_point:
             pl.new_line()
-            
-            for point_start_unscaled, point_end_unscaled in zip(each_group, each_group[1:]):
+            element_counter = 0
+            for data in zip(each_group, each_group[1:]):
+                # data = [[svl_data.x, svl_data.y, svl_data.index], [svl_data.x, svl_data.y, svl_data.index]]
+                data_start, data_end = data
+                point_start_unscaled = data_start
+                point_end_unscaled = data_end
 
+                point_start_last_layer = False
+                point_end_last_layer = False
+                if self.last_height[group_counter][element_counter] == plane_height:
+                    point_start_last_layer=True
+                if self.last_height[group_counter][element_counter+1] == plane_height:
+                    point_end_last_layer = True
 
                 point_start_scaled = pyclipper.scale_to_clipper(point_start_unscaled)
                 point_end_scaled = pyclipper.scale_to_clipper(point_end_unscaled)
@@ -82,32 +114,113 @@ class SupportVerticallines:
                 if np.sqrt((point_start_unscaled[0] - point_end_unscaled[0])**2 + (point_start_unscaled[1] - point_end_unscaled[1])**2 ) <= config.link_threshold: # new link line
 
                 # if point_start_unscaled[0] == point_end_unscaled[0]: # only vertical line
-                    pl.add_point_in_last_line(point_start_scaled)
-                    pl.add_point_in_last_line(point_end_scaled)
+                    if point_start_last_layer and point_end_last_layer:# true true:
+                        pl.new_line()
+                        pl.add_point_in_last_line(Last_point(point_start_scaled))
+                        pl.new_line()
+                        pl.add_point_in_last_line(Last_point(point_end_scaled))
+                        pl.new_line()
+                    elif point_start_last_layer and not point_end_last_layer:
+                        pl.new_line()
+                        pl.add_point_in_last_line(Last_point(point_start_scaled))
+                        pl.new_line()
+                        pl.add_point_in_last_line(point_end_scaled)
+                    elif point_end_last_layer and not point_start_last_layer:
+                        pl.add_point_in_last_line(point_start_scaled)
+                        pl.new_line()
+                        pl.add_point_in_last_line(Last_point(point_end_scaled))
+                        pl.new_line()
+                    else: # false and false
+                        pl.add_point_in_last_line(point_start_scaled)
+                        pl.add_point_in_last_line(point_end_scaled)
                 else: # point too far away
                     pl.new_line()
-        pl.clean()
+                    pl.add_point_in_last_line(point_end_scaled)
+
+                element_counter += 1
+
+            group_counter += 1
+        # pl.clean()
         return pl
 
+    def return_polylines(self, sampled_point, plane_height):
+
+        pl = Support_Line_Stack()
+        group_counter = 0
+        for each_group in sampled_point:
+            pl.new_line()
+            element_counter = 0
+            for this_point_ucscaled in each_group:
+                this_point_scaled = pyclipper.scale_to_clipper(this_point_ucscaled)
+
+                if self.last_height[group_counter][element_counter] == plane_height: 
+                    # this point is last point
+                    if pl.last_line_is_empty():
+                        pass
+                    else:
+                        pl.new_line()
+                    pl.add_point_in_last_line(Last_point(this_point_scaled))
+                    pl.new_line()
+                    element_counter += 1
+                    continue
+
+                if not this_point_ucscaled == each_group[0]: # if not last point and not first point                    
+                    if not pl.last_line_is_empty():
+                        last_point_unscaled = pyclipper.scale_from_clipper(pl.point_at_last_line())
+
+                        if np.sqrt((last_point_unscaled[0]-this_point_ucscaled[0])**2+(last_point_unscaled[1]-this_point_ucscaled[1])**2 )\
+                             <= config.link_threshold: # new link line
+                            pl.add_point_in_last_line(this_point_scaled)
+                        else:
+                            pl.new_line()
+                            pl.add_point_in_last_line(this_point_scaled)
+                    else:
+                        pl.add_point_in_last_line(this_point_scaled)
+
+                elif this_point_ucscaled == each_group[0]: # first point
+                    pl.add_point_in_last_line(this_point_scaled)
+
+                element_counter += 1
+            group_counter += 1
+        # pl.clean()
+        return pl
         # pl.visualize_all()
-    def return_polyline_by_height(self, plane_height, first_layer):
+    def return_polyline_by_height(self, plane_height, first_layer=False):
         sampled_point = self.index_list_intersect_with_plane(plane_height)
-        ls = self.return_polylines(sampled_point)
+        ls = self.return_polylines(sampled_point, plane_height)
 
-        pyclipper_formatting = []
-        
-        # pyclipper_formatting += pl.offset(config.line_width)
+        pyclipper_formatting = Polygon_stack([])
+        pyclipper_formatting.add_polygon_stack(ls.offset_point(config.line_width))
+        pyclipper_formatting.add_polygon_stack(ls.offset_last_point())
+
         if first_layer:
-            pyclipper_formatting += ls.offset_line(config.line_width)
-
-        # pyclipper_formatting += pl.offset_point(0.2)
-        # pyclipper_formatting += pl.offset_point(0.4)
-
-        pyclipper_formatting = Polygon_stack(pyclipper_formatting)
-
-
+            pyclipper_formatting.add_polygon_stack(ls.offset_all(config.line_width))
+        #     pyclipper_formatting.add_polygon_stack(ls.offset_all(config.line_width*2))
+        #     pyclipper_formatting.add_polygon_stack(ls.offset_all(config.line_width*3))
+        #     pyclipper_formatting.add_polygon_stack(ls.offset_all(config.line_width*4))
+        # else:
+        #     pyclipper_formatting.add_polygon_stack(ls.offset_point(config.line_width))
+            # pyclipper_formatting.add_polygon_stack(ls.offset_point(config.line_width*2))
+        
+        ls.clean()
         return [ls, pyclipper_formatting]
         
+
+    def add_sliceplanes_height(self, sliceplanes_height):
+        self.sliceplanes_height = sliceplanes_height
+
+    def get_last_layer(self):
+        last_height = []
+        for each_group in self.svl_data_group:
+            last_height.append([])
+            for each_svl in each_group:
+                for height_f, height_t in zip(self.sliceplanes_height,self.sliceplanes_height[1:]):
+                    if height_f <= each_svl.z_end <= height_t:
+                        last_height[-1].append(height_f)
+
+        self.last_height = last_height
+        # return last_height
+
 
 def ray_triangle_intersection(ray_near, triangle):
     """
@@ -363,22 +476,52 @@ class Support:
 
             group_tri = self.mesh.triangles[group]        
 
-            min_x = np.min(self.mesh.min_x[group] + offset)
-            max_x = np.max(self.mesh.max_x[group] - offset)
-            min_y = np.min(self.mesh.min_y[group] + offset)
-            max_y = np.max(self.mesh.max_y[group] - offset)
+
+            # import mesh_operations
+            # group_mesh = mesh_operations.mesh(group_tri, fix_mesh=False)
+            # group_mesh.visualize()
+            # raise Tiger
+            # min_x = np.min(self.mesh.min_x[group] + offset)
+            # max_x = np.max(self.mesh.max_x[group] - offset)
+            # min_y = np.min(self.mesh.min_y[group] + offset)
+            # max_y = np.max(self.mesh.max_y[group] - offset)
+
+
+            min_x = np.min(self.mesh.min_x[group])
+            max_x = np.max(self.mesh.max_x[group])
+            min_y = np.min(self.mesh.min_y[group])
+            max_y = np.max(self.mesh.max_y[group])
             min_z = np.min(self.mesh.min_z[group])
             max_z = np.max(self.mesh.max_z[group])
 
-            # sampling in x, y plane
-            x_sample = list(np.arange(min_x, max_x, config.supportSamplingDistance))
-            # if the sampling end point is too far from the offseted end point add the offseted end point
-            if len(x_sample) > 0 and max_x - x_sample[-1] > offset:
+            # thin part sampling distance 
+
+            config.supportSamplingDistanceSmall = 0.5
+            if max_x - min_x < 2*offset:
+                # print('here')
+                x_sample = list(np.arange(min_x, max_x, config.supportSamplingDistanceSmall))
                 x_sample.append(max_x)
-            y_sample = list(np.arange(min_y, max_y, config.supportSamplingDistance))
-            # if the sampling end point is too far from the offseted end point add the offseted end point
-            if len(y_sample) > 0 and max_y - y_sample[-1] > offset:
+            else:
+                x_sample = list(np.arange(min_x + offset, max_x - offset, config.supportSamplingDistance))
+                if len(x_sample) > 0 and max_x - x_sample[-1] > offset:
+                    x_sample.append(max_x)
+            if max_y - min_y < 2*offset:
+                # print('here')
+                y_sample = list(np.arange(min_y, max_y, config.supportSamplingDistanceSmall))
                 y_sample.append(max_y)
+            else:
+                y_sample = list(np.arange(min_y + offset, max_y - offset, config.supportSamplingDistance))
+                if len(y_sample) > 0 and max_y - y_sample[-1] > offset:
+                    y_sample.append(max_y)
+            # sampling in x, y plane
+            # x_sample = list(np.arange(min_x, max_x, config.supportSamplingDistance))
+            # if the sampling end point is too far from the offseted end point add the offseted end point
+            # if len(x_sample) > 0 and max_x - x_sample[-1] > offset:
+                # x_sample.append(max_x)
+            # y_sample = list(np.arange(min_y, max_y, config.supportSamplingDistance))
+            # if the sampling end point is too far from the offseted end point add the offseted end point
+            # if len(y_sample) > 0 and max_y - y_sample[-1] > offset:
+                # y_sample.append(max_y)
 
             epsilon = 0.3
             for x in x_sample:
@@ -451,16 +594,15 @@ class Support:
 
         z_triangle_selfsupport_by_groups = self.self_support_detection(self.support_points_by_groups)
         
-        for support_points, self_support_z_values in zip(self.support_points_by_groups, z_triangle_selfsupport_by_groups):
+        for support_points_by_groups,z_groups  in zip(self.support_points_by_groups, z_triangle_selfsupport_by_groups):
             Support_Vertical_Line_Data_group.append([])
 
-            for support_point, self_support_z in zip(support_points, self_support_z_values):
+            for support_point, self_support_z in zip(support_points_by_groups,z_groups):
                 x = support_point[0]
                 y = support_point[1]
                 z = support_point[2]
                 z_start = self_support_z
                 z_end = z
-
                 Support_Vertical_Line_Data_group[-1].append(Support_Vertical_Line_Data(x, y, z_start, z_end))
 
         svl = SupportVerticallines(Support_Vertical_Line_Data_group)
@@ -530,17 +672,20 @@ class Support:
         sliceplanes_height = np.arange(slice_height_from, slice_height_to, slice_step)
 
         svl = self.support_lines()
+        svl.add_sliceplanes_height(sliceplanes_height)
+        svl.get_last_layer()
 
         polylines_all = []
         layer_counter = 0
         for height in sliceplanes_height:
-            if layer_counter <= 1:
-                polylines_all.append(svl.return_polyline_by_height(height, True))
+            if layer_counter <= 2:
+                polylines_all.append(svl.return_polyline_by_height(height, first_layer = True))
             else:
-                polylines_all.append(svl.return_polyline_by_height(height, False))
+                polylines_all.append(svl.return_polyline_by_height(height, first_layer = False))
             layer_counter += 1
 
         return polylines_all
+
 
 def main():
     from stl import mesh as np_mesh
@@ -550,7 +695,7 @@ def main():
     import slicer.config as config
     config.reset()
     start_time = datetime.datetime.now()
-    mesh_name = "overhang_test_stl/SupportTEST.stl"
+    mesh_name = "overhang_test_stl/rotated_round_plane.stl"
     stl_mesh = np_mesh.Mesh.from_file(mesh_name)
     our_mesh = mesh_operations.mesh(stl_mesh.vectors, fix_mesh=True)
     sup = Support(our_mesh)

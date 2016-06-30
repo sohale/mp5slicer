@@ -190,7 +190,7 @@ class mesh():
         axes.auto_scale_xyz(scale, scale, scale)
 
         # Show the plot to the screen
-        # pyplot.show()
+        pyplot.show()
 
 class bounding_box():
     def __init__(self,xmin,xmax,ymin,ymax,zmin,zmax):
