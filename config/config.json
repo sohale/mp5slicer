@@ -1,0 +1,28 @@
+{
+  "layerThickness":0.1,
+  "line_width" : 0.46,
+  "temperature" : 210,
+  "inAirSpeed" : 7000,
+  "retractionSpeed": 2400,
+  "retractionLength": 4.5,
+  "speedRate" : 3000,
+  "filamentDiameter" : 2.85,
+  "shellSize" : 2,
+  "boundarySpeed" : 2500,
+  "holeSpeed" : 2500,
+  "shellSpeed" : 2500,
+  "infillSpeed" : 2500,
+  "skinSpeed" : 2500,
+  "raftSpeed" : 2000,
+  "useSupport" : false,
+  "supportSamplingDistance" : 2,
+  "supportOverhangangle" : -0.9,
+  "upSkinsCount" : 5,
+  "downSkinsCount" : 5,
+  "firstLayerOffset" : 0,
+  "interiorFanSpeed" : 0.4,
+  "exteriorFanSpeed" : 0.4,
+  "initial_extrusion" : 0.2,
+  "raft" : true
+}
+

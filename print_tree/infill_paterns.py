@@ -1,6 +1,9 @@
-import numpy
-from slicer.utils import distance
 import math
+
+import numpy
+
+from slicer.commons.utils import distance
+
 
 def linear_infill(spacing,XorY,BBox):
     _min = min(BBox.xmin,BBox.ymin)

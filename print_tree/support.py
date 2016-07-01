@@ -1,12 +1,13 @@
-import inspect, os
+import inspect
+import os
 import sys
+
 sys.path.append(os.path.split(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))))[0])
 
 import numpy as np
 import slicer.config as config
-import slicer.clipper_operations as clipper_operations
-from slicer.Polygon_stack import *
-from slicer.Line_stack import Support_Line_Stack
+from slicer.print_tree.Polygon_stack import *
+from slicer.print_tree.Line_stack import Support_Line_Stack
 from itertools import groupby
 from collections import namedtuple
 
@@ -614,7 +615,6 @@ class Support:
         ############# visulisation ####################
         from mpl_toolkits import mplot3d
         import matplotlib.pyplot as plt
-        import matplotlib.patches as mpatches
 
         # Create a new plot
         figure = plt.figure()
@@ -690,7 +690,6 @@ class Support:
 def main():
     from stl import mesh as np_mesh
     import mesh_operations
-    import numpy as np
     import datetime
     import slicer.config as config
     config.reset()

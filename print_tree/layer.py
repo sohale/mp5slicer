@@ -1,10 +1,9 @@
-from slicer.island import Island
-from slicer.Elements import Outline
-from slicer.Polygon_stack import *
-from slicer.Line_group import *
-import slicer.config as config
-from slicer.Line_stack import *
-from slicer.utils import overlap
+import slicer.config.config as config
+from slicer.commons.utils import overlap
+from slicer.print_tree.Line_group import *
+from slicer.print_tree.Line_stack import *
+from slicer.print_tree.island import Island
+
 
 class Layer():
 
@@ -17,7 +16,7 @@ class Layer():
         if self.index == 0 and config.raft == True:
             config.line_width = 0.35
         self.process_islands()
-        self.support_open_path, self.support_boundary_ps = support_polylines
+        self.support_open_path, self.support_boundary_ps = Line_stack(), Polygon_stack()
         self.support_polylines = self.support_polygon_union_with_outline(support_polylines)
         config.reset()
 

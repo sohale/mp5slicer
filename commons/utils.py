@@ -1,7 +1,8 @@
-from slicer.clipper_operations import *
-from  slicer import *
-from math import sqrt,pow
 import sys
+from math import sqrt,pow
+
+from slicer.print_tree.clipper_operations import *
+
 
 def copy_module(module):
     copy = conf_module

@@ -1,17 +1,15 @@
-import inspect, os
+import inspect
+import os
 import sys
+
 sys.path.append(os.path.split(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))))[0])
 
-from slicer.infill_paterns import *
-from slicer.clipper_operations import *
-from slicer.path_planner import *
-from slicer.Polygon_stack import *
-from slicer.Line_stack import *
+from slicer.print_tree.infill_paterns import *
+from slicer.post_process.path_planner import *
+from slicer.print_tree.Line_stack import *
 
-from slicer.Line_group import *
-import slicer.config as config
-
-import numpy as np
+from slicer.print_tree.Line_group import *
+import slicer.config.config as config
 
 
 #

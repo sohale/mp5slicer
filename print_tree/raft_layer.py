@@ -1,8 +1,8 @@
-from slicer.Line_group import *
-from slicer.Line_stack import *
-from slicer.infill_paterns import *
-import slicer.config as config
-from slicer.path_planner import *
+import slicer.config.config as config
+from slicer.post_process.path_planner import *
+from slicer.print_tree.Line_stack import *
+from slicer.print_tree.infill_paterns import *
+
 
 class Raft_layer():
 

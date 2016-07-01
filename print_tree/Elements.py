@@ -1,11 +1,7 @@
-from slicer.clipper_operations import *
-from slicer.Polygon_stack import *
-from slicer.SingleLine import SingleLine
-from slicer.Line_group import *
-import slicer.config as config
-
-
-
+import slicer.config.config as config
+from slicer.print_tree.Line_group import *
+from slicer.print_tree.Polygon_stack import *
+from slicer.print_tree.SingleLine import SingleLine
 
 
 class Outline:

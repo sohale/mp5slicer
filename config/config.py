@@ -1,11 +1,13 @@
-import slicer.base_config as base_config
 import sys
 
+import slicer.config.base_config as base_config
+
+
 def reset():
-    this_config = sys.modules["slicer.config"]
+    this_config = sys.modules["slicer.config.config"]
     attributes = dir(base_config)
     for atr in attributes:
-        setattr(this_config,atr, getattr(base_config,atr))
+        setattr(this_config, atr, getattr(base_config, atr))
 
 # these parameters are here only for autocompletion,
 #  they will be overwritten with default configuration and personnal configuration

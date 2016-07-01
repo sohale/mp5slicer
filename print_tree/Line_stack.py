@@ -1,9 +1,10 @@
-import inspect, os
+import inspect
+import os
 import sys
+
 sys.path.append(os.path.split(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))))[0])
 
-from slicer.clipper_operations import *
-from slicer.Polygon_stack import *
+from slicer.print_tree.Polygon_stack import *
 import pyclipper
 # A Line stack is equivalent to a polygon stack but its polygons are open
 class Line_stack:
@@ -133,7 +134,7 @@ class Line_stack:
 class Support_Line_Stack(Line_stack):
 
     def offset_point(self, offset_value):
-        import slicer.support as support
+        import slicer.print_tree.support as support
         points = []
         for each_line in self.lines:
             if len(each_line) == 1 and not isinstance(each_line[0], support.Last_point):
@@ -144,7 +145,7 @@ class Support_Line_Stack(Line_stack):
         return Polygon_stack(sol)
 
     def offset_last_point(self):
-        import slicer.support as support
+        import slicer.print_tree.support as support
         points = []
         for each_line in self.lines:
             if len(each_line) == 1 and isinstance(each_line[0], support.Last_point):

@@ -1,10 +1,11 @@
-import inspect, os
+import inspect
+import os
 import sys
+
 sys.path.append(os.path.split(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))))[0])
 
 import numpy as np
-from slicer.rotation import rotate as rotation
-import decimal
+from slicer.mesh_processing.rotation import rotate as rotation
 
 
 class mesh():
@@ -208,7 +209,6 @@ class bounding_box():
 if __name__ == '__main__':
 
     from stl import mesh as np_mesh
-    import mesh_operations
 
     stl_mesh = np_mesh.Mesh.from_file("elephant.stl")
 

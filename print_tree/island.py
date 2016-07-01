@@ -1,12 +1,12 @@
-from slicer.Parts import Infill, Skin
-from slicer.Elements import Outline
-from slicer.Line_group import *
-from slicer.Polynode import *
-from slicer.Polygon_stack import *
-import slicer.config as config
-import pyclipper
-from slicer.utils import get_center
-from slicer.utils import distance
+import slicer.config.config as config
+from slicer.commons.utils import distance
+from slicer.commons.utils import get_center
+from slicer.print_tree.Elements import Outline
+from slicer.print_tree.Line_group import *
+from slicer.print_tree.Parts import Infill, Skin
+from slicer.print_tree.Polygon_stack import *
+from slicer.print_tree.Polynode import *
+
 
 class Island():
     def __init__(self,print_tree, polynode, layers,layer_index,BBox, layer ):

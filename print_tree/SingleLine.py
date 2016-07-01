@@ -1,5 +1,4 @@
-from slicer.clipper_operations import SinglePolygonOffset
-from slicer.Polygon_stack import *
+from slicer.print_tree.Polygon_stack import *
 
 class SingleLine():
     def __init__(self,contour, line_width):

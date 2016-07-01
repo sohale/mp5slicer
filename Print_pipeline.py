@@ -1,23 +1,24 @@
-import inspect, os
+import inspect
+import os
 import sys
+
 sys.path.append(os.path.split(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))))[0])
-from slicer.layer import Layer
-from slicer.G_buffer import G_buffer
-from slicer.utils import *
+from slicer.print_tree.layer import Layer
+from slicer.gcode_writer.G_buffer import G_buffer
+from slicer.commons.utils import *
 import time
-from slicer.mesh_operations import mesh as MPmesh
-import sys, getopt
-from slicer.config_factory import config_factory
-from slicer.slice import *
-import slicer.support as support
-from slicer.raft_layer import *
+from slicer.mesh_processing.mesh_operations import mesh as MPmesh
+from slicer.config.config_factory import config_factory
+from slicer.mesh_processing.slice import *
+import slicer.print_tree.support as support
+from slicer.print_tree.raft_layer import *
 global start_time
 global print_settings
 
 # @profile
 def get_layer_list(polygon_layers, BBox, support_polylines_list = []):
 
-    import slicer.config as config
+    import slicer.config.config as config
 
     layer_list = []
 
@@ -55,15 +56,15 @@ def get_layer_list(polygon_layers, BBox, support_polylines_list = []):
     return layer_list
 
 def move_to_center(mesh):
-    import slicer.printer_config as printer_config
+    import slicer.config.printer_config as printer_config
     bbox = mesh.bounding_box()
     platform_center = {}
     if printer_config.origin == "center":
         platform_center["x"] = 0
         platform_center["y"] = 0
     else:
-        platform_center["x"] = printer_config.build_platformX/2
-        platform_center["y"] = printer_config.build_platformY/2
+        platform_center["x"] = printer_config.build_platformX / 2
+        platform_center["y"] = printer_config.build_platformY / 2
     objet_center = {}
     objet_center["x"] = (bbox.xmax - bbox.xmin)/2
     objet_center["y"] = (bbox.ymax - bbox.ymin)/2
@@ -81,7 +82,7 @@ def move_to_center(mesh):
 # @profile
 def get_polygon_layers(stl_file_name):
     from stl import mesh
-    import slicer.config as config
+    import slicer.config.config as config
 
 
     stl_mesh = mesh.Mesh.from_file(stl_file_name)
@@ -114,13 +115,12 @@ def get_polygon_layers(stl_file_name):
 
 # @profile
 def main():
-    import pyclipper
     args = sys.argv
     args = args[1:]
     stl_file_name = args[0]
     conf_file_name = args[1]
     config_factory(conf_file_name)
-    import slicer.config as config
+    import slicer.config.config as config
     config.reset()
 
     start_time = time.time()

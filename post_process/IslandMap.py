@@ -1,8 +1,10 @@
-from slicer.IslandMapNode import IslandMapNode
 import pyclipper
-from slicer.IslandMapEdge import IslandMapEdge
-from queue import Queue
 from math import sqrt,pow
+from queue import Queue
+
+from slicer.post_process.IslandMapEdge import IslandMapEdge
+from slicer.post_process.IslandMapNode import IslandMapNode
+
 
 class IslandMap:
 

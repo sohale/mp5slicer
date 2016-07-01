@@ -1,5 +1,6 @@
-from slicer.clipper_operations import *
-from slicer.Island_stack import *
+from slicer.print_tree.Island_stack import *
+from slicer.print_tree.clipper_operations import *
+
 
 #Polygon stack are generally used when a clipper operation is made on a group of polygon
 class Polygon_stack():

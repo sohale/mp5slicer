@@ -1,6 +1,8 @@
 import math
-import slicer.config as config
-import slicer.printer_config as printer_config
+
+import slicer.config.config as config
+import slicer.config.printer_config as printer_config
+
 
 ############################ GCodeEnvironment Taken from old slicer without any changes ###########################
 
@@ -139,10 +141,10 @@ class GCodeEnvironment:
     # returns the code written in the file startcode.gcode
     def startcode(self, printer):
         if printer == "r2x":
-            start_code_name = "r2xstart"
+            start_code_name = "gcode_writer/r2xstart"
             startString = "M104 S"+str(config.temperature)+" T1 (set extruder temperature)\n"
         else:
-            start_code_name = "startcode"
+            start_code_name = "gcode_writer/startcode"
             startString = "M109 S"+str(config.temperature)+"\n"
 
 
@@ -155,9 +157,9 @@ class GCodeEnvironment:
     # returns the code written in the file endcode.gcode
     def endcode(self,printer = 'default'):
         if printer == "r2x":
-            end_code_name = "r2xend"
+            end_code_name = "gcode_writer/r2xend"
         else:
-            end_code_name = "endcode"
+            end_code_name = "gcode_writer/endcode"
 
         endString = ""
         endCode = open(end_code_name + ".gcode","r")
