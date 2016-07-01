@@ -15,7 +15,7 @@ class Layer():
         self.index = index
         self.BBox = BBox
         if self.index == 0 and config.raft == True:
-            config.line_width = 0.27
+            config.line_width = 0.35
         self.process_islands()
         self.support_open_path, self.support_boundary_ps = support_polylines
         self.support_polylines = self.support_polygon_union_with_outline(support_polylines)
@@ -63,14 +63,14 @@ class Layer():
 
     def process_skins(self):
         if self.index == 0 and config.raft == True:
-            config.line_width = 0.27
+            config.line_width = 0.35
         for island in self.islands:
             island.process_skins()
         config.reset()
 
     def prepare_skins(self):
         if self.index == 0 and config.raft == True:
-            config.line_width = 0.27
+            config.line_width = 0.35
         for island in self.islands:
             island.prepare_skins()
         config.reset()
@@ -98,7 +98,7 @@ class Layer():
 
     def process_infill(self):
         if self.index == 0 and config.raft == True:
-            config.line_width = 0.27
+            config.line_width = 0.35
         for island in self.islands:
             island.process_infill()
         config.reset()

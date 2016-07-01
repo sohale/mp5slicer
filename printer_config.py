@@ -1,6 +1,8 @@
 model = "ultimaker"
 gcode_flavor = "marlin"
-max_extrusion = 3 #mm3.s-1
+max_extrusion_200 = 3 #mm3.s-1
+max_extrusion_210 = 3 #mm3.s-1
+max_extrusion_220 = 3 #mm3.s-1
 build_platformX = 240
 build_platformY = 160
 print_box_X = 150
