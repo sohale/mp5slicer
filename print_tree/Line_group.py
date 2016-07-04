@@ -5,7 +5,7 @@ class Line_group():
     def __init__(self,type, isLeaf, width = 0):
         self.sub_lines = []
         self.type = type
-        self.print_time = 0
+        self.properties = {}
         self.isLeaf = isLeaf
         if self.isLeaf:
             assert (width != 0)

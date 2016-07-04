@@ -61,10 +61,22 @@ class G_buffer:
             for line in leaf.sub_lines:
                 if len(line) > 0:
                     if self.skip_retraction:
-                        gcode_output.write(gcodeEnvironment.goToNextPoint(line[0],False))
-                        self.skip_retraction = False
+                        dist = gcodeEnvironment.calculDis(line[0])
+                        if dist < config.line_width * 2.5:
+                            instruction = gcodeEnvironment.drawToNextPoint(line[0], config.layerThickness,
+                                                             config.infillSpeed, config.interiorFanSpeed)
+                            gcode_output.write(instruction)
+                        else:
+                            gcode_output.write(gcodeEnvironment.goToNextPoint(line[0],False))
+                            self.skip_retraction = False
                     else:
-                        gcode_output.write(gcodeEnvironment.goToNextPoint(line[0], True))
+                        dist = gcodeEnvironment.calculDis(line[0])
+                        if dist < config.line_width * 2.5:
+                            instruction = gcodeEnvironment.drawToNextPoint(line[0], config.layerThickness,
+                                                             config.infillSpeed, config.interiorFanSpeed)
+                            gcode_output.write(instruction)
+                        else:
+                            gcode_output.write(gcodeEnvironment.goToNextPoint(line[0], True))
                     for point_index in range(1,len(line)):
                         instruction = gcodeEnvironment.drawToNextPoint(line[point_index], config.layerThickness, config.infillSpeed, config.interiorFanSpeed)
                         gcode_output.write(instruction)
@@ -74,10 +86,22 @@ class G_buffer:
             for line in leaf.sub_lines:
                 if len(line) > 0:
                     if self.skip_retraction:
-                        gcode_output.write(gcodeEnvironment.goToNextPoint(line[0],False))
-                        self.skip_retraction = False
+                        dist = gcodeEnvironment.calculDis(line[0])
+                        if dist < config.line_width * 2.5:
+                            instruction = gcodeEnvironment.drawToNextPoint(line[0], config.layerThickness,
+                                                             config.infillSpeed, config.interiorFanSpeed)
+                            gcode_output.write(instruction)
+                        else:
+                            gcode_output.write(gcodeEnvironment.goToNextPoint(line[0],False))
+                            self.skip_retraction = False
                     else:
-                        gcode_output.write(gcodeEnvironment.goToNextPoint(line[0], True))
+                        dist = gcodeEnvironment.calculDis(line[0])
+                        if dist < config.line_width * 2.5:
+                            instruction = gcodeEnvironment.drawToNextPoint(line[0], config.layerThickness,
+                                                             config.infillSpeed, config.interiorFanSpeed)
+                            gcode_output.write(instruction)
+                        else:
+                            gcode_output.write(gcodeEnvironment.goToNextPoint(line[0], True))
                     for point_index in range(1,len(line)):
                         instruction = gcodeEnvironment.drawToNextPoint(line[point_index], config.layerThickness , config.skinSpeed, config.interiorFanSpeed)
                         gcode_output.write(instruction)
