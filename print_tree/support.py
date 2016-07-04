@@ -11,22 +11,6 @@ from slicer.print_tree.Line_stack import Support_Line_Stack
 from itertools import groupby
 from collections import namedtuple
 
-class Group:
-    def __init__(self, data = []):
-        self.data_grouped = data
-    def apply_function_on_group(self, func):
-        result_group = Group()
-        for each_group in self.data_grouped:
-            func_iter_group(each_group)
-            func(each_group)
-            func_finish_group(each_group)
-
-    def append_data_in_new_group(self, data):
-        self.data_grouped.append(data)
-    def new_group(self):
-        self.data_grouped.append([])
-
-
 class Last_point:
     def __init__(self,point):
         self.point = point #[x, y]
@@ -196,8 +180,8 @@ class SupportVerticallines:
 
         if first_layer:
             pyclipper_formatting.add_polygon_stack(ls.offset_all(config.line_width))
-        #     pyclipper_formatting.add_polygon_stack(ls.offset_all(config.line_width*2))
-        #     pyclipper_formatting.add_polygon_stack(ls.offset_all(config.line_width*3))
+            pyclipper_formatting.add_polygon_stack(ls.offset_all(config.line_width*2))
+            pyclipper_formatting.add_polygon_stack(ls.offset_all(config.line_width*3))
         #     pyclipper_formatting.add_polygon_stack(ls.offset_all(config.line_width*4))
         # else:
         #     pyclipper_formatting.add_polygon_stack(ls.offset_point(config.line_width))
@@ -211,6 +195,7 @@ class SupportVerticallines:
         self.sliceplanes_height = sliceplanes_height
 
     def get_last_layer(self):
+        
         last_height = []
         for each_group in self.svl_data_group:
             last_height.append([])
@@ -323,7 +308,6 @@ def distance_between_two_point(point_start, point_end):
     return np.linalg.norm(point_start - point_end)
 
 class Support:
-    """class for all the support logic"""
     def __init__(self, mesh):
         self.mesh = mesh
         self.mesh.bbox = mesh.bounding_box()
@@ -495,25 +479,28 @@ class Support:
             min_z = np.min(self.mesh.min_z[group])
             max_z = np.max(self.mesh.max_z[group])
 
-            # thin part sampling distance 
+            # thin part sampling distance, rethink whether this is necessary
 
             config.supportSamplingDistanceSmall = 0.5
             if max_x - min_x < 2*offset:
-                # print('here')
+                print('here')
                 x_sample = list(np.arange(min_x, max_x, config.supportSamplingDistanceSmall))
                 x_sample.append(max_x)
+                print(x_sample)
             else:
                 x_sample = list(np.arange(min_x + offset, max_x - offset, config.supportSamplingDistance))
                 if len(x_sample) > 0 and max_x - x_sample[-1] > offset:
                     x_sample.append(max_x)
             if max_y - min_y < 2*offset:
-                # print('here')
+                print('here')
                 y_sample = list(np.arange(min_y, max_y, config.supportSamplingDistanceSmall))
                 y_sample.append(max_y)
+                print(y_sample)
             else:
                 y_sample = list(np.arange(min_y + offset, max_y - offset, config.supportSamplingDistance))
                 if len(y_sample) > 0 and max_y - y_sample[-1] > offset:
                     y_sample.append(max_y)
+
             # sampling in x, y plane
             # x_sample = list(np.arange(min_x, max_x, config.supportSamplingDistance))
             # if the sampling end point is too far from the offseted end point add the offseted end point
@@ -545,26 +532,9 @@ class Support:
 
     def self_support_detection(self, support_points_by_groups):
 
-        import datetime
-        start_time = datetime.datetime.now()
-
-        epsilon = 0.1
-
-        ray_direction_vector = np.array([[0],[0],[-1]])
-
-        bed_z = self.mesh.bed_z
-        min_z_list = self.mesh.min_z
-        min_x_list = self.mesh.min_x
-        max_x_list = self.mesh.max_x
-        min_y_list = self.mesh.min_y
-        max_y_list = self.mesh.max_y
-
-        z_triangle_selfsupport_by_groups = []
-
-        for support_points in support_points_by_groups:
+        def get_support_start_each_group(support_points):
 
             z_triangle_selfsupport = [self.mesh.bed_z for i in range(len(support_points))]
-            z_triangle_selfsupport_by_groups.append(z_triangle_selfsupport)
 
             for index in range(len(support_points)):
                 x = support_points[index][0]
@@ -582,6 +552,22 @@ class Support:
                     if res[0]:
                         if res[1] > z_triangle_selfsupport[index]:
                             z_triangle_selfsupport[index] = res[1]
+
+            return z_triangle_selfsupport
+
+        import datetime
+        start_time = datetime.datetime.now()
+
+        epsilon = 0.1
+        bed_z = self.mesh.bed_z
+        min_z_list = self.mesh.min_z
+        min_x_list = self.mesh.min_x
+        max_x_list = self.mesh.max_x
+        min_y_list = self.mesh.min_y
+        max_y_list = self.mesh.max_y
+
+
+        z_triangle_selfsupport_by_groups = list(map(get_support_start_each_group, support_points_by_groups))
 
         print('time for self-detection')
         print(datetime.datetime.now() - start_time)
@@ -678,7 +664,7 @@ class Support:
         polylines_all = []
         layer_counter = 0
         for height in sliceplanes_height:
-            if layer_counter <= 2:
+            if layer_counter <= 5:
                 polylines_all.append(svl.return_polyline_by_height(height, first_layer = True))
             else:
                 polylines_all.append(svl.return_polyline_by_height(height, first_layer = False))
@@ -694,11 +680,11 @@ def main():
     import slicer.config as config
     config.reset()
     start_time = datetime.datetime.now()
-    mesh_name = "overhang_test_stl/rotated_round_plane.stl"
+    mesh_name = "overhang_test_stl/archers.stl"
     stl_mesh = np_mesh.Mesh.from_file(mesh_name)
     our_mesh = mesh_operations.mesh(stl_mesh.vectors, fix_mesh=True)
     sup = Support(our_mesh)
-    sup.visulisation(require_support_lines=True)
+    sup.visulisation(require_group=True, require_support_lines=True)
 
 if __name__ == '__main__':
     main()

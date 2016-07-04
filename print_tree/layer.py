@@ -39,7 +39,7 @@ class Layer():
             for island in self.islands:
                 skirts = skirts.union_with(island.get_platform_bound())
             if not self.support_boundary_ps.isEmpty:
-                skirts = skirts.union_with(self.support_boundary_ps.offset(config.line_width*4))
+                skirts = skirts.union_with(self.support_boundary_ps.offset(config.line_width*3))
             skirtPolylines.add_chains(skirts.get_print_line())
             for count in range(config.platform_bound_count):
                 skirts = skirts.offset(config.line_width)
