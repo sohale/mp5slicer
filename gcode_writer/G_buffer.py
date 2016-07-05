@@ -18,8 +18,8 @@ class G_buffer:
         self.layerIslands = None
         self.layerThickness_list = layerThickness_list 
 
-    def add_layer(self,list):
-        self.layer_list.append(list)
+    def add_layer_list(self,list):
+        self.layer_list = list
 
 
 

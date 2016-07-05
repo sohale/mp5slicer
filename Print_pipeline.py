@@ -14,6 +14,8 @@ import slicer.print_tree.support as support
 from slicer.print_tree.raft_layer import *
 global start_time
 global print_settings
+from slicer.post_process.simple_routing import Simple_router
+from slicer.post_process.Tree_post_processor import Tree_post_processor
 
 # @profile
 def get_layer_list(polygon_layers, BBox, support_polylines_list = []):
@@ -144,10 +146,19 @@ def main():
         layer_list = get_layer_list(polygon_layers, BBox, support_polylines_list=support_polylines_list)
     else:
         layer_list = get_layer_list(polygon_layers, BBox)
+
+    print_tree = []
+    for layer in layer_list:
+        print_tree.append(layer.G_print())
+
+    TPPT = Tree_post_processor(print_tree)
+    router = Simple_router()
+    TPPT.add_task(router)
+    TPPT.run()
+
     name, dot, type = stl_file_name.partition('.')
     g_buffer = G_buffer(True, gcode_filename=name + ".gcode")
-    for layer in layer_list:
-        g_buffer.add_layer(layer.G_print())
+    g_buffer.add_layer_list(print_tree)
     g_buffer.print_Gcode()
 
 
