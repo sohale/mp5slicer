@@ -109,7 +109,7 @@ class GCodeEnvironment:
             self.E += extrusion
         except:
             raise RuntimeError
-        instruction += "G1" + " X" +str(A[0]) + " Y" +str(A[1]) + " Z" +str(self.truncate(self.Z,3)) + " E" +str(self.E) + " F" +str(self.F) + "\n"
+        instruction += "G1" + " X" +str(A[0]) + " Y" +str(A[1]) + " Z" +str(self.truncate(self.Z,3)) + " E" +str(self.truncate(self.E, 3)) + " F" +str(self.F) + "\n"
         self.X = A[0]
         self.Y = A[1]
         return instruction

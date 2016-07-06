@@ -5,7 +5,7 @@ import sys
 sys.path.append(os.path.split(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))))[0])
 
 import numpy as np
-import slicer.config as config
+import slicer.config.config as config
 from slicer.print_tree.Polygon_stack import *
 from slicer.print_tree.Line_stack import Support_Line_Stack
 from itertools import groupby
@@ -23,10 +23,23 @@ class Last_point:
 
 class SupportVerticallines:
     def __init__(self, svl_data_group):
-        self.svl_data_group = svl_data_group
+        self.svl_data_group = svl_data_group # has root elements namedtuple('Support_Vertical_Line_Data', 'x y z_start z_end')
         self.reorder()
         self.line_x_y_group = self.get_x_y()
         # self.last_height = self.get_last_layer()
+
+    def clean(self):
+        ''' remove the short svls which will only be printed on x number of layer'''
+        def clean_each_group(each_svl_data_group):
+            new_svl_data = []
+            for each_svl_data in each_svl_data_group:
+                z_start = each_svl_data.z_start
+                z_end = each_svl_data.z_end
+                if z_end - z_start > config.line_width:
+                    new_svl_data.append(each_svl_data)     
+            return new_svl_data
+
+        self.svl_data_group = list(map(clean_each_group, self.svl_data_group))
 
     def get_x_y(self):
         def get_x_y_each_group(each_group):
@@ -180,8 +193,8 @@ class SupportVerticallines:
 
         if first_layer:
             pyclipper_formatting.add_polygon_stack(ls.offset_all(config.line_width))
-            pyclipper_formatting.add_polygon_stack(ls.offset_all(config.line_width*2))
-            pyclipper_formatting.add_polygon_stack(ls.offset_all(config.line_width*3))
+            # pyclipper_formatting.add_polygon_stack(ls.offset_all(config.line_width*2))
+            # pyclipper_formatting.add_polygon_stack(ls.offset_all(config.line_width*3))
         #     pyclipper_formatting.add_polygon_stack(ls.offset_all(config.line_width*4))
         # else:
         #     pyclipper_formatting.add_polygon_stack(ls.offset_point(config.line_width))
@@ -196,6 +209,14 @@ class SupportVerticallines:
 
     def get_last_layer(self):
         
+        def get_last_layer_each_group(each_svl_data_group):
+            res = []
+            for each_svl in each_group:
+                for height_f, height_t in zip(self.sliceplanes_height,self.sliceplanes_height[1:]):
+                    if height_f <= each_svl.z_end <= height_t:
+                        res.append(height_f)
+            return res
+
         last_height = []
         for each_group in self.svl_data_group:
             last_height.append([])
@@ -659,12 +680,13 @@ class Support:
 
         svl = self.support_lines()
         svl.add_sliceplanes_height(sliceplanes_height)
+        svl.clean()
         svl.get_last_layer()
 
         polylines_all = []
         layer_counter = 0
         for height in sliceplanes_height:
-            if layer_counter <= 5:
+            if layer_counter <= 1:
                 polylines_all.append(svl.return_polyline_by_height(height, first_layer = True))
             else:
                 polylines_all.append(svl.return_polyline_by_height(height, first_layer = False))

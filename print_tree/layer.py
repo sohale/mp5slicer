@@ -16,7 +16,13 @@ class Layer():
         if self.index == 0 and config.raft == True:
             config.line_width = 0.35
         self.process_islands()
-        self.support_open_path, self.support_boundary_ps = Line_stack(), Polygon_stack()
+
+
+        if config.useSupport:
+            self.support_open_path, self.support_boundary_ps = support_polylines
+        else:
+            self.support_open_path, self.support_boundary_ps = Line_stack(), Polygon_stack()
+
         self.support_polylines = self.support_polygon_union_with_outline(support_polylines)
         config.reset()
 
