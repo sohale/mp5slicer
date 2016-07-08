@@ -18,6 +18,7 @@ class Last_point:
         return [self.point]
     @staticmethod
     def offset_value():
+        return 0 # testing
         return 0.1
 
 
@@ -35,8 +36,10 @@ class SupportVerticallines:
             for each_svl_data in each_svl_data_group:
                 z_start = each_svl_data.z_start
                 z_end = each_svl_data.z_end
-                if z_end - z_start > config.line_width:
-                    new_svl_data.append(each_svl_data)     
+                if z_end - z_start > 2*config.line_width:
+                    new_svl_data.append(each_svl_data)
+                else:
+                    pass    
             return new_svl_data
 
         self.svl_data_group = list(map(clean_each_group, self.svl_data_group))
@@ -211,21 +214,22 @@ class SupportVerticallines:
         
         def get_last_layer_each_group(each_svl_data_group):
             res = []
-            for each_svl in each_group:
+            for each_svl in each_svl_data_group:
                 for height_f, height_t in zip(self.sliceplanes_height,self.sliceplanes_height[1:]):
                     if height_f <= each_svl.z_end <= height_t:
                         res.append(height_f)
             return res
 
-        last_height = []
-        for each_group in self.svl_data_group:
-            last_height.append([])
-            for each_svl in each_group:
-                for height_f, height_t in zip(self.sliceplanes_height,self.sliceplanes_height[1:]):
-                    if height_f <= each_svl.z_end <= height_t:
-                        last_height[-1].append(height_f)
+        # last_height = []
+        # for each_group in self.svl_data_group:
+        #     last_height.append([])
+        #     for each_svl in each_group:
+        #         for height_f, height_t in zip(self.sliceplanes_height,self.sliceplanes_height[1:]):
+        #             if height_f <= each_svl.z_end <= height_t:
+        #                 last_height[-1].append(height_f)
 
-        self.last_height = last_height
+        # self.last_height = last_height
+        self.last_height = list(map(get_last_layer_each_group, self.svl_data_group))
         # return last_height
 
 
@@ -357,9 +361,17 @@ class Support:
 
         return support_required_mask # returns a boolen list indicated which triangles require support
 
-    def group_support_area(self, closeThreshold = 2, large_triangle_area_threshold = 5):
+    def group_support_area(self, large_triangle_area_threshold = 5):
         # group them together by connected group component algorithm 
         # from http://eddmann.com/posts/depth-first-search-and-breadth-first-search-in-python/
+
+        # closeThreshold is average_length_of_triangle * 2
+        avg_x = sum(self.mesh.max_x - self.mesh.min_x)/len(self.mesh.min_x)
+        avg_y = sum(self.mesh.max_y - self.mesh.min_y)/len(self.mesh.min_y)
+        avg_z = sum(self.mesh.max_z - self.mesh.min_z)/len(self.mesh.min_z)
+        # closeThreshold = np.sqrt(avg_x**2 + avg_y**2 + avg_z**2) # test
+        closeThreshold = np.sqrt(avg_x**2 + avg_y**2 + avg_z**2)*2
+
         def connect_connected_component(graph):
             def dfs(graph, start):
                 visited, stack = set(), [start]
@@ -386,13 +398,14 @@ class Support:
 
         ## use global index 
         support_triangles_index  = np.where(self.support_required_mask)[0]
+        print('number of triangles to be grouped')
+        print(len(support_triangles_index))
         centers = get_center(self.mesh.triangles[support_triangles_index])
 
         large_triangles_mask = self.mesh.areas.flatten()>large_triangle_area_threshold
         triangle_index_and_its_neighbour = {}
 
         for tri_index in support_triangles_index:
-
             neighbour = set()
             triangle_index_and_its_neighbour[tri_index] = neighbour
 
@@ -414,13 +427,13 @@ class Support:
             z = list(triangle[2])
 
             for tri_detect_index in test_index:
-
                 tri = self.mesh.triangles[tri_detect_index]
 
                 x_test = list(tri[0])
                 y_test = list(tri[1])
                 z_test = list(tri[2])
 
+                # one vertex equal then neighbour
                 if x == x_test:
                     neighbour.add(tri_detect_index)
                     continue # check for next triangle, this triangle is already a neighbour, no need to check further
@@ -451,7 +464,40 @@ class Support:
                 else:
                     pass
 
-            neighbour.remove(tri_index) # itself
+
+                # edge equal then neighbour
+                # if [x, y] == [x_test, y_test] or [y, x] == [x_test, y_test]:
+                #     neighbour.add(tri_detect_index)
+                #     continue # check for next triangle, this triangle is already a neighbour, no need to check further
+                # elif [x, y] == [x_test, z_test] or [y, x] == [x_test, z_test]:
+                #     neighbour.add(tri_detect_index)
+                #     continue
+                # elif [x, y] == [y_test, z_test] or [y, x] == [y_test, z_test]:
+                #     neighbour.add(tri_detect_index)
+                #     continue
+                # elif [x, z] == [x_test, y_test] or [z, x] == [x_test, y_test]:
+                #     neighbour.add(tri_detect_index)
+                #     continue # check for next triangle, this triangle is already a neighbour, no need to check further
+                # elif [x, z] == [x_test, z_test] or [z, x] == [x_test, z_test]:
+                #     neighbour.add(tri_detect_index)
+                #     continue
+                # elif [x, z] == [y_test, z_test] or [z, x] == [y_test, z_test]:
+                #     neighbour.add(tri_detect_index)
+                #     continue
+                # elif [y, z] == [x_test, y_test] or [z, y] == [x_test, y_test]:
+                #     neighbour.add(tri_detect_index)
+                #     continue # check for next triangle, this triangle is already a neighbour, no need to check further
+                # elif [y, z] == [x_test, z_test] or [z, y] == [x_test, z_test]:
+                #     neighbour.add(tri_detect_index)
+                #     continue
+                # elif [y, z] == [y_test, z_test] or [z, y] == [y_test, z_test]:
+                #     neighbour.add(tri_detect_index)
+                #     continue
+                # else:
+                #     pass
+                # if len(neighbour) == 4: # including itself
+                #     neighbour.remove(tri_index) # remove itself
+                #     break
 
         print('------- grouping time -------------')
         print(datetime.datetime.now() - start_time)
@@ -460,7 +506,7 @@ class Support:
 
         print('-------len of group-----------')
         print(len(groups))
-
+        # raise Tiger
         return groups
 
     def sampling_support_points(self): 
@@ -503,20 +549,20 @@ class Support:
             # thin part sampling distance, rethink whether this is necessary
 
             config.supportSamplingDistanceSmall = 0.5
-            if max_x - min_x < 2*offset:
-                print('here')
+            if max_x - min_x < offset:
+                # print('here')
                 x_sample = list(np.arange(min_x, max_x, config.supportSamplingDistanceSmall))
                 x_sample.append(max_x)
-                print(x_sample)
+                # print(x_sample)
             else:
                 x_sample = list(np.arange(min_x + offset, max_x - offset, config.supportSamplingDistance))
                 if len(x_sample) > 0 and max_x - x_sample[-1] > offset:
                     x_sample.append(max_x)
-            if max_y - min_y < 2*offset:
-                print('here')
+            if max_y - min_y < offset:
+                # print('here')
                 y_sample = list(np.arange(min_y, max_y, config.supportSamplingDistanceSmall))
                 y_sample.append(max_y)
-                print(y_sample)
+                # print(y_sample)
             else:
                 y_sample = list(np.arange(min_y + offset, max_y - offset, config.supportSamplingDistance))
                 if len(y_sample) > 0 and max_y - y_sample[-1] > offset:
@@ -637,7 +683,12 @@ class Support:
 
         if require_group:
             for group in self.groups:
-                c_n = next(cname)
+
+                if len(self.groups) > 50:
+                    c_n = 'r'
+                else:
+                    c_n = next(cname)
+
                 for index in group:
                     colors[index] = c_n
 
@@ -686,7 +737,7 @@ class Support:
         polylines_all = []
         layer_counter = 0
         for height in sliceplanes_height:
-            if layer_counter <= 1:
+            if layer_counter <= config.bed_support_strengthen_number:
                 polylines_all.append(svl.return_polyline_by_height(height, first_layer = True))
             else:
                 polylines_all.append(svl.return_polyline_by_height(height, first_layer = False))
@@ -699,10 +750,10 @@ def main():
     from stl import mesh as np_mesh
     import mesh_operations
     import datetime
-    import slicer.config as config
+    # import slicer.config.config as config
     config.reset()
     start_time = datetime.datetime.now()
-    mesh_name = "overhang_test_stl/archers.stl"
+    mesh_name = "overhang_test_stl/icarus_10.stl"
     stl_mesh = np_mesh.Mesh.from_file(mesh_name)
     our_mesh = mesh_operations.mesh(stl_mesh.vectors, fix_mesh=True)
     sup = Support(our_mesh)

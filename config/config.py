@@ -39,12 +39,15 @@ interiorFanSpeed = None
 supportFanSpeed = None
 upSkinsCount = None
 downSkinsCount = None
+
 supportSamplingDistance = None
-supportOverhangangle = None # cos(155), 75 degree to building direction requires support
+supportOverhangangle = None 
+link_threshold = None
+bed_support_strengthen_number = None
+
 platform_bound = None
 platform_bound_count = None
 raft = None
 raftLayerThickness = None
 extrusion_multiplier = None
 initial_extrusion = None
-

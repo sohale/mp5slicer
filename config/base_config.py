@@ -27,10 +27,14 @@ interiorFanSpeed = 0
 supportFanSpeed = 1
 upSkinsCount = 4
 downSkinsCount = 3
+
+# support
 supportSamplingDistance = 1.5
 link_threshold = 5*np.sqrt(2*(supportSamplingDistance**2))
+bed_support_strengthen_number = 5
 supportOverhangangle = -0.7 # cos(155), 75 degree to building direction requires support
-platform_bound = "brim"
+
+platform_bound = "skirts"
 platform_bound_count = 3
 raft = False
 raftLayerThickness = 0.15
