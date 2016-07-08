@@ -148,7 +148,8 @@ class Island():
                             middle_points.append(get_center(bbox))
                         dx = middle_points[1][0] - middle_points[0][0]
                         d= distance(middle_points[0], middle_points[1])
-                        orientation = acos(dx/d)
+                        if d > 0:
+                            orientation = acos(dx/d)
 
         self.skins = Skin(downskins, upskins, self.layers, self.layer_index,self.BBox, orientation)
         self.skins.process(Polygon_stack(), perimeter)

@@ -154,6 +154,7 @@ def main():
     TPPT = Tree_post_processor(print_tree)
     router = Simple_router()
     TPPT.add_task(router)
+
     TPPT.run()
 
     name, dot, type = stl_file_name.partition('.')
