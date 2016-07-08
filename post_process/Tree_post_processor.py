@@ -25,6 +25,8 @@ class Tree_post_processor():
 
     def __switch_leaf(self, leaf):
         for task in self.tasks:
+            if leaf.type == "infill":
+                print("tppt")
             method = getattr(task, leaf.type)
             method(leaf)
 
@@ -32,5 +34,9 @@ class Tree_post_processor():
     # @profile
     def __swith_node(self, node):
         for task in self.tasks:
+            if node.type == "infill":
+                print("tppt")
             method = getattr(task, node.type)
             method(node)
+            for sub_node in node.sub_lines:
+                self.__gotroughgroup(sub_node)
