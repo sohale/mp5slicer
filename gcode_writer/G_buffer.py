@@ -37,13 +37,18 @@ class G_buffer:
 
         # @profile
         def print_boundary(boundary):
+            line_count = 0
             for line in boundary.sub_lines:
+                point_in_each_line_counter = 0
                 if len(line) > 0:
                     gcode_output.write(gcodeEnvironment.goToNextPoint(line[0],True))
+                    # for point_index in range(1,len(line)-1):
                     for point_index in range(1,len(line)):
                         instruction = gcodeEnvironment.drawToNextPoint(line[point_index], config.layerThickness, config.boundarySpeed, config.exteriorFanSpeed)
                         gcode_output.write(instruction)
-
+                    # gcode_output.write(gcodeEnvironment.goToNextPoint(line[-1],True))
+                        point_in_each_line_counter += 1
+                line_count += 1
             self.skip_retraction = False
 
         # @profile
@@ -122,10 +127,13 @@ class G_buffer:
         def print_inner_shell(shell):
             for line in shell.sub_lines:
                 if len(line) > 0:
-                    gcode_output.write(gcodeEnvironment.goToNextPoint(line[0], True))
-                    for point_index in range(1, len(line)):
-                        instruction = gcodeEnvironment.drawToNextPoint(line[point_index], config.layerThickness , config.shellSpeed, config.interiorFanSpeed)
+                    gcode_output.write(gcodeEnvironment.goToNextPoint(line[0],True))
+                    for point_index in range(1,len(line)-1):
+                    # for point_index in range(1,len(line)):
+                        instruction = gcodeEnvironment.drawToNextPoint(line[point_index], config.layerThickness, config.boundarySpeed, config.exteriorFanSpeed)
                         gcode_output.write(instruction)
+                    gcode_output.write(gcodeEnvironment.goToNextPoint(line[-1],True))
+
             self.skip_retraction = False
 
         def print_skirt(skirt):
@@ -224,13 +232,13 @@ class G_buffer:
 
         # @profile
         def print_layer(node):
-            # if self.layer_index < 2:
-            #     config.infillSpeed  = 1500
-            #     config.skinSpeed = 1500
-            #     config.boundarySpeed = 1500
-            #     config.holeSpeed = 1500
-            #     config.shellSpeed = 1500
-            #     config.supportSpeed = 1500
+            if self.layer_index < 2:
+                config.infillSpeed  = 1500
+                config.skinSpeed = 1500
+                config.boundarySpeed = 1500
+                config.holeSpeed = 1500
+                config.shellSpeed = 1500
+                config.supportSpeed = 1500
 
             # allow change of layerThickness for each layer
             if self.layerThickness_list: # open happen if it is adaptive slicing

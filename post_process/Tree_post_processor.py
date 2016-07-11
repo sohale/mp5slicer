@@ -20,23 +20,28 @@ class Tree_post_processor():
         if (group.isLeaf):
             self.__switch_leaf(group)
         else:
-            self.__swith_node(group)
+            self.__switch_node(group)
 
 
     def __switch_leaf(self, leaf):
         for task in self.tasks:
-            if leaf.type == "infill":
-                print("tppt")
+            print('------------')
+            print(task)
             method = getattr(task, leaf.type)
+            print(method)
+            method(leaf)
+
+        assert leaf.isLeaf 
+        if leaf.isLeaf:
+            method = getattr(task, 'leaf')
             method(leaf)
 
 
     # @profile
-    def __swith_node(self, node):
+    def __switch_node(self, node):
         for task in self.tasks:
-            if node.type == "infill":
-                print("tppt")
             method = getattr(task, node.type)
             method(node)
             for sub_node in node.sub_lines:
                 self.__gotroughgroup(sub_node)
+

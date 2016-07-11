@@ -15,6 +15,8 @@ from slicer.print_tree.raft_layer import *
 global start_time
 global print_settings
 from slicer.post_process.simple_routing import Simple_router
+from slicer.post_process.boundary_finishing_touch import Boundary_finish
+from slicer.post_process.extrusion_calculation import Cal_extrusion
 from slicer.post_process.Tree_post_processor import Tree_post_processor
 
 # @profile
@@ -198,8 +200,14 @@ def main():
 
     TPPT = Tree_post_processor(print_tree)
     router = Simple_router()
-    TPPT.add_task(router)
+    boundary_finisher = Boundary_finish()
+    cal_extrusion = Cal_extrusion()
 
+    TPPT.add_task(router)
+    TPPT.add_task(boundary_finisher)
+    TPPT.add_task(cal_extrusion) # extrusion calculation at the end because other task will change line group
+
+    
     TPPT.run()
 
     name, dot, type = stl_file_name.partition('.')

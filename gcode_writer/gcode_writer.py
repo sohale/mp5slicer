@@ -34,15 +34,6 @@ class GCodeEnvironment:
         return float('.'.join((i, (d+'0'*n)[:n])))
 
 
-    # Calculate the extrusion for a straight movement from A to B
-    def calculE(self, A, B, layerThickness=config.layerThickness):
-        distance = math.sqrt( (pow((A[0]-B[0]),2)) + pow((A[1]-B[1]),2))
-        section_surface = layerThickness * self.settings.line_width # layerThickness is possible to change for each layer
-        volume = section_surface * distance * config.extrusion_multiplier
-        filament_length = volume / self.settings.crossArea
-        # filament_length = self.truncate(filament_length, 4)
-        return filament_length
-
     def calculDis(self,A):
 
         distance = math.sqrt( (pow((self.X-A[0]),2)) + pow((self.Y-A[1]),2))
@@ -83,7 +74,7 @@ class GCodeEnvironment:
 
     # draw to point A
     # @profile
-    def drawToNextPoint(self, A, layerThickness, speed = 0, fan_speed = 0):
+    def drawToNextPoint(self, A, extrusion, layerThickness, speed = 0, fan_speed = 0):
         if fan_speed != self.fan_speed:
             self.fan_speed = fan_speed
             if printer_config.model == "r2x":
@@ -105,7 +96,7 @@ class GCodeEnvironment:
         A = B
         currentPoint = [self.X,self.Y,self.Z]
         try:
-            extrusion = self.calculE(currentPoint,A,layerThickness)
+            # extrusion = self.calculE(currentPoint,A,layerThickness)
             self.E += extrusion
         except:
             raise RuntimeError

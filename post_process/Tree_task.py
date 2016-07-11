@@ -53,3 +53,6 @@ class Tree_task():
 
     def island(self, line_group):
         pass
+
+    def leaf(self, line_group):
+        pass
