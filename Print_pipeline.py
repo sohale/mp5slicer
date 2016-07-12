@@ -78,16 +78,19 @@ def move_to_center(mesh):
 
 
 
-
-
-
-# @profile
-def get_polygon_layers(stl_file_name):
+def get_stl_from_file(stl_file_name):
     from stl import mesh
     import slicer.config.config as config
 
 
-    stl_mesh = mesh.Mesh.from_file(stl_file_name)
+    return mesh.Mesh.from_file(stl_file_name)
+
+
+# @profile
+def get_polygon_layers(stl_mesh):
+    import slicer.config.config as config
+
+
     this_mesh = MPmesh(stl_mesh.vectors, fix_mesh= True)
 
     move_to_center(this_mesh)
@@ -115,6 +118,47 @@ def get_polygon_layers(stl_file_name):
     else:
         return layers_as_polygons, BBox
 
+def print_from_stl(stl_mesh):
+    config_factory("config/config.json")
+    import slicer.config.config as config
+    config.reset()
+
+    start_time = time.time()
+    polygon_layers, BBox = get_polygon_layers(stl_mesh)
+
+    # generate support polylines from mesh directly
+
+    if config.useSupport:
+        from stl import mesh
+        this_mesh = MPmesh(stl_mesh.vectors, fix_mesh= True)
+        move_to_center(this_mesh)
+        import datetime
+        support_start_time = datetime.datetime.now()
+        support_polylines_list = support.Support(this_mesh).get_support_polylines_list()
+        print('time for support')
+        print(datetime.datetime.now() - support_start_time)
+    ############## end of support polylines generation and feed to get_layer_list####################
+
+    if config.useSupport:
+        layer_list = get_layer_list(polygon_layers, BBox, support_polylines_list=support_polylines_list)
+    else:
+        layer_list = get_layer_list(polygon_layers, BBox)
+
+    print_tree = []
+    for layer in layer_list:
+        print_tree.append(layer.G_print())
+
+    TPPT = Tree_post_processor(print_tree)
+    router = Simple_router()
+    TPPT.add_task(router)
+
+    TPPT.run()
+
+
+    g_buffer = G_buffer(True, "mp5.gcode")
+    g_buffer.add_layer_list(print_tree)
+    g_buffer.print_Gcode()
+
 # @profile
 def main():
     args = sys.argv
@@ -126,7 +170,8 @@ def main():
     config.reset()
 
     start_time = time.time()
-    polygon_layers, BBox = get_polygon_layers(stl_file_name)
+    stl_mesh = get_stl_from_file(stl_file_name)
+    polygon_layers, BBox = get_polygon_layers(stl_mesh)
 
     # generate support polylines from mesh directly
 
