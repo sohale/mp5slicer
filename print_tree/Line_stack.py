@@ -15,9 +15,9 @@ class Line_stack:
             self.lines  = lines.lines
         elif isinstance(lines, list) and len(lines) == 0:
             self.lines  = []
-        elif  isinstance(lines[0][0],int):
+        elif  isinstance(lines[0][0],int) or isinstance(lines[0][0], long):
             self.lines  = [lines]
-        elif  isinstance(lines[0][0][0],int):
+        elif  isinstance(lines[0][0][0],int) or isinstance(lines[0][0][0], long):
             self.lines = lines
         else: raise TypeError
 

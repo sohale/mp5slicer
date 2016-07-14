@@ -36,7 +36,7 @@ def shorten_last_line(line_group, shorten_length):
         if len(each_line) > 2:
             vector_from_last_line = [each_line[-1][0] - each_line[-2][0], each_line[-1][1] - each_line[-2][1]]
             final_vector = shorten_vector(vector_from_last_line, shorten_length)
-            if final_vector == None: # last line shorter than shorten_length， then delete last line
+            if final_vector == None: # last line shorter than shorten_length,then delete last line
                 original_end_point = line_group.sub_lines[index][-1]
                 line_group.sub_lines[index] = line_group.sub_lines[index][:-1]
                 line_group.sub_lines.insert(index+1,[original_end_point]) # tricking the gcode write to go to a new point

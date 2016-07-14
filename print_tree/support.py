@@ -236,7 +236,7 @@ class SupportVerticallines:
 def ray_triangle_intersection(ray_near, triangle):
     """
     Taken from Printrun
-    Möller–Trumbore intersection algorithm in pure python
+    Moller-Trumbore intersection algorithm in pure python
     Based on http://en.wikipedia.org/wiki/M%C3%B6ller%E2%80%93Trumbore_intersection_algorithm
     
     ray_dir is set as [[0],[0],[-1]] for optimizing running speed
@@ -278,7 +278,7 @@ def ray_triangle_intersection(ray_near, triangle):
 # def ray_triangle_intersection_old(ray_near, ray_dir, triangle):
 #     """
 #     Taken from Printrun
-#     Möller–Trumbore intersection algorithm in pure python
+#     Moller-Trumbore intersection algorithm in pure python
 #     Based on http://en.wikipedia.org/wiki/M%C3%B6ller%E2%80%93Trumbore_intersection_algorithm
     
 #     ray_near should be the origin of this ray.
