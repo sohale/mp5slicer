@@ -16,6 +16,7 @@ raftSpeed = 2000
 boundarySpeed = 5400
 holeSpeed = 5400
 shellSpeed = 5400
+supportSpeed = 1800
 min_retraction_distance = 5
 default_fan_speed = 0.5
 hasControllableFanSpeed  = True
@@ -25,6 +26,8 @@ exteriorFanSpeed = 0.3
 bridgeFanSpeed = 0.4
 interiorFanSpeed = 0
 supportFanSpeed = 1
+skirtFanSpeed = 0.2
+raftFanSpeed = 0
 upSkinsCount = 4
 downSkinsCount = 3
 
@@ -34,8 +37,8 @@ link_threshold = 5*np.sqrt(2*(supportSamplingDistance**2))
 bed_support_strengthen_number = 5
 supportOverhangangle = -0.7 # cos(155), 75 degree to building direction requires support
 
-platform_bound = "skirts"
-platform_bound_count = 3
+platform_bound = "brim"
+platform_bound_count = 10
 raft = False
 raftLayerThickness = 0.15
 extrusion_multiplier = 1.1

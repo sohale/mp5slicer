@@ -62,8 +62,8 @@ class G_buffer:
             self.skip_retraction = False
 
         # @profile
-        def print_infill(leaf):
-            for line in leaf.sub_lines:
+        def print_infill(infill):
+            for line in infill.sub_lines:
                 if len(line) > 0:
                     if self.skip_retraction:
                         dist = gcodeEnvironment.calculDis(line[0])
@@ -87,8 +87,8 @@ class G_buffer:
                         gcode_output.write(instruction)
 
         # @profile
-        def print_skin(leaf):
-            for line in leaf.sub_lines:
+        def print_skin(skin):
+            for line in skin.sub_lines:
                 if len(line) > 0:
                     if self.skip_retraction:
                         dist = gcodeEnvironment.calculDis(line[0])
@@ -111,8 +111,8 @@ class G_buffer:
                         instruction = gcodeEnvironment.drawToNextPoint(line[point_index], config.layerThickness , config.skinSpeed, config.interiorFanSpeed)
                         gcode_output.write(instruction)
 
-        def print_support(leaf):
-            for line in leaf.sub_lines:
+        def print_support(support):
+            for line in support.sub_lines:
                 if len(line) > 0:
                     if self.skip_retraction:
                         gcode_output.write(gcodeEnvironment.goToNextPoint(line[0],False))

@@ -251,7 +251,7 @@ class Infill:
     def make_polyline(self,polygons,skin_islands, layer_index):
 
         teta = 45 if self.XorY else 135
-        self.pattern = Line_stack(pyclipper.scale_to_clipper(linear_infill2(10,teta,self.BBox)))
+        self.pattern = Line_stack(pyclipper.scale_to_clipper(linear_infill2(5,teta,self.BBox)))
 
         if not skin_islands.isEmpty:
             innerlines = self.pattern.intersect_with(polygons)

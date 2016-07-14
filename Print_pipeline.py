@@ -18,6 +18,7 @@ from slicer.post_process.simple_routing import Simple_router
 from slicer.post_process.boundary_finishing_touch import Boundary_finish
 from slicer.post_process.extrusion_calculation import Cal_extrusion
 from slicer.post_process.Tree_post_processor import Tree_post_processor
+from slicer.post_process.gcode_writer_new import Gcode_writer
 
 # @profile
 def get_layer_list(polygon_layers, BBox, support_polylines_list = []):
@@ -203,17 +204,20 @@ def main():
     boundary_finisher = Boundary_finish()
     cal_extrusion = Cal_extrusion()
 
+    name, dot, type = stl_file_name.partition('.')
+    write_gcode = Gcode_writer(True, gcode_filename=name + ".gcode")
+
     TPPT.add_task(router)
     TPPT.add_task(boundary_finisher)
     TPPT.add_task(cal_extrusion) # extrusion calculation at the end because other task will change line group
-
-    
+    TPPT.add_task(write_gcode)
     TPPT.run()
-
-    name, dot, type = stl_file_name.partition('.')
-    g_buffer = G_buffer(True, gcode_filename=name + ".gcode")
-    g_buffer.add_layer_list(print_tree)
-    g_buffer.print_Gcode()
+    print(name + ".gcode")
+    print('gcode written')
+    # name, dot, type = stl_file_name.partition('.')
+    # g_buffer = G_buffer(True, gcode_filename=name + ".gcode")
+    # g_buffer.add_layer_list(print_tree)
+    # g_buffer.print_Gcode()
 
 
 

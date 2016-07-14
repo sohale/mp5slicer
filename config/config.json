@@ -1,7 +1,7 @@
 {
   "layerThickness":0.2,
   "line_width" : 0.46,
-  "temperature" : 205,
+  "temperature" : 210,
   "inAirSpeed" : 7000,
   "retractionSpeed": 2400,
   "retractionLength": 4.5,
@@ -24,7 +24,7 @@
   "exteriorFanSpeed" : 0.4,
   "initial_extrusion" : 0.2,
   "raft" : false,
-  "extrusion_multiplier" : 1,
+  "extrusion_multiplier" : 1.4,
   "bed_support_strengthen_number":5
 }
 

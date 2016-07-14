@@ -36,21 +36,32 @@ def shorten_last_line(line_group, shorten_length):
         if len(each_line) > 2:
             vector_from_last_line = [each_line[-1][0] - each_line[-2][0], each_line[-1][1] - each_line[-2][1]]
             final_vector = shorten_vector(vector_from_last_line, shorten_length)
-            if final_vector == None: # last line shorter than shorten_length
+            if final_vector == None: # last line shorter than shorten_length， then delete last line
                 original_end_point = line_group.sub_lines[index][-1]
                 line_group.sub_lines[index] = line_group.sub_lines[index][:-1]
-                line_group.sub_lines[index].append(original_end_point) # new format
+                line_group.sub_lines.insert(index+1,[original_end_point]) # tricking the gcode write to go to a new point
             else:
-                final_end_point= [final_vector[0] + each_line[-2][0], final_vector[1] + each_line[-2][1]]
+                final_end_point = [final_vector[0] + each_line[-2][0], final_vector[1] + each_line[-2][1]]
                 original_end_point = line_group.sub_lines[index][-1]
                 line_group.sub_lines[index][-1] = final_end_point
-                line_group.sub_lines[index].append(original_end_point) # new format
+                line_group.sub_lines.insert(index+1,[original_end_point]) # tricking the gcode write to go to a new point
+
         else:
-            # new format
-            original_end_point = line_group.sub_lines[index][-1] 
-            line_group.sub_lines[index].append(original_end_point)
+            pass
+            # original_end_point = line_group.sub_lines[index][-1] 
+            # line_group.sub_lines.insert(index+1,[original_end_point]) # tricking the gcode write to go to a new point
 import math
 def calculE(A, B):
+
+
+    def truncate(f, n):
+        '''Truncates/pads a float f to n decimal places without rounding'''
+        s = '{}'.format(f)
+        if 'e' in s or 'E' in s:
+            return float('{0:.{1}f}'.format(f, n))
+        i, p, d = s.partition('.')
+        return float('.'.join((i, (d+'0'*n)[:n])))
+
     # Calculate the extrusion for a straight movement from A to B
     distance = math.sqrt( (pow((A[0]-B[0]),2)) + pow((A[1]-B[1]),2))
     section_surface = config.layerThickness * config.line_width # layerThickness is possible to change for each layer
@@ -58,5 +69,5 @@ def calculE(A, B):
     assert config.line_width != None
     volume = section_surface * distance * config.extrusion_multiplier
     filament_length = volume / config.crossArea
-    # filament_length = self.truncate(filament_length, 4)
+    filament_length = truncate(filament_length, 4)
     return filament_length

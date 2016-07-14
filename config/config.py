@@ -37,6 +37,8 @@ exteriorFanSpeed = None
 bridgeFanSpeed = None
 interiorFanSpeed = None
 supportFanSpeed = None
+skirtFanSpeed = None
+raftFanSpeed = None
 upSkinsCount = None
 downSkinsCount = None
 

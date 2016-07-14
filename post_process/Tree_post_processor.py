@@ -6,7 +6,7 @@ class Tree_post_processor():
     def __init__(self, print_tree):
         self.print_tree = print_tree
         self.tasks = []
-
+        
     def add_task(self, task, level = 0):
         self.tasks.append(task)
 
@@ -25,15 +25,11 @@ class Tree_post_processor():
 
     def __switch_leaf(self, leaf):
         for task in self.tasks:
-            print('------------')
-            print(task)
-            method = getattr(task, leaf.type)
-            print(method)
+            method = getattr(task, 'leaf')
             method(leaf)
 
-        assert leaf.isLeaf 
-        if leaf.isLeaf:
-            method = getattr(task, 'leaf')
+        for task in self.tasks:
+            method = getattr(task, leaf.type)
             method(leaf)
 
 
@@ -42,6 +38,7 @@ class Tree_post_processor():
         for task in self.tasks:
             method = getattr(task, node.type)
             method(node)
-            for sub_node in node.sub_lines:
-                self.__gotroughgroup(sub_node)
+
+        for sub_node in node.sub_lines:
+            self.__gotroughgroup(sub_node)
 

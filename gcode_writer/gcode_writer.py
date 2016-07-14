@@ -23,7 +23,7 @@ class GCodeEnvironment:
 
         self.X = 0
         self.Y = 0
-        self.Z = config.firstLayerOffset # need to change due to adative height
+        self.Z = config.firstLayerOffset
 
     def truncate(self,f, n):
         '''Truncates/pads a float f to n decimal places without rounding'''
@@ -63,12 +63,12 @@ class GCodeEnvironment:
 
     def retract(self):
         self.E -= 5
-        instruction = "G1 E" + str(self.E)+ " F2400\n"
+        instruction = "G1 E" + str(self.truncate(self.E, 4))+ " F2400\n"
         return instruction
 
     def unretract(self):
         self.E += 5
-        instruction = "G1 E" + str(self.E)+ " F2400\n"
+        instruction = "G1 E" + str(self.truncate(self.E, 4))+ " F2400\n"
         return instruction
 
 
@@ -100,7 +100,7 @@ class GCodeEnvironment:
             self.E += extrusion
         except:
             raise RuntimeError
-        instruction += "G1" + " X" +str(A[0]) + " Y" +str(A[1]) + " Z" +str(self.truncate(self.Z,3)) + " E" +str(self.truncate(self.E, 3)) + " F" +str(self.F) + "\n"
+        instruction += "G1" + " X" +str(A[0]) + " Y" +str(A[1]) + " Z" +str(self.truncate(self.Z,3)) + " E" +str(self.truncate(self.E, 4)) + " F" +str(self.F) + "\n"
         self.X = A[0]
         self.Y = A[1]
         return instruction
@@ -108,7 +108,7 @@ class GCodeEnvironment:
     # a simple instrcuction that will retract filament
     # call the caller: changeLayer (or nextLayer)
     def retractFilament(self, retraction):
-        return "G1 F"+str(self.settings.retractionSpeed) + " E" + str( max(0, (self.E - retraction) ) ) + "\n"
+        return "G1 F"+str(self.settings.retractionSpeed) + " E" + str( max(0, (self.truncate(self.E, 4) - retraction) ) ) + "\n"
 
 
     def volumeInLinear(self, A, B):
