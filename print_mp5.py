@@ -4,9 +4,13 @@ import sys
 
 sys.path.append(os.path.split(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))))[0])
 from slicer.implicit_slicing.mp5tostl import demo_combination_plus_qem
-from slicer.Print_pipeline import print_from_stl
-from stl import mesh
+from slicer.Print_pipeline import print_mesh
+from slicer.config.config_factory import config_factory
 
+conf_file_name = sys.argv[1]
+config_factory(conf_file_name)
+import slicer.config.config as config
+config.reset()
 
 stl = demo_combination_plus_qem()
 # iobj = json2implicit_func(json)
@@ -14,7 +18,7 @@ stl = demo_combination_plus_qem()
 # iobj.implicitFunction(x)
 # stl = demo_combination_plus_qem(iobj)
 stl.save("mp5.stl")
-print_from_stl(stl)
+print_mesh(stl, "mp5")
 # g = slice(stl, iobj)
 
 

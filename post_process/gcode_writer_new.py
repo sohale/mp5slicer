@@ -240,12 +240,12 @@ class GCodeEnvironment:
 
     def retract(self):
         self.E -= 5
-        instruction = "G1 E" + str(self.E)+ " F2400\n"
+        instruction = "G1 E" + str(self.truncate(self.E,3))+ " F2400\n"
         return instruction
 
     def unretract(self):
         self.E += 5
-        instruction = "G1 E" + str(self.E)+ " F2400\n"
+        instruction = "G1 E" + str(self.truncate(self.E,3))+ " F2400\n"
         return instruction
 
 
