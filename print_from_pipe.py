@@ -1,13 +1,13 @@
 import inspect
 import os
 import sys
-
+import json
 
 sys.path.append(os.path.split(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))))[0])
-from solidmodeler.clean_code.mp5tostl import puppy_magic
-from slicer.Print_pipeline import print_mesh
 from slicer.config.config_factory import config_factory
-import json
+from slicer.Print_pipeline import print_mesh
+from solidmodeler.clean_code.mp5tostl import puppy_magic
+
 
 def print_from_pipe():
     conf_file_name = sys.argv[1]
@@ -15,15 +15,13 @@ def print_from_pipe():
     import slicer.config.config as config
     config.reset()
 
-    mp5_as_json = sys.stdin.readlines()
+    mp5_as_json = "".join(sys.stdin.readlines())
 
-
-    mp5 = json.load(mp5_as_json)
+    mp5 = json.loads(mp5_as_json)
 
     stl = puppy_magic(mp5)
     stl.save("mp5.stl")
     print_mesh(stl, "mp5", False)
-
 
 if __name__ == '__main__':
     print_from_pipe()
