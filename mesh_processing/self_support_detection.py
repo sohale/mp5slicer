@@ -201,8 +201,8 @@ def boolist_for_selfsupporting_facet(mesh, boolist_support_required):
                 z_triangle_selfsupport[tri_index] = res[1]
                 break #  when it finds the highest facet, don't need to search for lower facet (in terms of minimal z)
 
-    print(np.sum(boolist_triangle_selfsupport))
-    print(np.count_nonzero(z_triangle_selfsupport))
+    # print(np.sum(boolist_triangle_selfsupport))
+    # print(np.count_nonzero(z_triangle_selfsupport))
     return boolist_triangle_selfsupport, z_triangle_selfsupport
 
 def boolist_for_selfsupporting_facet_modified_for_support_detection(mesh, boolist_support_required):
@@ -276,7 +276,7 @@ def visulisation_selfsupport_facet(mesh, boolist_triangle_selfsupport, boolist_s
         for i in range(len(boolist_support_required)):
             if boolist_support_required[i]:
                 if colors[i] == 'r':
-                    print('warning this facet requires support and self-supporting!!!!!!!')
+                    # print('warning this facet requires support and self-supporting!!!!!!!')
                 else:
                     colors[i] = 'green'
 
@@ -352,7 +352,7 @@ def simple_support_visualisation(mesh, boolist_support_required, boolist_triangl
         for i in range(len(boolist_support_required)):
             if boolist_support_required[i]:
                 if colors[i] == 'r':
-                    print('warning this facet requires support and self-supporting!!!!!!!')
+                    # print('warning this facet requires support and self-supporting!!!!!!!')
                 else:
                     colors[i] = 'green'
 
@@ -393,8 +393,8 @@ def simple_support_visualisation(mesh, boolist_support_required, boolist_triangl
     ############# end of support visualisation #################
 
     # # Show the plot to the screen 
-    print('--------- facet require support ----------')
-    print(np.sum(boolist_support_required))
+    # print('--------- facet require support ----------')
+    # print(np.sum(boolist_support_required))
     groups_to_rectangle(mesh, boolist_support_required, z_triangle_selfsupport, support_area_detection(mesh, boolist_support_required ) )
     plt.show()
 
@@ -412,7 +412,7 @@ def support_area_detection(mesh, boolist_support_required = []):
 
     triangle_index_and_its_neighbour = {}
     for tri_index in range(len(support_triangles)):
-        print(tri_index)
+        # print(tri_index)
         neighbour = set()
         triangle_index_and_its_neighbour[tri_index] = neighbour
 
@@ -541,11 +541,11 @@ def support_area_detection(mesh, boolist_support_required = []):
             group.append(i)
         support_indexs = support_indexs - visited
 
-    print('-------len of group-----------')
-    print(len(groups))
+    # print('-------len of group-----------')
+    # print(len(groups))
 
-    print('------- grouping time -------------')
-    print(datetime.datetime.now() - start_time)
+    # print('------- grouping time -------------')
+    # print(datetime.datetime.now() - start_time)
     return groups
 
 def groups_to_rectangle(mesh,boolist_support_required, z_triangle_selfsupport, groups = []):
@@ -662,8 +662,8 @@ if __name__ == '__main__':
 
     # visulisation_selfsupport_facet(your_mesh, boolist_triangle_selfsupport, boolist_support_required)
 
-    print('number support requrie facet')
-    print(np.sum(boolist_support_required))
+    # print('number support requrie facet')
+    # print(np.sum(boolist_support_required))
     simple_support_visualisation(your_mesh, boolist_support_required, boolist_triangle_selfsupport, z_triangle_selfsupport)
     # groups_to_rectangle(your_mesh, boolist_support_required)
 

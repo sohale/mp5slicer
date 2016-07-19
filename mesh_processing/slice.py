@@ -375,7 +375,7 @@ if __name__ == '__main__':
 
     stl_mesh = mesh.Mesh.from_file('elephant.stl')
     this_mesh = MPmesh(stl_mesh.vectors, fix_mesh= True)
-    print(max_curvature_for_this_layer(this_mesh, 12))
-    print(maximum_cusp_height_for_this_layer(this_mesh, 12, 0.2))
+    # print(max_curvature_for_this_layer(this_mesh, 12))
+    # print(maximum_cusp_height_for_this_layer(this_mesh, 12, 0.2))
     # z_values = adative_height(this_mesh, 0.2)
     # slice_layers = slicer_from_mesh_as_dict(this_mesh, sliceplanes_height = [])

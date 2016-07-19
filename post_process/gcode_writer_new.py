@@ -2,13 +2,14 @@ from slicer.post_process.Tree_task import Tree_task
 import slicer.config.config as config
 import slicer.config.printer_config as printer_config
 import math
+import sys
 
 
 
 class Gcode_writer(Tree_task):
 
-    def __init__(self,to_file, gcode_filename = "test.gcode", layerThickness_list = []):
-        self.to_file = to_file
+    def __init__(self, gcode_filename = "test.gcode", layerThickness_list = []):
+        self.to_file = config.toFile
         self.gcode_filename = gcode_filename
         self.gcodeEnvironment = GCodeEnvironment()
         self.layer_index = 0
@@ -207,8 +208,8 @@ class GCodeEnvironment:
         return distance
 
     def calculE(self, A, B, layerThickness=config.layerThickness):
-        print('extrusion---')
-        print(config.extrusion_multiplier)
+        # print('extrusion---')
+        # print(config.extrusion_multiplier)
         distance = math.sqrt( (pow((A[0]-B[0]),2)) + pow((A[1]-B[1]),2))
         section_surface = layerThickness * config.line_width # layerThickness is possible to change for each layer
         volume = section_surface * distance * config.extrusion_multiplier

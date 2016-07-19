@@ -16,7 +16,7 @@ def refine_print_tree(print_tree ,stl_file_name ):
 
 
     name, dot, type = stl_file_name.partition('.')
-    write_gcode = Gcode_writer(True, gcode_filename=name + ".gcode")
+    write_gcode = Gcode_writer( gcode_filename=name + ".gcode")
     TPPT.add_task(router)
     TPPT.add_task(boundary_finisher)
     TPPT.add_task(cal_extrusion) # extrusion calculation at the end because other task will change line group

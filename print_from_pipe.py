@@ -22,7 +22,7 @@ def print_from_pipe():
 
     stl = puppy_magic(mp5)
     stl.save("mp5.stl")
-    print_mesh(stl, "mp5")
+    print_mesh(stl, "mp5", False)
 
 
 if __name__ == '__main__':

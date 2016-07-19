@@ -398,8 +398,8 @@ class Support:
 
         ## use global index 
         support_triangles_index  = np.where(self.support_required_mask)[0]
-        print('number of triangles to be grouped')
-        print(len(support_triangles_index))
+        # print('number of triangles to be grouped')
+        # print(len(support_triangles_index))
         centers = get_center(self.mesh.triangles[support_triangles_index])
 
         large_triangles_mask = self.mesh.areas.flatten()>large_triangle_area_threshold
@@ -499,13 +499,13 @@ class Support:
                 #     neighbour.remove(tri_index) # remove itself
                 #     break
 
-        print('------- grouping time -------------')
-        print(datetime.datetime.now() - start_time)
+        # print('------- grouping time -------------')
+        # print(datetime.datetime.now() - start_time)
         
         groups = connect_connected_component(triangle_index_and_its_neighbour)
 
-        print('-------len of group-----------')
-        print(len(groups))
+        # print('-------len of group-----------')
+        # print(len(groups))
         # raise Tiger
         return groups
 
@@ -593,8 +593,8 @@ class Support:
                     else:
                         pass
 
-        print('time for sampling support point')
-        print(datetime.datetime.now() - start_time)
+        # print('time for sampling support point')
+        # print(datetime.datetime.now() - start_time)
         self.support_points_by_groups = support_points_by_groups
 
     def self_support_detection(self, support_points_by_groups):
@@ -636,8 +636,8 @@ class Support:
 
         z_triangle_selfsupport_by_groups = list(map(get_support_start_each_group, support_points_by_groups))
 
-        print('time for self-detection')
-        print(datetime.datetime.now() - start_time)
+        # print('time for self-detection')
+        # print(datetime.datetime.now() - start_time)
         return z_triangle_selfsupport_by_groups
 
     def support_lines(self):

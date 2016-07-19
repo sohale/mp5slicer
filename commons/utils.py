@@ -276,15 +276,15 @@ if __name__ == '__main__':
     import time
 
     start_time = time.time()
-    print("--- %s seconds ---" % (time.time() - start_time))
+    # print("--- %s seconds ---" % (time.time() - start_time))
     mesh = mesh.Mesh.from_file("cyl_cyl.stl")
-    print("--- %s seconds ---" % (time.time() - start_time))
+    # print("--- %s seconds ---" % (time.time() - start_time))
     mesh = remove_duplicates_from_mesh(mesh)
-    print("--- %s seconds ---" % (time.time() - start_time))
+    # print("--- %s seconds ---" % (time.time() - start_time))
     slice_layers = slicer_from_mesh_as_dict(mesh, slice_height_from=0, slice_height_to=100, slice_step=1)
-    print("--- %s seconds ---" % (time.time() - start_time))
+    # print("--- %s seconds ---" % (time.time() - start_time))
     layers_as_polygons = polygonize_layers_from_trimed_dict(slice_layers)
-    print("--- %s seconds ---" % (time.time() - start_time))
+    # print("--- %s seconds ---" % (time.time() - start_time))
     for layer in layers_as_polygons:
         vizz_2d_multi(layer)
     # tut = pyclipper.scale_to_clipper(10)
@@ -294,7 +294,7 @@ if __name__ == '__main__':
     #     vizz_2d(layers_as_polygons[7][i])
     # for i in range(len(layers_as_polygons[9])):
     #     vizz_2d(layers_as_polygons[16][i])
-    print("--- %s seconds ---" % (time.time() - start_time))
+    # print("--- %s seconds ---" % (time.time() - start_time))
     # reord = [layers_as_polygons[8][1],layers_as_polygons[8][0]]
     # vizz_2d_multi(reord)
     layers_as_polygons = reord_layers(layers_as_polygons)
@@ -322,7 +322,6 @@ if __name__ == '__main__':
     # poly = pyclipper.scale_to_clipper(layers_as_polygons[2][0])
     # print("--- %s seconds ---" % (time.time() - start_time))
     # isIn = pyclipper.PointInPolygon(point, poly)
-    print("--- %s seconds ---" % (time.time() - start_time))
-    print("dtc")
+    # print("--- %s seconds ---" % (time.time() - start_time))
 
 

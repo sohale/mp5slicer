@@ -54,3 +54,4 @@ raftLayerThickness = None
 extrusion_multiplier = None
 initial_extrusion = None
 crossArea = None
+toFile = False
