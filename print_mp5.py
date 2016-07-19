@@ -2,21 +2,26 @@ import inspect
 import os
 import sys
 
+
 sys.path.append(os.path.split(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))))[0])
-from solidmodeler.clean_code.mp5tostl import demo_combination_plus_qem
+from solidmodeler.clean_code.mp5tostl import puppy_magic
 from slicer.Print_pipeline import print_mesh
 from slicer.config.config_factory import config_factory
-
+import json
 
 def print_from_mp5():
 
-
+    mp5_file_name = sys.argv[2]
     conf_file_name = sys.argv[1]
     config_factory(conf_file_name)
     import slicer.config.config as config
     config.reset()
 
-    stl = demo_combination_plus_qem()
+
+    mp5 = json.load(open(mp5_file_name))
+
+
+    stl = puppy_magic(mp5)
     # iobj = json2implicit_func(json)
     # iobj.implicitGradient(x)
     # iobj.implicitFunction(x)
