@@ -27,6 +27,10 @@ class Gcode_writer(Tree_task):
         instruction += "G1 F200 E" + str(config.initial_extrusion)
         self.gcode_output.write(instruction)
 
+    def __del__(self):
+        self.gcode_output.write(self.gcodeEnvironment.endcode(printer_config.model))
+        self.gcode_output.close()
+
     def basic_writing_gcode(self, line_group, speed = None, fan_speed = None, layerThickness = None):
         if speed == None:
             speed = config.speedRate
@@ -49,6 +53,8 @@ class Gcode_writer(Tree_task):
                     line_segment_count += 1
             line_count += 1
         self.skip_retraction = False
+
+
 
 
     def infill(self,line_group): # change me
