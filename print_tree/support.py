@@ -191,7 +191,11 @@ class SupportVerticallines:
         ls = self.return_polylines(sampled_point, plane_height)
 
         pyclipper_formatting = Polygon_stack([])
-        pyclipper_formatting.add_polygon_stack(ls.offset_point(config.line_width))
+
+        # offset points
+        # pyclipper_formatting.add_polygon_stack(ls.offset_point(config.line_width))
+
+         # remove the contacting layer, i.e. one empty layer between support and object
         pyclipper_formatting.add_polygon_stack(ls.offset_last_point())
 
         if first_layer:
@@ -333,9 +337,10 @@ def distance_between_two_point(point_start, point_end):
     return np.linalg.norm(point_start - point_end)
 
 class Support:
-    def __init__(self, mesh):
+    def __init__(self, mesh, bbox):
         self.mesh = mesh
-        self.mesh.bbox = mesh.bounding_box()
+        self.mesh.bbox = bbox
+        print(self.mesh)
         self.mesh.min_x = mesh.min_x() # numpy array
         self.mesh.max_x = mesh.max_x() # numpy array
         self.mesh.min_y = mesh.min_y() # numpy array

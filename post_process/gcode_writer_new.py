@@ -15,6 +15,7 @@ class Gcode_writer(Tree_task):
         self.layer_index = 0
         self.previousPos = None
         self.layerThickness_list = layerThickness_list
+        self.skip_retraction = False
         # create the gcode_output
         if self.to_file:
             self.gcode_output = open(self.gcode_filename, "w")
@@ -42,7 +43,6 @@ class Gcode_writer(Tree_task):
                     # print(line_count, line_segment_count)
                     # line_group.E[line_count]
                     # line_group.E[line_count][line_segment_count]
-                    # instruction = self.gcodeEnvironment.drawToNextPoint(line[point_index], layerThickness, speed, fan_speed, line_group.E[line_count][line_segment_count])
                     instruction = self.gcodeEnvironment.drawToNextPoint(line[point_index], layerThickness, speed, fan_speed)
 
                     self.gcode_output.write(instruction)
@@ -179,10 +179,6 @@ class Gcode_writer(Tree_task):
 
 class GCodeEnvironment:
 
-
-
-
-
     def __init__(self):
 
         self.E = 0
@@ -195,6 +191,9 @@ class GCodeEnvironment:
 
     def truncate(self,f, n):
         '''Truncates/pads a float f to n decimal places without rounding'''
+
+        # return f
+
         s = '{}'.format(f)
         if 'e' in s or 'E' in s:
             return float('{0:.{1}f}'.format(f, n))
@@ -208,8 +207,6 @@ class GCodeEnvironment:
         return distance
 
     def calculE(self, A, B, layerThickness=config.layerThickness):
-        # print('extrusion---')
-        # print(config.extrusion_multiplier)
         distance = math.sqrt( (pow((A[0]-B[0]),2)) + pow((A[1]-B[1]),2))
         section_surface = layerThickness * config.line_width # layerThickness is possible to change for each layer
         volume = section_surface * distance * config.extrusion_multiplier
@@ -240,16 +237,19 @@ class GCodeEnvironment:
         return instruction
 
     def retract(self):
-        self.E -= 5
-        instruction = "G1 E" + str(self.truncate(self.E,3))+ " F2400\n"
+        instruction = "G92 E0\n"
+        self.E = -4.0000
+        instruction += "G1 E" + str(self.truncate(self.E, 5))+ " F2400\n"
+
         return instruction
 
     def unretract(self):
-        self.E += 5
-        instruction = "G1 E" + str(self.truncate(self.E,3))+ " F2400\n"
+        self.E = 0.0000
+        # self.E += 5
+        instruction = "G1 E" + str(self.truncate(self.E, 5))+ " F2400\n"
+        instruction += "G92 E0\n"
+
         return instruction
-
-
     # draw to point A
     # @profile
     def drawToNextPoint(self, A, layerThickness, speed = 0, fan_speed = 0, extrusion = None):
@@ -279,7 +279,7 @@ class GCodeEnvironment:
         self.E += extrusion
         # except:
         #     raise RuntimeError
-        instruction += "G1" + " X" +str(A[0]) + " Y" +str(A[1]) + " Z" +str(self.truncate(self.Z,3)) + " E" +str(self.truncate(self.E, 3)) + " F" +str(self.F) + "\n"
+        instruction += "G1" + " X" +str(A[0]) + " Y" +str(A[1]) + " Z" +str(self.truncate(self.Z,3)) + " E" +str(self.truncate(self.E, 5)) + " F" +str(self.F) + "\n"
         self.X = A[0]
         self.Y = A[1]
         return instruction

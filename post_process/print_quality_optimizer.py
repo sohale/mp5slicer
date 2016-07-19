@@ -8,11 +8,12 @@ def shorten_last_line(line_group, shorten_length):
     def shorten_vector(end, shorten_length): # start is 0,0
         import numpy as np
         shorten_length = np.sqrt(shorten_length)
+
         angle = np.arctan2(end[1],end[0])
         length_of_end = np.sqrt(end[0]**2 + end[1]**2)
 
         if length_of_end < shorten_length:
-            return None # last line is less than 0.8
+            return length_of_end# last line is less than 0.8
 
         if end[0] == 0:
             shorten_length_ratio_x = 0
@@ -30,22 +31,26 @@ def shorten_last_line(line_group, shorten_length):
         answer = [end[0]*shorten_length_ratio_x, end[1]*shorten_length_ratio_y]
         return answer
 
-    for index in range(len(line_group.sub_lines)):       
-
-        each_line = line_group.sub_lines[index]
-        if len(each_line) > 2:
-            vector_from_last_line = [each_line[-1][0] - each_line[-2][0], each_line[-1][1] - each_line[-2][1]]
-            final_vector = shorten_vector(vector_from_last_line, shorten_length)
-            if final_vector == None: # last line shorter than shorten_length,then delete last line
-                original_end_point = line_group.sub_lines[index][-1]
-                line_group.sub_lines[index] = line_group.sub_lines[index][:-1]
-                line_group.sub_lines.insert(index+1,[original_end_point]) # tricking the gcode write to go to a new point
+    for index in range(len(line_group.sub_lines)):   
+        while shorten_length > 0:
+            each_line = line_group.sub_lines[index]    
+            if len(each_line) > 2:
+                each_line = line_group.sub_lines[index]
+                vector_from_last_line = [each_line[-1][0] - each_line[-2][0], each_line[-1][1] - each_line[-2][1]]
+                final_vector = shorten_vector(vector_from_last_line, shorten_length)
+                if isinstance(final_vector, float): # last line shorter than shorten_length,then delete last line
+                    shorten_length -= final_vector
+                    original_end_point = line_group.sub_lines[index][-1]
+                    line_group.sub_lines[index] = line_group.sub_lines[index][:-1]
+                    line_group.sub_lines.insert(index+1,[original_end_point]) # tricking the gcode write to go to a new point
+                else:
+                    final_end_point = [final_vector[0] + each_line[-2][0], final_vector[1] + each_line[-2][1]]
+                    original_end_point = line_group.sub_lines[index][-1]
+                    line_group.sub_lines[index][-1] = final_end_point
+                    line_group.sub_lines.insert(index+1,[original_end_point]) # tricking the gcode write to go to a new point
+                    break
             else:
-                final_end_point = [final_vector[0] + each_line[-2][0], final_vector[1] + each_line[-2][1]]
-                original_end_point = line_group.sub_lines[index][-1]
-                line_group.sub_lines[index][-1] = final_end_point
-                line_group.sub_lines.insert(index+1,[original_end_point]) # tricking the gcode write to go to a new point
-
+                break
         else:
             pass
             # original_end_point = line_group.sub_lines[index][-1] 

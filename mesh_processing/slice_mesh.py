@@ -50,6 +50,6 @@ def slice_mesh(stl_mesh):
 
 
     if config.useAdaptiveSlicing:
-        return layers_as_polygons, BBox, adaptive_thickness
+        return layers_as_polygons, this_mesh, BBox, adaptive_thickness
     else:
-        return layers_as_polygons, BBox
+        return layers_as_polygons, this_mesh, BBox

@@ -7,10 +7,10 @@ from slicer.post_process.refine_print_tree import refine_print_tree
 import slicer.config.config as config
 
 def print_mesh(mesh, stl_name):
-    polygon_layers, BBox = slice_mesh(mesh)
+    polygon_layers, our_mesh, BBox = slice_mesh(mesh)
 
     if config.useSupport:
-        support_polylines_list = support.Support(mesh).get_support_polylines_list()
+        support_polylines_list = support.Support(our_mesh, BBox).get_support_polylines_list()
     else:
         support_polylines_list = []
 

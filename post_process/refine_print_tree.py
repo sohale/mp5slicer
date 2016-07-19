@@ -22,3 +22,15 @@ def refine_print_tree(print_tree ,stl_file_name ):
     TPPT.add_task(cal_extrusion) # extrusion calculation at the end because other task will change line group
     TPPT.add_task(write_gcode)
     TPPT.run()
+
+
+    from slicer.post_process.gcode_writer_new import GCodeEnvironment
+    gcodeEnvironment = GCodeEnvironment()
+    gcode_output = open(name + ".gcode", "a")
+    end_code_name = "gcode_writer/endcode"
+    endString = ""
+    endCode = open(end_code_name + ".gcode","r")
+    for line in endCode:
+        endString = endString + line
+    endCode.close()
+    gcode_output.write(endString)
