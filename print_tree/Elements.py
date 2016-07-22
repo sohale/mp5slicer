@@ -48,17 +48,21 @@ class Outline:
     def g_print(self):
         polylines = Line_group("outline", False)
 
-        polylines.add_group(self.boundary.g_print()) # printing the outer line first, optimize the z-scar
+        if config.outline_outside_in:
+            polylines.add_group(self.boundary.g_print()) # printing the outer line first, optimize the z-scar
 
-        for boundary_shell in self.boundaryShells.polygons:
-            self.innerBoundaryPolylines.add_chain(Outline.process_polyline(boundary_shell))
-        polylines.add_group(self.innerBoundaryPolylines)
+            for boundary_shell in self.boundaryShells.polygons:
+                self.innerBoundaryPolylines.add_chain(Outline.process_polyline(boundary_shell))
+            polylines.add_group(self.innerBoundaryPolylines)
+
+        else:
+            for boundary_shell in reversed(self.boundaryShells.polygons):
+                self.innerBoundaryPolylines.add_chain(Outline.process_polyline(boundary_shell))
+            polylines.add_group(self.innerBoundaryPolylines)
+            polylines.add_group(self.boundary.g_print()) # printing the outer line first, optimize the z-scar
 
         for hole in self.holes:
             polylines.add_group(hole.g_print())
-
-
-        # polylines.add_group(self.boundary.g_print())
 
         return polylines
 

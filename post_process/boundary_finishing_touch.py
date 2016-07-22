@@ -7,7 +7,7 @@ import slicer.config.config as config
 class Boundary_finish(Tree_task):
 
     def boundary(self, line_group):
-        shorten_last_line(line_group, config.boundary_finish_shorten_length)
+        shorten_last_line(line_group, config.coast_at_end_length)
 
     def inner_boundary(self, line_group):
-        shorten_last_line(line_group, config.boundary_finish_shorten_length)
+        shorten_last_line(line_group, config.coast_at_end_length)
