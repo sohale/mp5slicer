@@ -9,17 +9,30 @@ import pyclipper
 # A Line stack is equivalent to a polygon stack but its polygons are open
 class Line_stack:
     def __init__(self, lines = None):
-        if lines is None:
-            self.lines = []
-        elif isinstance(lines,Line_stack):
-            self.lines  = lines.lines
-        elif isinstance(lines, list) and len(lines) == 0:
-            self.lines  = []
-        elif  isinstance(lines[0][0],int) or isinstance(lines[0][0], long):
-            self.lines  = [lines]
-        elif  isinstance(lines[0][0][0],int) or isinstance(lines[0][0][0], long):
-            self.lines = lines
-        else: raise TypeError
+        if sys.version_info[0] == (3):
+            if lines is None:
+                self.lines = []
+            elif isinstance(lines,Line_stack):
+                self.lines  = lines.lines
+            elif isinstance(lines, list) and len(lines) == 0:
+                self.lines  = []
+            elif  isinstance(lines[0][0],int):
+                self.lines  = [lines]
+            elif  isinstance(lines[0][0][0],int):
+                self.lines = lines
+            else: raise TypeError
+        else:
+            if lines is None:
+                self.lines = []
+            elif isinstance(lines,Line_stack):
+                self.lines  = lines.lines
+            elif isinstance(lines, list) and len(lines) == 0:
+                self.lines  = []
+            elif  isinstance(lines[0][0],int) or isinstance(lines[0][0], long):
+                self.lines  = [lines]
+            elif  isinstance(lines[0][0][0],int) or isinstance(lines[0][0][0], long):
+                self.lines = lines
+            else: raise TypeError
 
     def is_empty(self):
         if self.lines:

@@ -6,27 +6,48 @@ from slicer.print_tree.clipper_operations import *
 class Polygon_stack():
     def __init__(self, polygons = None):
         self.isEmpty = True
-        if polygons is None:
-            self.polygons = []
-        elif isinstance(polygons,Polygon_stack):
-            self.polygons  = polygons.polygons
-            self.isEmpty = polygons.isEmpty
-        elif isinstance(polygons, list) and len(polygons) == 0:
-            self.polygons  = []
-        elif isinstance(polygons[0][0],int) or isinstance(polygons[0][0],long):
-            self.polygons  = [polygons]
-            self.isEmpty = False
-        elif isinstance(polygons[0][0][0],int) or isinstance(polygons[0][0][0],long):
-            self.polygons = polygons
-            self.isEmpty = False
-        else: raise TypeError
+        if sys.version_info[0] == 3:
+            if polygons is None:
+                self.polygons = []
+            elif isinstance(polygons,Polygon_stack):
+                self.polygons  = polygons.polygons
+                self.isEmpty = polygons.isEmpty
+            elif isinstance(polygons, list) and len(polygons) == 0:
+                self.polygons  = []
+            elif isinstance(polygons[0][0],int) :
+                self.polygons  = [polygons]
+                self.isEmpty = False
+            elif isinstance(polygons[0][0][0],int) :
+                self.polygons = polygons
+                self.isEmpty = False
+            else: raise TypeError
+        else:
+            if polygons is None:
+                self.polygons = []
+            elif isinstance(polygons,Polygon_stack):
+                self.polygons  = polygons.polygons
+                self.isEmpty = polygons.isEmpty
+            elif isinstance(polygons, list) and len(polygons) == 0:
+                self.polygons  = []
+            elif isinstance(polygons[0][0],int) or isinstance(polygons[0][0],long):
+                self.polygons  = [polygons]
+                self.isEmpty = False
+            elif isinstance(polygons[0][0][0],int) or isinstance(polygons[0][0][0],long):
+                self.polygons = polygons
+                self.isEmpty = False
+            else: raise TypeError
 
     def add_polygons(self,polygons):
-        if isinstance(polygons[0][0][0],int) or isinstance(polygons[0][0][0],long):
-            self.polygons += polygons
-            self.isEmpty = False
-
-        else: raise TypeError
+        if sys.version_info[0] == (3):
+            if isinstance(polygons[0][0][0],int):
+                self.polygons += polygons
+                self.isEmpty = False
+            else: raise TypeError
+        else:
+            if isinstance(polygons[0][0][0],int) or isinstance(polygons[0][0][0],long):
+                self.polygons += polygons
+                self.isEmpty = False
+            else: raise TypeError
 
     def add_polygon(self,polygon):
         if isinstance(polygon[0][0],int):
