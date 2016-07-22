@@ -4,6 +4,7 @@ import sys
 import json
 
 sys.path.append(os.path.split(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))))[0])
+
 from slicer.config.config_factory import config_factory
 from slicer.Print_pipeline import print_mesh
 from solidmodeler.clean_code.mp5tostl import puppy_magic
@@ -21,7 +22,7 @@ def print_from_pipe():
 
     stl = puppy_magic(mp5)
     stl.save("mp5.stl")
-    print_mesh(stl, "mp5", False)
+    print_mesh(stl, "mp5")
 
 if __name__ == '__main__':
     print_from_pipe()
