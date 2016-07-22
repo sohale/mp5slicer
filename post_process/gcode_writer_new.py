@@ -19,12 +19,18 @@ class Gcode_writer(Tree_task):
         # create the gcode_output
         if self.to_file:
             self.gcode_output = open(self.gcode_filename, "w")
+            instruction = ""
+            for attr in dir(config):
+                if not attr.startswith('__'):
+                    instruction += ";" +str(attr)+ " : "+str(getattr(config, attr)) +" \n"
+            self.gcode_output.write(instruction)
+
         else:
             self.gcode_output = sys.stdout
 
         ## gcode writing starts 
         instruction = self.gcodeEnvironment.startcode(printer_config.model)
-        instruction += "G1 F200 E" + str(config.initial_extrusion)
+        instruction += "G1 F200 E" + str(config.initial_extrusion) + "\n"
         self.gcode_output.write(instruction)
 
     def __del__(self):
@@ -41,7 +47,7 @@ class Gcode_writer(Tree_task):
         line_count = 0
         for line in line_group.sub_lines:
             if len(line) > 0:
-                self.gcode_output.write(self.gcodeEnvironment.goToNextPoint(line[0], True))
+                self.gcode_output.write(self.gcodeEnvironment.goToNextPoint(line[0], self.skip_retraction))
                 line_segment_count = 0
                 for point_index in range(1, len(line)):
                     # print(line_count, line_segment_count)
@@ -90,8 +96,10 @@ class Gcode_writer(Tree_task):
             config.shellSpeed = 750
             config.supportSpeed = 750
             config.raftSpeed = 750
-        else:
+        elif self.layer_index == 2:
             config.reset()
+        else:
+            pass
 
         # allow change of layerThickness for each layer
         if self.layerThickness_list: # open happen if it is adaptive slicing
@@ -189,7 +197,7 @@ class GCodeEnvironment:
 
         self.E = 0
         self.F = 1000 # in mm/minute
-        self.fan_speed = 0
+        self.fan_speed = config.default_fan_speed
 
         self.X = 0
         self.Y = 0
@@ -217,7 +225,6 @@ class GCodeEnvironment:
         section_surface = layerThickness * config.line_width # layerThickness is possible to change for each layer
         volume = section_surface * distance * config.extrusion_multiplier
         filament_length = volume / config.crossArea
-        # filament_length = self.truncate(filament_length, 4)
         return filament_length
 
     # go to point A without extruding filament
@@ -243,17 +250,21 @@ class GCodeEnvironment:
         return instruction
 
     def retract(self):
-        instruction = "G92 E0\n"
-        self.E = -4.0000
-        instruction += "G1 E" + str(self.truncate(self.E, 5))+ " F2400\n"
+        self.E -= 5
+        instruction = "G1 E" + str(self.truncate(self.E, 5))+ " F2400\n"
 
         return instruction
 
     def unretract(self):
-        self.E = 0.0000
-        # self.E += 5
-        instruction = "G1 E" + str(self.truncate(self.E, 5))+ " F2400\n"
-        instruction += "G92 E0\n"
+
+        if self.E > 1900: # https://github.com/Ultimaker/CuraEngine/issues/14
+            instruction = "G92 E0\n"
+            self.E = 0.0000
+            instruction += "G1 E" + str(self.truncate(self.E, 5))+ " F2400\n"
+        else:
+
+            self.E += 5
+            instruction = "G1 E" + str(self.truncate(self.E, 5))+ " F2400\n"
 
         return instruction
     # draw to point A
@@ -267,6 +278,8 @@ class GCodeEnvironment:
                 instruction = "M106 S" + str(int(math.floor(fan_speed*255))) + "\n"
         else:
             instruction = ""
+
+        # instruction = ""
         if isinstance(A,str):
             raise RuntimeError
 
@@ -318,7 +331,7 @@ class GCodeEnvironment:
     def startcode(self, printer):
         if printer == "r2x":
             start_code_name = "gcode_writer/r2xstart"
-            startString = "M104 S"+str(config.temperature)+" T1 (set extruder temperature)\n"
+            startString = "M104 S"+str(confistag.temperature)+" T1 (set extruder temperature)\n"
         else:
             start_code_name = "gcode_writer/startcode"
             startString = "M109 S"+str(config.temperature)+"\n"

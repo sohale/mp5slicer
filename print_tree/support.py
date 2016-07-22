@@ -340,7 +340,6 @@ class Support:
     def __init__(self, mesh, bbox):
         self.mesh = mesh
         self.mesh.bbox = bbox
-        print(self.mesh)
         self.mesh.min_x = mesh.min_x() # numpy array
         self.mesh.max_x = mesh.max_x() # numpy array
         self.mesh.min_y = mesh.min_y() # numpy array

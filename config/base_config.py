@@ -44,3 +44,4 @@ raftLayerThickness = 0.15
 extrusion_multiplier = 1.1
 initial_extrusion = 0.2
 toFile = False
+boundary_finish_shorten_length = 1

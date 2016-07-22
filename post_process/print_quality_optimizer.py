@@ -57,8 +57,6 @@ def shorten_last_line(line_group, shorten_length):
             # line_group.sub_lines.insert(index+1,[original_end_point]) # tricking the gcode write to go to a new point
 import math
 def calculE(A, B):
-
-
     def truncate(f, n):
         '''Truncates/pads a float f to n decimal places without rounding'''
         s = '{}'.format(f)
@@ -74,5 +72,4 @@ def calculE(A, B):
     assert config.line_width != None
     volume = section_surface * distance * config.extrusion_multiplier
     filament_length = volume / config.crossArea
-    filament_length = truncate(filament_length, 4)
     return filament_length
