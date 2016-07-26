@@ -3,9 +3,9 @@
 import os
 import signal
 import sys
-import couchdb
 import redis
 import requests
+import time
 
 """
     This is the API communication wrapper for the MP5 slicer. Workflow:
@@ -44,16 +44,17 @@ def usage():
     print('usage: ./wrapper.py')
     exit()
 
+
 def parse_args(settings):
     return ['--{}={} '.format(key, settings[key]) for key in settings]
 
-class Redis():
 
+class Redis:
     def __init__(self):
         self.client = redis.StrictRedis(
-            host= 'redis',
-            port= 6379,
-            db= 1
+            host='redis',
+            port=6379,
+            db=1
         )
 
     def pop(self):
@@ -62,22 +63,21 @@ class Redis():
                 return int(self.client.blpop('s', 0)[1])
             except:
                 print(sys.argv[0], ": blpop() failed.")
-                pass
+                time.sleep(0.5)  # We sleep half a second to prevent from overloading CPU
 
-    def broadcast_progress(self, task_ID, progress):
-        return self.client.publish('s:{}'.format(task_ID), progress)
+    def broadcast_progress(self, task_id, progress):
+        return self.client.publish('s:{}'.format(task_id), progress)
 
 
 def execute(task, broadcast):
-    '''
-        All names relative to the slicer
-    '''
+    """
+    All names relative to the slicer
+    """
 
     (r_stdout, w_stdout) = os.pipe()
     (r_stderr, w_stderr) = os.pipe()
-    (r_stdin, w_stdin)   = os.pipe()
+    (r_stdin, w_stdin) = os.pipe()
     err = ''
-
 
     args = [WRAPPER_SETTINGS['exec']]
     args += parse_args(task['settings'])
@@ -86,7 +86,7 @@ def execute(task, broadcast):
         for fd in [r_stdin, w_stderr, w_stdout]:
             os.close(fd)
         errs = os.fdopen(r_stderr)
-        ok  = os.fdopen(r_stdout)
+        ok = os.fdopen(r_stdout)
         os.write(w_stdin, bytes(str(task['obj']['root']), 'utf-8'))
         os.close(w_stdin)
         for line in errs:
@@ -107,8 +107,8 @@ def execute(task, broadcast):
             os.close(fd)
         for (old, new) in [(1, w_stdout), (2, w_stderr), (0, r_stdin)]:
             os.dup2(new, old)
-        os.execv('./a.out', ['./a.out',])#args)
-        os.exit(0)
+        os.execv('./a.out', ['./a.out', ])#args)
+        os._exit(0)
 
 
 def get_settings():
@@ -148,15 +148,18 @@ def get_settings():
 
 
 WRAPPER_SETTINGS = get_settings()
+
+
 def main():
 
     should_quit = False
+
     def gracefully_exit(*args):
         nonlocal should_quit
         should_quit = True
     signal.signal(signal.SIGINT, gracefully_exit)
 
-    #Next section up to the while is to be deleted
+    # Next section up to the while is to be deleted
     f = open('./testfile')
     task = {
         "obj": {
@@ -169,12 +172,14 @@ def main():
 
         r = Redis()
         running = False
-        pk = r.pop() # blocking until a task is actually retrieved
+        pk = r.pop()  # blocking until a task is actually retrieved
         if should_quit:
             print("This is a complicated edge case to handle. We should probably abort and report to the API if we still have the time")
             exit(1)
         url = WRAPPER_SETTINGS['django_host'] + str(pk)
+
 #TODO:API request        task = requests.get(url + '/start/', data = {}) # /!\ FIX ME: Need to authenticate
+
         traceback = None
         try:
             sliced, debug = execute(task, lambda x: r.broadcast_progress(pk, x))
@@ -185,6 +190,7 @@ def main():
             print(inst.args[1])
             traceback = inst.args[1]
             r.broadcast_progress(pk, -1)
+
 #TODO:API request        ret = requests.patch(url + '/end/', data = {'status':0, 'logs':''})
 
         # Remove the following when implemented correctly
