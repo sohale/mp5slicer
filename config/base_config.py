@@ -43,7 +43,7 @@ raft = False
 raftLayerThickness = 0.15
 extrusion_multiplier = 1.1
 initial_extrusion = 0.2
-toFile = True
+toFile = False
 
 # outline
 coast_at_end_length = 1
