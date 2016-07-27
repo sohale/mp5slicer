@@ -19,6 +19,9 @@ def refine_print_tree(print_tree ,stl_file_name ):
     write_gcode = Gcode_writer( gcode_filename=name + ".gcode")
     TPPT.add_task(router)
     TPPT.add_task(boundary_finisher)
-    TPPT.add_task(cal_extrusion) # extrusion calculation at the end because other task will change line group
+    # TPPT.add_task(cal_extrusion) # extrusion calculation at the end because other task will change line group
+    TPPT.run()
+    
+    TPPT = Tree_post_processor(simple_print_tree)
     TPPT.add_task(write_gcode)
     TPPT.run()

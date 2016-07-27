@@ -16,7 +16,7 @@ raftSpeed = 2000
 boundarySpeed = 5400
 holeSpeed = 5400
 shellSpeed = 5400
-supportSpeed = 1800
+supportSpeed = 1200
 min_retraction_distance = 5
 default_fan_speed = 0.5
 hasControllableFanSpeed  = True
@@ -32,21 +32,23 @@ upSkinsCount = 4
 downSkinsCount = 3
 
 # support
-supportSamplingDistance = 1.5
+supportSamplingDistance = 2
 link_threshold = 5*np.sqrt(2*(supportSamplingDistance**2))
 bed_support_strengthen_number = 5
 supportOverhangangle = -0.7 # cos(155), 75 degree to building direction requires support
 
 platform_bound = "brim"
-platform_bound_count = 10
+platform_bound_count = 20
 raft = False
 raftLayerThickness = 0.15
 extrusion_multiplier = 1.1
 initial_extrusion = 0.2
-toFile = False
+toFile = True
 
 # outline
 coast_at_end_length = 1
 outline_outside_in = True
 
-
+# new
+z_movement_speed = 1000
+retraction_at_change_layer = True

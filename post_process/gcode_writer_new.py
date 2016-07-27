@@ -4,8 +4,6 @@ import slicer.config.printer_config as printer_config
 import math
 import sys
 
-
-
 class Gcode_writer(Tree_task):
 
     def __init__(self, gcode_filename = "test.gcode", layerThickness_list = []):
@@ -37,55 +35,39 @@ class Gcode_writer(Tree_task):
         self.gcode_output.write(self.gcodeEnvironment.endcode(printer_config.model))
         self.gcode_output.close()
 
-    def basic_writing_gcode(self, line_group, speed = None, fan_speed = None, layerThickness = None):
-        if speed == None:
-            speed = config.speedRate
-        if fan_speed == None:
-            fan_speed = config.default_fan_speed
+    def basic_writing_gcode(self, line_group, speed, fan_speed, layerThickness = None):
         if layerThickness == None:
             layerThickness = config.layerThickness
+
         line_count = 0
         for line in line_group.sub_lines:
             if len(line) > 0:
                 self.gcode_output.write(self.gcodeEnvironment.goToNextPoint(line[0], self.skip_retraction))
-                line_segment_count = 0
                 for point_index in range(1, len(line)):
-                    # print(line_count, line_segment_count)
-                    # line_group.E[line_count]
-                    # line_group.E[line_count][line_segment_count]
                     instruction = self.gcodeEnvironment.drawToNextPoint(line[point_index], layerThickness, speed, fan_speed)
-
                     self.gcode_output.write(instruction)
-                    line_segment_count += 1
-            line_count += 1
         self.skip_retraction = False
 
+    def writing_gcode_with_length_filter(self, line_group, layerThickness, speed, fan_speed, length_threshold):
 
-
-
-    def infill(self,line_group): # change me
         for line in line_group.sub_lines:
             if len(line) > 0:
-                if self.skip_retraction:
-                    dist = self.gcodeEnvironment.calculDis(line[0])
-                    if dist < config.line_width * 2.5:
-                        instruction = self.gcodeEnvironment.drawToNextPoint(line[0], config.layerThickness,
-                                                         config.infillSpeed, config.interiorFanSpeed)
-                        self.gcode_output.write(instruction)
-                    else:
-                        self.gcode_output.write(self.gcodeEnvironment.goToNextPoint(line[0],False))
-                        self.skip_retraction = False
-                else:
-                    dist = self.gcodeEnvironment.calculDis(line[0])
-                    if dist < config.line_width * 2.5:
-                        instruction = self.gcodeEnvironment.drawToNextPoint(line[0], config.layerThickness,
-                                                         config.infillSpeed, config.interiorFanSpeed)
-                        self.gcode_output.write(instruction)
-                    else:
-                        self.gcode_output.write(self.gcodeEnvironment.goToNextPoint(line[0], True))
-                for point_index in range(1,len(line)):
-                    instruction = self.gcodeEnvironment.drawToNextPoint(line[point_index], config.layerThickness, config.infillSpeed, config.interiorFanSpeed)
+                dist = self.gcodeEnvironment.calculDis(line[0])
+                if dist < length_threshold:
+                    instruction = self.gcodeEnvironment.drawToNextPoint(line[0], layerThickness, speed, fan_speed)
                     self.gcode_output.write(instruction)
+                else:
+                    self.gcode_output.write(self.gcodeEnvironment.goToNextPoint(line[0], self.skip_retraction))
+                if self.skip_retraction:
+                    self.skip_retraction = False
+
+                for point_index in range(1,len(line)):
+                    instruction = self.gcodeEnvironment.drawToNextPoint(line[point_index], layerThickness, speed, fan_speed)
+                    self.gcode_output.write(instruction)
+
+    def infill(self,line_group): # done
+        length_threshold = config.line_width * 2.5
+        self.writing_gcode_with_length_filter(line_group, config.layerThickness, config.infillSpeed, config.interiorFanSpeed, length_threshold)
 
     def layer(self,line_group): # done
         if self.layer_index < 2:
@@ -114,6 +96,17 @@ class Gcode_writer(Tree_task):
 
         self.layer_index += 1
 
+        if config.retraction_at_change_layer:
+            instruction = "G1 Z{} F{}\n".format(self.gcodeEnvironment.truncate(self.gcodeEnvironment.Z, 3),
+                                            config.z_movement_speed)
+            self.gcode_output.write(instruction)
+            self.skip_retraction = False
+
+        else:
+            instruction = "G1 Z{} F{}\n".format(self.gcodeEnvironment.truncate(self.gcodeEnvironment.Z, 3),
+                                            config.z_movement_speed)
+            self.gcode_output.write(instruction)
+
     def raft_layer(self, line_group): # done
         config.extrusion_multiplier = 1.1
         self.gcodeEnvironment.Z += config.raftLayerThickness
@@ -132,46 +125,25 @@ class Gcode_writer(Tree_task):
         self.gcodeEnvironment.Z += config.layerThickness + 0.2
 
         # self.gcode_output.write("M104 S220 \n")
-        self.gcode_output.write(self.gcodeEnvironment.goToNextPoint(self.wait_point, True))
+        self.gcode_output.write(self.gcodeEnvironment.goToNextPoint(self.wait_point, False))
         self.gcode_output.write(self.gcodeEnvironment.wait_for_cooling(config.temperature, 25000))
 
         config.reset()
 
     def skin(self, line_group): # done
-        for line in line_group.sub_lines:
-            if len(line) > 0:
-                if self.skip_retraction:
-                    dist = self.gcodeEnvironment.calculDis(line[0])
-                    if dist < config.line_width * 2.5:
-                        instruction = self.gcodeEnvironment.drawToNextPoint(line[0], config.layerThickness,
-                                                         config.skinSpeed, config.interiorFanSpeed)
-                        self.gcode_output.write(instruction)
-                    else:
-                        self.gcode_output.write(self.gcodeEnvironment.goToNextPoint(line[0],False))
-                        self.skip_retraction = False
-                else:
-                    dist = self.gcodeEnvironment.calculDis(line[0])
-                    if dist < config.line_width * 2.5:
-                        instruction = self.gcodeEnvironment.drawToNextPoint(line[0], config.layerThickness,
-                                                         config.skinSpeed, config.interiorFanSpeed)
-                        self.gcode_output.write(instruction)
-                    else:
-                        self.gcode_output.write(self.gcodeEnvironment.goToNextPoint(line[0], True))
-                for point_index in range(1,len(line)):
-                    instruction = self.gcodeEnvironment.drawToNextPoint(line[point_index], config.layerThickness, config.skinSpeed, config.interiorFanSpeed)
-                    self.gcode_output.write(instruction)
-
+        length_threshold = config.line_width * 2.5
+        self.writing_gcode_with_length_filter(line_group, config.layerThickness, config.skinSpeed, config.interiorFanSpeed, length_threshold)
     def hole(self, line_group): # done
         self.basic_writing_gcode(line_group, config.holeSpeed, config.exteriorFanSpeed)
 
     def inner_boundary(self, line_group): # done
-        self.basic_writing_gcode(line_group, config.boundarySpeed)
+        self.basic_writing_gcode(line_group, config.boundarySpeed, config.default_fan_speed)
 
     def inner_hole(self, line_group): # done
         self.basic_writing_gcode(line_group, config.boundarySpeed, config.exteriorFanSpeed)
 
     def boundary(self, line_group): # done
-        self.basic_writing_gcode(line_group, config.boundarySpeed)
+        self.basic_writing_gcode(line_group, config.boundarySpeed, config.default_fan_speed)
 
     def skirt(self, line_group): #done
         self.basic_writing_gcode(line_group, config.raftSpeed, config.skirtFanSpeed)
@@ -186,7 +158,7 @@ class Gcode_writer(Tree_task):
         config.extrusion_multiplier = 0.8
         self.basic_writing_gcode(line_group, config.raftSpeed, config.raftFanSpeed, config.raftLayerThickness)
         self.wait_point = line_group.sub_lines[0][0]
-        self.gcode_output.write(self.gcodeEnvironment.goToNextPoint(self.wait_point, True))
+        self.gcode_output.write(self.gcodeEnvironment.goToNextPoint(self.wait_point, False))
         self.gcode_output.write(self.gcodeEnvironment.wait_for_cooling(196, 60000))
 
         config.reset()
@@ -196,13 +168,12 @@ class GCodeEnvironment:
     def __init__(self):
 
         self.E = 0
-        self.F = 1000 # in mm/minute
         self.fan_speed = config.default_fan_speed
-
+        self.speed = config.speedRate
         self.X = 0
         self.Y = 0
         self.Z = config.firstLayerOffset
-
+        self.rewrite_speed = True
     def truncate(self,f, n):
         '''Truncates/pads a float f to n decimal places without rounding'''
 
@@ -220,33 +191,32 @@ class GCodeEnvironment:
         distance = math.sqrt( (pow((self.X-A[0]),2)) + pow((self.Y-A[1]),2))
         return distance
 
-    def calculE(self, A, B, layerThickness=config.layerThickness):
+    def calculE(self, A, B):
         distance = math.sqrt( (pow((A[0]-B[0]),2)) + pow((A[1]-B[1]),2))
-        section_surface = layerThickness * config.line_width # layerThickness is possible to change for each layer
+        section_surface = config.layerThickness * config.line_width # layerThickness is possible to change for each layer
         volume = section_surface * distance * config.extrusion_multiplier
         filament_length = volume / config.crossArea
         return filament_length
 
     # go to point A without extruding filament
     # @profile
-    def goToNextPoint(self,A, retract):
-        B = [0.1]*2
-        for i in range(len(A)):
-            B[i] = self.truncate(A[i],3)
-        A = B
+    def goToNextPoint(self, A, skip_retract):
+        A = map(self.truncate, A, [3]*len(A))
         distance = self.calculDis(A)
-        if distance > config.min_retraction_distance and retract:
+        if distance > config.min_retraction_distance and not skip_retract:
             instruction = self.retract()
 
-            instruction +=  "G0" + " X"+str(A[0]) + " Y"+str(A[1]) + " Z"+str(self.truncate(self.Z,3)) +" F"+str(config.inAirSpeed)+"\n"
+            instruction +=  "G0" + " X"+str(A[0]) + " Y"+str(A[1]) + " F"+str(config.inAirSpeed)+"\n"
             instruction += self.unretract()
         else :
-            instruction =  "G0" + " X"+str(A[0]) + " Y"+str(A[1]) + " Z"+str(self.truncate(self.Z,3)) + " F"+str(config.inAirSpeed)+"\n"
+            instruction =  "G0" + " X"+str(A[0]) + " Y"+str(A[1]) + " F"+str(config.inAirSpeed)+"\n"
 
 
 
         self.X = A[0]
         self.Y = A[1]
+
+        self.rewrite_speed = True
         return instruction
 
     def retract(self):
@@ -257,19 +227,19 @@ class GCodeEnvironment:
 
     def unretract(self):
 
-        if self.E > 1900: # https://github.com/Ultimaker/CuraEngine/issues/14
-            instruction = "G92 E0\n"
-            self.E = 0.0000
-            instruction += "G1 E" + str(self.truncate(self.E, 5))+ " F2400\n"
-        else:
+        # if self.E > 1900: # https://github.com/Ultimaker/CuraEngine/issues/14
+        #     instruction = "G92 E0\n"
+        #     self.E = 0.0000
+        #     instruction += "G1 E" + str(self.truncate(self.E, 5))+ " F2400\n"
+        # else:
 
-            self.E += 5
-            instruction = "G1 E" + str(self.truncate(self.E, 5))+ " F2400\n"
+        self.E += 5
+        instruction = "G1 E" + str(self.truncate(self.E, 5))+ " F2400\n"
 
         return instruction
     # draw to point A
     # @profile
-    def drawToNextPoint(self, A, layerThickness, speed = 0, fan_speed = 0, extrusion = None):
+    def drawToNextPoint(self, A, layerThickness, speed, fan_speed):
         if fan_speed != self.fan_speed:
             self.fan_speed = fan_speed
             if printer_config.model == "r2x":
@@ -282,23 +252,22 @@ class GCodeEnvironment:
         # instruction = ""
         if isinstance(A,str):
             raise RuntimeError
-
-        self.F = speed
-
-        B = [0.1]*2
-        for i in range(len(A)):
-            B[i] = self.truncate(A[i],3)
-        A = B
-        currentPoint = [self.X,self.Y,self.Z]
+        # A = B
+        A = map(self.truncate, A, [3]*len(A))
+        currentPoint = [self.X,self.Y]
         # try:
-        if extrusion == None:
-            extrusion = self.calculE(currentPoint,A,layerThickness)
-        else:
-            pass
+        extrusion = self.calculE(currentPoint, A)
         self.E += extrusion
         # except:
         #     raise RuntimeError
-        instruction += "G1" + " X" +str(A[0]) + " Y" +str(A[1]) + " Z" +str(self.truncate(self.Z,3)) + " E" +str(self.truncate(self.E, 5)) + " F" +str(self.F) + "\n"
+        if speed != self.speed or self.rewrite_speed:
+            self.speed = speed
+            self.rewrite_speed = False
+            instruction += "G1" + " X" +str(A[0]) + " Y" +str(A[1]) + " E" +str(self.truncate(self.E, 5)) + " F" +str(self.speed) + "\n"
+        else:
+            instruction += "G1" + " X" +str(A[0]) + " Y" +str(A[1]) + " E" +str(self.truncate(self.E, 5)) + "\n"
+
+
         self.X = A[0]
         self.Y = A[1]
         return instruction

@@ -199,7 +199,8 @@ class SupportVerticallines:
         pyclipper_formatting.add_polygon_stack(ls.offset_last_point())
 
         if first_layer:
-            pyclipper_formatting.add_polygon_stack(ls.offset_all(config.line_width))
+            pyclipper_formatting.add_polygon_stack(ls.offset_line(config.line_width))
+            # pyclipper_formatting.add_polygon_stack(ls.offset_all(config.line_width))
             # pyclipper_formatting.add_polygon_stack(ls.offset_all(config.line_width*2))
             # pyclipper_formatting.add_polygon_stack(ls.offset_all(config.line_width*3))
         #     pyclipper_formatting.add_polygon_stack(ls.offset_all(config.line_width*4))

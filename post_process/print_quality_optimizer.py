@@ -55,6 +55,31 @@ def shorten_last_line(line_group, shorten_length):
             pass
             # original_end_point = line_group.sub_lines[index][-1] 
             # line_group.sub_lines.insert(index+1,[original_end_point]) # tricking the gcode write to go to a new point
+        return line_group
+
+def reorder_lines_close_to_point(point, line_group):
+
+    for line_index in range(len(line_group.sub_lines)):
+        # line_group format has the first point equals to last point, so delete it for easier mulipulation
+        line = line_group.sub_lines[line_index][:-1] 
+
+        shortest_length = 9999999999
+
+        for point_index in range(len(line)):
+            length = dist(point, line[point_index])
+            if length < shortest_length:
+                shortest_length = length
+                shortest_length_index = point_index
+
+        new_line = []
+        for i in range(shortest_length_index, len(line)):
+            new_line.append(line[i])
+        for i in range(shortest_length_index):
+            new_line.append(line[i])
+
+        new_line.append(new_line[0]) # forcing the format for line_group
+        line_group.sub_lines[line_index] = new_line
+
 import math
 def calculE(A, B):
     def truncate(f, n):
@@ -68,8 +93,6 @@ def calculE(A, B):
     # Calculate the extrusion for a straight movement from A to B
     distance = math.sqrt( (pow((A[0]-B[0]),2)) + pow((A[1]-B[1]),2))
     section_surface = config.layerThickness * config.line_width # layerThickness is possible to change for each layer
-    assert config.layerThickness != None
-    assert config.line_width != None
     volume = section_surface * distance * config.extrusion_multiplier
     filament_length = volume / config.crossArea
     return filament_length
