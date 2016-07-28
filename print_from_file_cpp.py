@@ -18,8 +18,9 @@ def print_from_mp5():
     import slicer.config.config as config
     config.reset()
 
-    mp5 = open(mp5_file_name).read()
-    mp5 = '{"type":"iellipsoid","displayColor":{"x":0.005798184165187736,"y":0.7660847647199172,"z":0.02514520193564107},"matrix":[10,0,0,100,0,10,0,100,0,0,10,5,0,0,0,1],"index":3241862}'
+    mp5 = json.loads(open(mp5_file_name).read())
+    mp5 = mp5["root"]["children"][0]
+    # mp5 = '{"type":"iellipsoid","displayColor":{"x":0.005798184165187736,"y":0.7660847647199172,"z":0.02514520193564107},"matrix":[10,0,0,100,0,10,0,100,0,0,10,5,0,0,0,1],"index":3241862}'
     mc = ' {"resolution":28,"box":{"xmin":-0.5,"xmax":0.5,"ymin":-0.5,"ymax":0.5,"zmin":-0.5,"zmax":0.5},"ignore_root_matrix":true}'
 
 
