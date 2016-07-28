@@ -1,125 +1,209 @@
 import numpy as np
 # from slicer.slicerCyth  import *
 
-class Plane:
-    def __init__(self, normal, z):
-        self.normal = normal
-        self.z = z
+# class Plane:
+#     def __init__(self, z):
+#         self.z = z
 
-    def distance_to_vertice(self, vertice):
-        assert isinstance(vertice, np.ndarray)
-        dot = np.dot(vertice, self.normal)
-        distance = dot - self.z
-        assert len(distance) == 1
-        return distance[0]
+#     def intersection_with_line(self, vertice_0, vertice_1):
+#         if vertice_0[2]< vertice_1[2]:
+#             low = vertice_1
+#             high = vertice_0
+#         else:
+#             low = vertice_0
+#             high = vertice_1
+#         if self.z < high[2] or self.z> low[2]:
+#             if high[2] == self.z:
+#                 return high
+#             elif low[2] == self.z:
+#                 return low
+#             else:
+#                 return None
+#         else :
+#             r = (self.z - low[2]) / (high[2] - low[2])
 
-    def intersection_with_line_segment(self, vertice_0, vertice_1):
-        dist_0 = self.distance_to_vertice(vertice_0)
-        dist_1 = self.distance_to_vertice(vertice_1)
+#             S = np.array([low[0] + (r * (high[0]- low[0])),
+#                           low[1] + (r * (high[1] - low[1])),
+#                          0])
 
-        if dist_0 == 0:
-            return vertice_0
-        if dist_1 == 0:
-            return vertice_1
+#             return S
 
-        if dist_0*dist_1 > 0:
+#     def intersection_with_triangle(self, triangle):
+#         # triangle is a 3*3 matrix
+#         assert isinstance(triangle, np.ndarray)
+#         # if(np.array_equal(triangle[0],triangle[1])):
+#         #     return []
+#         # if(np.array_equal(triangle[0],triangle[2])):
+#         #     return []
+#         # if(np.array_equal(triangle[2],triangle[1])):
+#         #     return []
+
+
+
+#         vertice_0 = triangle[0]
+#         vertice_1 = triangle[1]
+#         vertice_2 = triangle[2]
+
+
+
+
+#         if vertice_0[2] == self.z:
+#             if vertice_1[2] == self.z:
+#                 if  vertice_2[2] != self.z:
+#                     return [vertice_0,vertice_1]
+#                 else:
+#                     return None
+#             if vertice_2[2] == self.z:
+#                 if  vertice_1[2] != self.z:
+#                     return [vertice_0,vertice_2]
+#                 else:
+#                     return None
+#         if vertice_1[2] == self.z:
+#             if vertice_2[2] == self.z:
+#                 if  vertice_0[2] != self.z:
+#                     return [vertice_1,vertice_2]
+#                 else:
+#                     return None
+
+
+
+
+
+#         line = []
+
+#         intersection_point_0 = self.intersection_with_line(vertice_0, vertice_1)
+#         if intersection_point_0 is not None :
+#             line.append(intersection_point_0)
+
+#         intersection_point_1 = self.intersection_with_line(vertice_1, vertice_2)
+#         if intersection_point_1 is not None :
+#             if not np.array_equal(intersection_point_1,intersection_point_0):
+#                 line.append(intersection_point_1)
+
+#         intersection_point_2 = self.intersection_with_line(vertice_0, vertice_2)
+#         if intersection_point_2 is not None :
+#             if not np.array_equal(intersection_point_2,intersection_point_0) and not np.array_equal(intersection_point_1,intersection_point_2):
+#                 line.append(intersection_point_2)
+#         if len(line) == 1:
+#             raise RuntimeError
+#         if len(line) != 2:
+#             raise RuntimeError
+
+
+#         return line
+
+# slower
+# def intersection_with_line(z, vertice_0, vertice_1):
+#     if vertice_0[2] < vertice_1[2]:
+#         low = vertice_1
+#         high = vertice_0
+#     else:
+#         low = vertice_0
+#         high = vertice_1
+
+#     if z < high[2] or z > low[2]:
+#         return None
+#     else :
+#         r = (z - low[2]) / (high[2] - low[2])
+#         S = [low[0] + r * (high[0] - low[0]),
+#              low[1] + r * (high[1] - low[1])]
+#         return S
+
+def intersection_with_line(z, vertice_0, vertice_1):
+    v_0_x = vertice_0[0]
+    v_0_y = vertice_0[1]
+    v_0_z = vertice_0[2]
+    
+    v_1_x = vertice_1[0]
+    v_1_y = vertice_1[1]
+    v_1_z = vertice_1[2]
+
+    if v_0_z < z:    
+        if z < v_1_z:
+            r = (z - v_0_z)/(v_1_z - v_0_z)
+            s = [v_0_x + (v_1_x - v_0_x)*r, 
+                 v_0_y + (v_1_y - v_0_y)*r]
+            return s
+        elif z > v_1_z:
             return None
-        else:
-            t =  dist_0 /  float(dist_0 - dist_1)
-            outP = vertice_0 + t * (vertice_1 - vertice_0)
+    elif z > v_1_z: # we know v_0_z > z
+        r = (z - v_1_z)/(v_0_z - v_1_z)
+        s = [v_1_x + (v_0_x - v_1_x)*r, 
+             v_1_y + (v_0_y - v_1_y)*r]
+        return s
+    else:
+        return None
 
-            return outP
-
-    def intersection_with_line(self, vertice_0, vertice_1):
-        if vertice_0[2]< vertice_1[2]:
-            low = vertice_1
-            high = vertice_0
-        else:
-            low = vertice_0
-            high = vertice_1
-        if self.z < high[2] or self.z> low[2]:
-            if high[2] == self.z:
-                return high
-            elif low[2] == self.z:
-                return low
-            else:
-                return None
-        else :
-            r = (self.z - low[2]) / (high[2] - low[2])
-
-            S = np.array([low[0] + (r * (high[0]- low[0])),
-                          low[1] + (r * (high[1] - low[1])),
-                         0])
-            return S
+def intersection_with_triangle(z, triangle):
+    # triangle is a 3*3 
+    assert isinstance(triangle, np.ndarray)
+    # if(np.array_equal(triangle[0],triangle[1])):
+    #     return []
+    # if(np.array_equal(triangle[0],triangle[2])):
+    #     return []
+    # if(np.array_equal(triangle[2],triangle[1])):
+    #     return []
 
 
 
+    vertice_0 = triangle[0]
+    vertice_1 = triangle[1]
+    vertice_2 = triangle[2]
 
-    def intersection_with_triangle(self, triangle):
-        # triangle is a 3*3 matrix
-        assert isinstance(triangle, np.ndarray)
-        # if(np.array_equal(triangle[0],triangle[1])):
-        #     return []
-        # if(np.array_equal(triangle[0],triangle[2])):
-        #     return []
-        # if(np.array_equal(triangle[2],triangle[1])):
-        #     return []
+    if vertice_0[2] == z:
+        if vertice_1[2] == z:
+            # not necessary since the triangle are repaired
+            # if  vertice_2[2] != z: 
+            #     return [vertice_0,vertice_1]
+            # else:
+            #     return None
+            return [vertice_0,vertice_1]
+        if vertice_2[2] == z:
+                return [vertice_0,vertice_2]
+        # not necessary since the triangle are repaired
+        # else:
+            # return None
+    if vertice_1[2] == z:
+        if vertice_2[2] == z:
+            # not necessary since the triangle are repaired
+            # if  vertice_0[2] != z:
+            #     return [vertice_1,vertice_2]
+            # else:
+            #     return None
+            return [vertice_1,vertice_2]
 
+    line = []
 
+    intersection_point_0 = intersection_with_line(z, vertice_0, vertice_1)
 
-        vertice_0 = triangle[0]
-        vertice_1 = triangle[1]
-        vertice_2 = triangle[2]
-
-
-
-
-        if vertice_0[2] == self.z:
-            if vertice_1[2] == self.z:
-                if  vertice_2[2] != self.z:
-                    return [vertice_0,vertice_1]
-                else:
-                    return None
-            if vertice_2[2] == self.z:
-                if  vertice_1[2] != self.z:
-                    return [vertice_0,vertice_2]
-                else:
-                    return None
-        if vertice_1[2] == self.z:
-            if vertice_2[2] == self.z:
-                if  vertice_0[2] != self.z:
-                    return [vertice_1,vertice_2]
-                else:
-                    return None
+    if intersection_point_0 is not None :
+        line.append(intersection_point_0)
 
 
+    intersection_point_1 = intersection_with_line(z, vertice_1, vertice_2)
+    if intersection_point_0 == None: # line is empty so this must be one intersection point
+            line.append(intersection_point_1)
+    else:
+        if intersection_point_1 is not None:
+            line.append(intersection_point_1)
 
-
-
-        line = []
-
-        intersection_point_0 = self.intersection_with_line(vertice_0, vertice_1)
-        if intersection_point_0 is not None :
-            line.append(intersection_point_0)
-
-        intersection_point_1 = self.intersection_with_line(vertice_1, vertice_2)
-        if intersection_point_1 is not None :
-            if not np.array_equal(intersection_point_1,intersection_point_0):
-                line.append(intersection_point_1)
-
-        intersection_point_2 = self.intersection_with_line(vertice_0, vertice_2)
-        if intersection_point_2 is not None :
-            if not np.array_equal(intersection_point_2,intersection_point_0) and not np.array_equal(intersection_point_1,intersection_point_2):
-                line.append(intersection_point_2)
-        if len(line) == 1:
-            raise RuntimeError
-        if len(line) != 2:
-            raise RuntimeError
-
-
+    if len(line) == 2:
         return line
 
+    # if the line has not returned means there is noly one intersection point here
+    intersection_point_2 = intersection_with_line(z, vertice_0, vertice_2)
+    line.append(intersection_point_2)
+    return line 
+    # if intersection_point_2 is not None :
+    #     if not np.array_equal(intersection_point_2,intersection_point_0) and not np.array_equal(intersection_point_1,intersection_point_2):
+    #         line.append(intersection_point_2)
+    # if len(line) == 1:
+    #     raise RuntimeError
+    # if len(line) != 2:
+    #     raise RuntimeError
 
+
+    # return line
 
 
 def min_max_z(triangle):
@@ -142,10 +226,11 @@ def slicer_from_mesh_as_dict_cy(mesh, slice_height_from=0, slice_height_to=100, 
 
 def slicer_from_mesh_as_dict(mesh, slice_height_from=0, slice_height_to=100, slice_step=1, sliceplanes_height=[]):
 
+    import datetime
+    start_time = datetime.datetime.now()
 
     slice_height_from += 0.198768976
     slice_height_to += 0.198768976
-    normal = np.array([[0.],[0.],[1.]])
 
     if sliceplanes_height != []: # if empty
         sliceplanes_height = sliceplanes_height
@@ -155,41 +240,37 @@ def slicer_from_mesh_as_dict(mesh, slice_height_from=0, slice_height_to=100, sli
 
     slice_layers = [{} for i in range(len(sliceplanes_height))]
 
-    for triangle in mesh.triangles:
-        tri_min, tri_max = min_max_z(triangle)
-        intersect_planes_heights = sliceplanes_height[(tri_min<=sliceplanes_height)&(sliceplanes_height<=tri_max)]
+    z = mesh.triangles[:,:,2]
+    tri_min_list, tri_max_list = np.amin(z, axis=1), np.amax(z, axis=1)
+
+    for triangle_index in range(len(mesh.triangles)):
+        triangle = mesh.triangles[triangle_index]
+        tri_min, tri_max = tri_min_list[triangle_index], tri_max_list[triangle_index]
+
         plane_index = np.where((tri_min<=sliceplanes_height)&(sliceplanes_height<=tri_max))[0]
+        intersect_planes_heights = sliceplanes_height[plane_index]
 
-        planes = [Plane(normal=normal, z=height) for height in intersect_planes_heights]
-        for index, plane in zip(plane_index, planes):
-            line = plane.intersection_with_triangle(triangle)
-            if isinstance(line, list):
-                line[0] =line[0][:2]
-                line[1] =line[1][:2]
+        for index, z in zip(plane_index, intersect_planes_heights):
+            line = intersection_with_triangle(z, triangle)
+            # for point_index in range(len(line)):
+            #     for val_index in range(len(line[point_index])):
+            #         line[point_index][val_index] = truncate(line[point_index][val_index],8)
 
+            point1 = tuple(line[0])
+            point2 = tuple(line[1])
 
-                line[0] = line[0].tolist()
-                line[1] = line[1].tolist()
-                # for point_index in range(len(line)):
-                #     for val_index in range(len(line[point_index])):
-                #         line[point_index][val_index] = truncate(line[point_index][val_index],8)
-
-                point1 = tuple(line[0])
-
-                point2= tuple(line[1])
-                try:
-                    if point2 not in slice_layers[index][point1]:
-                        slice_layers[index][point1].append(point2)
-                except:
-                    slice_layers[index][point1] = []
+            try:
+                if point2 not in slice_layers[index][point1]:
                     slice_layers[index][point1].append(point2)
-                try:
-                    if point1 not in slice_layers[index][point2]:
-                        slice_layers[index][point2].append(point1)
-                except:
-                    slice_layers[index][point2] = []
+            except KeyError:
+                slice_layers[index][point1] = []
+                slice_layers[index][point1].append(point2)
+            try:
+                if point1 not in slice_layers[index][point2]:
                     slice_layers[index][point2].append(point1)
-
+            except KeyError:
+                slice_layers[index][point2] = []
+                slice_layers[index][point2].append(point1)
     return slice_layers
 
 def visualization_3d(slice_layers):

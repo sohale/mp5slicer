@@ -97,13 +97,13 @@ class Gcode_writer(Tree_task):
         self.layer_index += 1
 
         if config.retraction_at_change_layer:
-            instruction = "G1 Z{} F{}\n".format(self.gcodeEnvironment.truncate(self.gcodeEnvironment.Z, 3),
+            instruction = "G1 Z{} F{}\n".format(self.gcodeEnvironment.Z,
                                             config.z_movement_speed)
             self.gcode_output.write(instruction)
             self.skip_retraction = False
 
         else:
-            instruction = "G1 Z{} F{}\n".format(self.gcodeEnvironment.truncate(self.gcodeEnvironment.Z, 3),
+            instruction = "G1 Z{} F{}\n".format(self.gcodeEnvironment.Z,
                                             config.z_movement_speed)
             self.gcode_output.write(instruction)
 
@@ -174,26 +174,35 @@ class GCodeEnvironment:
         self.Y = 0
         self.Z = config.firstLayerOffset
         self.rewrite_speed = True
-    def truncate(self,f, n):
+
+    @staticmethod
+    def truncate(f, n):
         '''Truncates/pads a float f to n decimal places without rounding'''
 
-        # return f
-
         s = '{}'.format(f)
-        if 'e' in s or 'E' in s:
-            return float('{0:.{1}f}'.format(f, n))
+        # if 'e' in s or 'E' in s: # in our case the float is not that large for the use of e
+        #     return float('{0:.{1}f}'.format(f, n))
         i, p, d = s.partition('.')
         return float('.'.join((i, (d+'0'*n)[:n])))
 
+    @staticmethod
+    def truncate_return_str(f, n):
+        '''Truncates/pads a float f to n decimal places without rounding'''
+
+        s = '{}'.format(f)
+        # if 'e' in s or 'E' in s: # in our case the float is not that large for the use of e
+        #     return float('{0:.{1}f}'.format(f, n))
+        i, p, d = s.partition('.')
+        return '.'.join((i, (d+'0'*n)[:n]))
 
     def calculDis(self,A):
 
         distance = math.sqrt( (pow((self.X-A[0]),2)) + pow((self.Y-A[1]),2))
         return distance
 
-    def calculE(self, A, B):
+    def calculE(self, A, B, layerThickness):
         distance = math.sqrt( (pow((A[0]-B[0]),2)) + pow((A[1]-B[1]),2))
-        section_surface = config.layerThickness * config.line_width # layerThickness is possible to change for each layer
+        section_surface = layerThickness * config.line_width # layerThickness is possible to change for each layer
         volume = section_surface * distance * config.extrusion_multiplier
         filament_length = volume / config.crossArea
         return filament_length
@@ -221,7 +230,7 @@ class GCodeEnvironment:
 
     def retract(self):
         self.E -= 5
-        instruction = "G1 E" + str(self.truncate(self.E, 5))+ " F2400\n"
+        instruction = "G1 E" + self.truncate_return_str(self.E, 5)+ " F2400\n"
 
         return instruction
 
@@ -234,7 +243,7 @@ class GCodeEnvironment:
         # else:
 
         self.E += 5
-        instruction = "G1 E" + str(self.truncate(self.E, 5))+ " F2400\n"
+        instruction = "G1 E" + self.truncate_return_str(self.E, 5)+ " F2400\n"
 
         return instruction
     # draw to point A
@@ -250,23 +259,22 @@ class GCodeEnvironment:
             instruction = ""
 
         # instruction = ""
-        if isinstance(A,str):
-            raise RuntimeError
+        # if isinstance(A,str):
+        #     raise RuntimeError
         # A = B
         A = list(map(self.truncate, A, [3]*len(A)))
         currentPoint = [self.X,self.Y]
         # try:
-        extrusion = self.calculE(currentPoint, A)
+        extrusion = self.calculE(currentPoint, A, layerThickness)
         self.E += extrusion
         # except:
         #     raise RuntimeError
-        if speed != self.speed or self.rewrite_speed:
+        if self.rewrite_speed or speed != self.speed:
             self.speed = speed
             self.rewrite_speed = False
-            instruction += "G1" + " X" +str(A[0]) + " Y" +str(A[1]) + " E" +str(self.truncate(self.E, 5)) + " F" +str(self.speed) + "\n"
+            instruction += "G1" + " X" +str(A[0]) + " Y" +str(A[1]) + " E" + self.truncate_return_str(self.E, 5) + " F" +str(self.speed) + "\n"
         else:
-            instruction += "G1" + " X" +str(A[0]) + " Y" +str(A[1]) + " E" +str(self.truncate(self.E, 5)) + "\n"
-
+            instruction += "G1" + " X" +str(A[0]) + " Y" +str(A[1]) + " E" + self.truncate_return_str(self.E, 5) + "\n"
 
         self.X = A[0]
         self.Y = A[1]
