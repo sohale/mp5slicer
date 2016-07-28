@@ -201,7 +201,7 @@ class GCodeEnvironment:
     # go to point A without extruding filament
     # @profile
     def goToNextPoint(self, A, skip_retract):
-        A = map(self.truncate, A, [3]*len(A))
+        A = list(map(self.truncate, A, [3]*len(A)))
         distance = self.calculDis(A)
         if distance > config.min_retraction_distance and not skip_retract:
             instruction = self.retract()
@@ -253,7 +253,7 @@ class GCodeEnvironment:
         if isinstance(A,str):
             raise RuntimeError
         # A = B
-        A = map(self.truncate, A, [3]*len(A))
+        A = list(map(self.truncate, A, [3]*len(A)))
         currentPoint = [self.X,self.Y]
         # try:
         extrusion = self.calculE(currentPoint, A)
