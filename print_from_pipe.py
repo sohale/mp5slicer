@@ -21,7 +21,7 @@ def print_from_pipe():
     mp5 = json.loads(mp5_as_json)
 
     stl = puppy_magic(mp5)
-    stl.save("mp5.stl")
+    # stl.save("mp5.stl")
     print_mesh(stl, "mp5")
 
 if __name__ == '__main__':
