@@ -118,7 +118,7 @@ def intersection_with_line(z, vertice_0, vertice_1):
     v_1_y = vertice_1[1]
     v_1_z = vertice_1[2]
 
-    if v_0_z < z:    
+    if v_0_z < z: 
         if z < v_1_z:
             r = (z - v_0_z)/(v_1_z - v_0_z)
             s = [v_0_x + (v_1_x - v_0_x)*r, 
@@ -126,11 +126,22 @@ def intersection_with_line(z, vertice_0, vertice_1):
             return s
         elif z > v_1_z:
             return None
-    elif z > v_1_z: # we know v_0_z > z
+        elif z == v_1_z:
+            return [v_1_x, v_1_y]
+        else:
+            raise StandardError("this should be happen")
+    elif v_0_z == z:
+        return [v_0_x, v_0_y]
+    elif z > v_1_z: # we know v_0_z > z  
         r = (z - v_1_z)/(v_0_z - v_1_z)
         s = [v_1_x + (v_0_x - v_1_x)*r, 
              v_1_y + (v_0_y - v_1_y)*r]
         return s
+    elif z == v_1_z: # we know v_0_z > z and z <= v_1_z, the only possible way to has answer here is when z == v_1_z
+        if v_0_z < v_1_z: # order for trim dict
+            return [v_0_x, v_1_x]
+        else:
+            return [v_1_x, v_0_x]
     else:
         return None
 
@@ -145,32 +156,32 @@ def intersection_with_triangle(z, triangle):
     #     return []
 
 
-
     vertice_0 = triangle[0]
     vertice_1 = triangle[1]
     vertice_2 = triangle[2]
 
-    if vertice_0[2] == z:
-        if vertice_1[2] == z:
+    # this is dealed with in the intersection by line
+    # if vertice_0[2] == z:
+    #     if vertice_1[2] == z:
             # not necessary since the triangle are repaired
             # if  vertice_2[2] != z: 
             #     return [vertice_0,vertice_1]
             # else:
             #     return None
-            return [vertice_0,vertice_1]
-        if vertice_2[2] == z:
-                return [vertice_0,vertice_2]
+        #     return [vertice_0,vertice_1]
+        # if vertice_2[2] == z:
+        #         return [vertice_0,vertice_2]
         # not necessary since the triangle are repaired
         # else:
             # return None
-    if vertice_1[2] == z:
-        if vertice_2[2] == z:
+    # if vertice_1[2] == z:
+    #     if vertice_2[2] == z:
             # not necessary since the triangle are repaired
             # if  vertice_0[2] != z:
             #     return [vertice_1,vertice_2]
             # else:
             #     return None
-            return [vertice_1,vertice_2]
+            # return [vertice_1,vertice_2]
 
     line = []
 
@@ -239,15 +250,16 @@ def slicer_from_mesh_as_dict(mesh, slice_height_from=0, slice_height_to=100, sli
         sliceplanes_height = np.arange(slice_height_from, slice_height_to, slice_step)
 
     slice_layers = [{} for i in range(len(sliceplanes_height))]
+    plane_index_list = np.array(range(len(slice_layers)))
 
     z = mesh.triangles[:,:,2]
     tri_min_list, tri_max_list = np.amin(z, axis=1), np.amax(z, axis=1)
-
+    index_list = range(len(mesh.triangles))
     for triangle_index in range(len(mesh.triangles)):
         triangle = mesh.triangles[triangle_index]
         tri_min, tri_max = tri_min_list[triangle_index], tri_max_list[triangle_index]
 
-        plane_index = np.where((tri_min<=sliceplanes_height)&(sliceplanes_height<=tri_max))[0]
+        plane_index = plane_index_list[(tri_min<=sliceplanes_height)&(sliceplanes_height<=tri_max)]
         intersect_planes_heights = sliceplanes_height[plane_index]
 
         for index, z in zip(plane_index, intersect_planes_heights):
