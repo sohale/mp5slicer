@@ -7,12 +7,12 @@ import slicer.config.config as config
 class Boundary_finish(Tree_task):
 
     def boundary(self, line_group):
-    	# reorder_lines_close_to_point([75,90], line_group)
-      	# reorder_lines_close_to_point([0,0], line_group)
-
+    	if config.boundary_starts_close_to_point != None:
+	      	reorder_lines_close_to_point(config.boundary_starts_close_to_point, line_group)
         shorten_last_line(line_group, config.coast_at_end_length)
+
     def inner_boundary(self, line_group):
-    	# reorder_lines_close_to_point([75,90], line_group)
-    	# reorder_lines_close_to_point([0,0], line_group)
-
+    	if config.boundary_starts_close_to_point != None:
+	    	reorder_lines_close_to_point(config.boundary_starts_close_to_point, line_group)
         shorten_last_line(line_group, config.coast_at_end_length)
+        

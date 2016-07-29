@@ -96,16 +96,12 @@ class Gcode_writer(Tree_task):
 
         self.layer_index += 1
 
-        if config.retraction_at_change_layer:
-            instruction = "G1 Z{} F{}\n".format(self.gcodeEnvironment.Z,
-                                            config.z_movement_speed)
-            self.gcode_output.write(instruction)
-            self.skip_retraction = False
+        instruction = self.gcodeEnvironment.retract()
+        instruction += "G0 Z{} F{}\n".format(self.gcodeEnvironment.Z,
+                                        config.z_movement_speed)
+        instrcuction = self.gcodeEnvironment.unretract()
 
-        else:
-            instruction = "G1 Z{} F{}\n".format(self.gcodeEnvironment.Z,
-                                            config.z_movement_speed)
-            self.gcode_output.write(instruction)
+        self.gcode_output.write(instruction)
 
     def raft_layer(self, line_group): # done
         config.extrusion_multiplier = 1.1
@@ -236,14 +232,13 @@ class GCodeEnvironment:
 
     def unretract(self):
 
-        # if self.E > 1900: # https://github.com/Ultimaker/CuraEngine/issues/14
-        #     instruction = "G92 E0\n"
-        #     self.E = 0.0000
-        #     instruction += "G1 E" + str(self.truncate(self.E, 5))+ " F2400\n"
-        # else:
-
-        self.E += 5
-        instruction = "G1 E" + self.truncate_return_str(self.E, 5)+ " F2400\n"
+        if self.E < 1900: # https://github.com/Ultimaker/CuraEngine/issues/14
+            self.E += 5
+            instruction = "G1 E" + str(self.truncate(self.E, 5))+ " F2400\n"
+        else:
+            instruction = "G92 E0\n"
+            self.E = 0.0000
+            instruction += "G1 E" + str(self.truncate(self.E, 5))+ " F2400\n"
 
         return instruction
     # draw to point A
@@ -264,6 +259,9 @@ class GCodeEnvironment:
         # A = B
         A = list(map(self.truncate, A, [3]*len(A)))
         currentPoint = [self.X,self.Y]
+        if currentPoint == A:
+            instruction = ""
+            return instruction
         # try:
         extrusion = self.calculE(currentPoint, A, layerThickness)
         self.E += extrusion

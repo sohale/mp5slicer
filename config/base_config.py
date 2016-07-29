@@ -38,7 +38,7 @@ bed_support_strengthen_number = 5
 supportOverhangangle = -0.7 # cos(155), 75 degree to building direction requires support
 
 platform_bound = "brim"
-platform_bound_count = 20
+platform_bound_count = 10
 raft = False
 raftLayerThickness = 0.15
 extrusion_multiplier = 1.1
@@ -52,3 +52,4 @@ outline_outside_in = True
 # new
 z_movement_speed = 1000
 retraction_at_change_layer = True
+boundary_starts_close_to_point = None
