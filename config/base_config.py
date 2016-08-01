@@ -1,27 +1,28 @@
 import numpy as np
 
 layerThickness = 0.2
-line_width = 0.4
+nozzle_size = 0.4 # for calculation extrusion
+line_width = 0.4 # for caluculating the offset for polygons
 temperature =  220
 inAirSpeed = 9000
 retractionSpeed = 2400
 retractionLength = 4.5
-speedRate =  3000
+speedRate =  1800
 filamentDiameter = 2.85
 shellSize = 3
-firstLayerOffset = 0.2
-infillSpeed  = 5400
-skinSpeed = 5400
-raftSpeed = 2000
-boundarySpeed = 5400
-holeSpeed = 5400
-shellSpeed = 5400
-supportSpeed = 1200
+firstLayerOffset = 0
+infillSpeed  = 1800
+skinSpeed = 1800
+raftSpeed = 1800
+boundarySpeed = 1800
+holeSpeed = 1800
+shellSpeed = 1800
+supportSpeed = 1800
 min_retraction_distance = 5
 default_fan_speed = 0.5
 hasControllableFanSpeed  = True
 useAdaptiveSlicing = False
-useSupport = False
+useSupport = True
 exteriorFanSpeed = 0.3
 bridgeFanSpeed = 0.4
 interiorFanSpeed = 0
@@ -46,10 +47,20 @@ initial_extrusion = 0.2
 toFile = False
 
 # outline
-coast_at_end_length = 1
+coast_at_end_length = 0
 outline_outside_in = True
 
 # new
-z_movement_speed = 1000
+z_movement_speed = 9000
 retraction_at_change_layer = True
 boundary_starts_close_to_point = None
+
+# first layer
+first_layer_line_width = 0.44
+first_layer_infillSpeed = 750
+first_layer_skinSpeed = 750
+first_layer_boundarySpeed = 750 
+first_layer_holeSpeed = 750
+first_layer_supportSpeed = 750
+first_layer_raftSpeed = 750
+first_layer_shellSpeed = 750

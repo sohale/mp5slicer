@@ -1,10 +1,10 @@
 {
-  "layerThickness":0.2,
+  "layerThickness" : 0.2,
   "line_width" : 0.4,
   "temperature" : 210,
   "inAirSpeed" : 7000,
-  "retractionSpeed": 2400,
-  "retractionLength": 4.5,
+  "retractionSpeed" : 2400,
+  "retractionLength" : 4.5,
   "speedRate" : 3000,
   "filamentDiameter" : 2.85,
   "shellSize" : 2,
@@ -15,7 +15,7 @@
   "skinSpeed" : 1200,
   "raftSpeed" : 2000,
   "useSupport" : true,
-  "supportSamplingDistance" : 2,
+  "supportSamplingDistance" : 1,
   "supportOverhangangle" : -0.7,
   "upSkinsCount" : 5,
   "downSkinsCount" : 5,
@@ -24,8 +24,9 @@
   "exteriorFanSpeed" : 0.4,
   "initial_extrusion" : 0.2,
   "raft" : false,
-  "extrusion_multiplier" : 1.2,
-  "bed_support_strengthen_number":5,
-  "default_fan_speed":1
+  "extrusion_multiplier" : 1.1,
+  "bed_support_strengthen_number" : 5,
+  "default_fan_speed" : 1,
+  "toFile" : true
 }
 

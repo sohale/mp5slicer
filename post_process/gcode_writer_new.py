@@ -48,6 +48,12 @@ class Gcode_writer(Tree_task):
                     self.gcode_output.write(instruction)
         self.skip_retraction = False
 
+    def type_gcode_start(self, type_str):
+        self.gcode_output.write(self.gcodeEnvironment.type_gcode_start(type_str))
+
+    def type_gcode_end(self, type_str):
+        self.gcode_output.write(self.gcodeEnvironment.type_gcode_end(type_str))
+
     def writing_gcode_with_length_filter(self, line_group, layerThickness, speed, fan_speed, length_threshold):
 
         for line in line_group.sub_lines:
@@ -66,22 +72,27 @@ class Gcode_writer(Tree_task):
                     self.gcode_output.write(instruction)
 
     def infill(self,line_group): # done
+        self.gcodeEnvironment.type_gcode_start('infill')
         length_threshold = config.line_width * 2.5
         self.writing_gcode_with_length_filter(line_group, config.layerThickness, config.infillSpeed, config.interiorFanSpeed, length_threshold)
+        self.gcodeEnvironment.type_gcode_end('infill')
 
     def layer(self,line_group): # done
-        if self.layer_index < 2:
-            config.infillSpeed  = 750
-            config.skinSpeed = 750
-            config.boundarySpeed = 750
-            config.holeSpeed = 750
-            config.shellSpeed = 750
-            config.supportSpeed = 750
-            config.raftSpeed = 750
-        elif self.layer_index == 2:
+        if self.layer_index > 1:
+            pass
+        elif self.layer_index == 0:
+            config.line_width = config.first_layer_line_width
+            config.infillSpeed = config.first_layer_infillSpeed  
+            config.skinSpeed = config.first_layer_skinSpeed
+            config.boundarySpeed = config.first_layer_boundarySpeed
+            config.holeSpeed = config.first_layer_holeSpeed
+            config.shellSpeed = config.first_layer_shellSpeed
+            config.supportSpeed = config.first_layer_supportSpeed
+            config.raftSpeed = config.first_layer_raftSpeed
+        elif self.layer_index == 1:
             config.reset()
         else:
-            pass
+            raise StandardError
 
         # allow change of layerThickness for each layer
         if self.layerThickness_list: # open happen if it is adaptive slicing
@@ -96,12 +107,13 @@ class Gcode_writer(Tree_task):
 
         self.layer_index += 1
 
+        self.type_gcode_start('layer')
         instruction = self.gcodeEnvironment.retract()
         instruction += "G0 Z{} F{}\n".format(self.gcodeEnvironment.Z,
                                         config.z_movement_speed)
         instrcuction = self.gcodeEnvironment.unretract()
-
         self.gcode_output.write(instruction)
+        self.type_gcode_end('layer')
 
     def raft_layer(self, line_group): # done
         config.extrusion_multiplier = 1.1
@@ -127,36 +139,47 @@ class Gcode_writer(Tree_task):
         config.reset()
 
     def skin(self, line_group): # done
+        self.type_gcode_start('skin')
         length_threshold = config.line_width * 2.5
         self.writing_gcode_with_length_filter(line_group, config.layerThickness, config.skinSpeed, config.interiorFanSpeed, length_threshold)
+        self.type_gcode_end('hole')
+
     def hole(self, line_group): # done
+        self.type_gcode_start('hole')
         self.basic_writing_gcode(line_group, config.holeSpeed, config.exteriorFanSpeed)
-
+        self.type_gcode_end('hole')
     def inner_boundary(self, line_group): # done
+        self.type_gcode_start('infill')
         self.basic_writing_gcode(line_group, config.boundarySpeed, config.default_fan_speed)
-
+        self.type_gcode_end('infill')
     def inner_hole(self, line_group): # done
+        self.type_gcode_start('inner_hole')
         self.basic_writing_gcode(line_group, config.boundarySpeed, config.exteriorFanSpeed)
-
+        self.type_gcode_end('inner_hole')
     def boundary(self, line_group): # done
+        self.type_gcode_start('boundary')
         self.basic_writing_gcode(line_group, config.boundarySpeed, config.default_fan_speed)
-
+        self.type_gcode_end('boundary')
     def skirt(self, line_group): #done
+        self.type_gcode_start('skirt')
         self.basic_writing_gcode(line_group, config.raftSpeed, config.skirtFanSpeed)
-
+        self.type_gcode_end('skirt')
     def support(self, line_group): # done
+        self.type_gcode_start('support')
         self.basic_writing_gcode(line_group, config.supportSpeed,config.supportFanSpeed)
-
+        self.type_gcode_end('support')
     def raft(self, line_group): # done
+        self.type_gcode_start('raft')
         self.basic_writing_gcode(line_group, config.raftSpeed, config.raftFanSpeed, config.raftLayerThickness)
-
+        self.type_gcode_end('raft')
     def top_raft(self, line_group): # done
+        self.type_gcode_start('top_raft')
         config.extrusion_multiplier = 0.8
         self.basic_writing_gcode(line_group, config.raftSpeed, config.raftFanSpeed, config.raftLayerThickness)
         self.wait_point = line_group.sub_lines[0][0]
         self.gcode_output.write(self.gcodeEnvironment.goToNextPoint(self.wait_point, False))
         self.gcode_output.write(self.gcodeEnvironment.wait_for_cooling(196, 60000))
-
+        self.type_gcode_end('top_raft')  
         config.reset()
 
 class GCodeEnvironment:
@@ -198,7 +221,7 @@ class GCodeEnvironment:
 
     def calculE(self, A, B, layerThickness):
         distance = math.sqrt( (pow((A[0]-B[0]),2)) + pow((A[1]-B[1]),2))
-        section_surface = layerThickness * config.line_width # layerThickness is possible to change for each layer
+        section_surface = layerThickness * config.nozzle_size # layerThickness is possible to change for each layer
         volume = section_surface * distance * config.extrusion_multiplier
         filament_length = volume / config.crossArea
         return filament_length
@@ -331,5 +354,12 @@ class GCodeEnvironment:
             endString = endString + line
         endCode.close()
         return endString
+
+    def type_gcode_start(self, type_str):
+        return  "; {} starts \n".format(type_str)
+
+    def type_gcode_end(self, type_str):
+        return "; {} ends \n".format(type_str)
+
 
 
