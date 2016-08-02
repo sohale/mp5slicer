@@ -3,7 +3,7 @@ import numpy as np
 layerThickness = 0.2
 nozzle_size = 0.4 # for calculation extrusion
 line_width = 0.4 # for caluculating the offset for polygons
-temperature =  220
+temperature =  210
 inAirSpeed = 9000
 retractionSpeed = 2400
 retractionLength = 4.5
@@ -48,7 +48,7 @@ toFile = False
 
 # outline
 coast_at_end_length = 0
-outline_outside_in = True
+outline_outside_in = False
 
 # new
 z_movement_speed = 9000

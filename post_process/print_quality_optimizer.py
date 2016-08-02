@@ -79,20 +79,3 @@ def reorder_lines_close_to_point(point, line_group):
 
         new_line.append(new_line[0]) # forcing the format for line_group
         line_group.sub_lines[line_index] = new_line
-
-import math
-def calculE(A, B):
-    def truncate(f, n):
-        '''Truncates/pads a float f to n decimal places without rounding'''
-        s = '{}'.format(f)
-        if 'e' in s or 'E' in s:
-            return float('{0:.{1}f}'.format(f, n))
-        i, p, d = s.partition('.')
-        return float('.'.join((i, (d+'0'*n)[:n])))
-
-    # Calculate the extrusion for a straight movement from A to B
-    distance = math.sqrt( (pow((A[0]-B[0]),2)) + pow((A[1]-B[1]),2))
-    section_surface = config.layerThickness * config.line_width # layerThickness is possible to change for each layer
-    volume = section_surface * distance * config.extrusion_multiplier
-    filament_length = volume / config.crossArea
-    return filament_length

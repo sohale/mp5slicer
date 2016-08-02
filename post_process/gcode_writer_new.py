@@ -10,7 +10,7 @@ class Gcode_writer(Tree_task):
         self.to_file = config.toFile
         self.gcode_filename = gcode_filename
         self.gcodeEnvironment = GCodeEnvironment()
-        self.layer_index = 0
+        self.layer_index = -1
         self.previousPos = None
         self.layerThickness_list = layerThickness_list
         self.skip_retraction = False
@@ -36,6 +36,8 @@ class Gcode_writer(Tree_task):
         self.gcode_output.close()
 
     def basic_writing_gcode(self, line_group, speed, fan_speed, layerThickness = None):
+        self.gcodeEnvironment.rewrite_speed = True
+        self.gcodeEnvironment.rewrite_fan_speed = True
         if layerThickness == None:
             layerThickness = config.layerThickness
 
@@ -55,7 +57,8 @@ class Gcode_writer(Tree_task):
         self.gcode_output.write(self.gcodeEnvironment.type_gcode_end(type_str))
 
     def writing_gcode_with_length_filter(self, line_group, layerThickness, speed, fan_speed, length_threshold):
-
+        self.gcodeEnvironment.rewrite_speed = True
+        self.gcodeEnvironment.rewrite_fan_speed = True
         for line in line_group.sub_lines:
             if len(line) > 0:
                 dist = self.gcodeEnvironment.calculDis(line[0])
@@ -78,6 +81,8 @@ class Gcode_writer(Tree_task):
         self.gcodeEnvironment.type_gcode_end('infill')
 
     def layer(self,line_group): # done
+        self.layer_index += 1
+
         if self.layer_index > 1:
             pass
         elif self.layer_index == 0:
@@ -89,10 +94,11 @@ class Gcode_writer(Tree_task):
             config.shellSpeed = config.first_layer_shellSpeed
             config.supportSpeed = config.first_layer_supportSpeed
             config.raftSpeed = config.first_layer_raftSpeed
+            self.gcodeEnvironment.rewrite_speed = True
         elif self.layer_index == 1:
             config.reset()
         else:
-            raise StandardError
+            raise StandardError("layer_index doesn't make sense")
 
         # allow change of layerThickness for each layer
         if self.layerThickness_list: # open happen if it is adaptive slicing
@@ -105,15 +111,16 @@ class Gcode_writer(Tree_task):
         else:
             self.gcodeEnvironment.Z += config.layerThickness
 
-        self.layer_index += 1
-
         self.type_gcode_start('layer')
         instruction = self.gcodeEnvironment.retract()
-        instruction += "G0 Z{} F{}\n".format(self.gcodeEnvironment.Z,
+        self.gcodeEnvironment.Z = round(self.gcodeEnvironment.Z, 2)
+        instruction += "G0 Z{} F{}\n".format(self.gcodeEnvironment.Z ,
                                         config.z_movement_speed)
         instrcuction = self.gcodeEnvironment.unretract()
         self.gcode_output.write(instruction)
         self.type_gcode_end('layer')
+        self.gcodeEnvironment.rewrite_speed = True
+        self.gcodeEnvironment.rewrite_fan_speed = True
 
     def raft_layer(self, line_group): # done
         config.extrusion_multiplier = 1.1
@@ -194,25 +201,32 @@ class GCodeEnvironment:
         self.Z = config.firstLayerOffset
         self.rewrite_speed = True
 
+    # @staticmethod
+    # def truncate(f, n):
+    #     '''Truncates/pads a float f to n decimal places without rounding'''
+
+    #     s = '{}'.format(f)
+    #     # if 'e' in s or 'E' in s: # in our case the float is not that large for the use of e
+    #     #     return float('{0:.{1}f}'.format(f, n))
+    #     i, p, d = s.partition('.')
+    #     return float('.'.join((i, (d+'0'*n)[:n])))
+
     @staticmethod
-    def truncate(f, n):
-        '''Truncates/pads a float f to n decimal places without rounding'''
-
-        s = '{}'.format(f)
-        # if 'e' in s or 'E' in s: # in our case the float is not that large for the use of e
-        #     return float('{0:.{1}f}'.format(f, n))
-        i, p, d = s.partition('.')
-        return float('.'.join((i, (d+'0'*n)[:n])))
-
+    def truncate3(f):
+        return int(f*1000)/1000
     @staticmethod
-    def truncate_return_str(f, n):
-        '''Truncates/pads a float f to n decimal places without rounding'''
+    def truncate5(f):
+        return int(f*100000)/100000
 
-        s = '{}'.format(f)
-        # if 'e' in s or 'E' in s: # in our case the float is not that large for the use of e
-        #     return float('{0:.{1}f}'.format(f, n))
-        i, p, d = s.partition('.')
-        return '.'.join((i, (d+'0'*n)[:n]))
+    # @staticmethod
+    # def truncate_return_str(f, n):
+    #     '''Truncates/pads a float f to n decimal places without rounding'''
+
+    #     s = '{}'.format(f)
+    #     # if 'e' in s or 'E' in s: # in our case the float is not that large for the use of e
+    #     #     return float('{0:.{1}f}'.format(f, n))
+    #     i, p, d = s.partition('.')
+    #     return '.'.join((i, (d+'0'*n)[:n]))
 
     def calculDis(self,A):
 
@@ -229,7 +243,7 @@ class GCodeEnvironment:
     # go to point A without extruding filament
     # @profile
     def goToNextPoint(self, A, skip_retract):
-        A = list(map(self.truncate, A, [3]*len(A)))
+        A = [self.truncate3(A[0]), self.truncate3(A[1])]
         distance = self.calculDis(A)
         if distance > config.min_retraction_distance and not skip_retract:
             instruction = self.retract()
@@ -244,12 +258,14 @@ class GCodeEnvironment:
         self.X = A[0]
         self.Y = A[1]
 
+        self.speed = config.inAirSpeed
         self.rewrite_speed = True
         return instruction
 
     def retract(self):
         self.E -= 5
-        instruction = "G1 E" + self.truncate_return_str(self.E, 5)+ " F2400\n"
+        instruction = "G1 E" + str(self.truncate5(self.E)) + " F2400\n"
+        self.speed = 2400
 
         return instruction
 
@@ -257,30 +273,36 @@ class GCodeEnvironment:
 
         if self.E < 1900: # https://github.com/Ultimaker/CuraEngine/issues/14
             self.E += 5
-            instruction = "G1 E" + str(self.truncate(self.E, 5))+ " F2400\n"
+            instruction = "G1 E" + str(self.truncate5(self.E))+ " F2400\n"
         else:
             instruction = "G92 E0\n"
             self.E = 0.0000
-            instruction += "G1 E" + str(self.truncate(self.E, 5))+ " F2400\n"
+            instruction += "G1 E" + str(self.truncate5(self.E))+ " F2400\n"
 
+        self.speed = 2400
+        self.rewrite_speed = True
         return instruction
     # draw to point A
     # @profile
     def drawToNextPoint(self, A, layerThickness, speed, fan_speed):
-        if fan_speed != self.fan_speed:
+        # if fan_speed == self.fan_speed:
+        #     instruction = ""
+        # else:
+        #     if printer_config.model == "r2x":
+        #         instruction = "M126 S" + str(fan_speed) + "\n"
+        #     else:
+        #         instruction = "M106 S" + str(int(math.floor(fan_speed*255))) + "\n"
+
+        if self.rewrite_fan_speed and self.fan_speed != fan_speed:
             self.fan_speed = fan_speed
-            if printer_config.model == "r2x":
-                instruction = "M126 S" + str(fan_speed) + "\n"
-            else:
-                instruction = "M106 S" + str(int(math.floor(fan_speed*255))) + "\n"
+            instruction = "M106 S" + str(int(math.floor(fan_speed*255))) + "\n"
         else:
             instruction = ""
-
         # instruction = ""
         # if isinstance(A,str):
         #     raise RuntimeError
         # A = B
-        A = list(map(self.truncate, A, [3]*len(A)))
+        A = [self.truncate3(A[0]), self.truncate3(A[1])]
         currentPoint = [self.X,self.Y]
         if currentPoint == A:
             instruction = ""
@@ -290,12 +312,20 @@ class GCodeEnvironment:
         self.E += extrusion
         # except:
         #     raise RuntimeError
-        if self.rewrite_speed or speed != self.speed:
+        # if not self.rewrite_speed and speed == self.speed:
+        #     instruction += "G1" + " X" +str(A[0]) + " Y" +str(A[1]) + " E" + str(self.truncate5(self.E)) + "\n"
+        # else:
+        #     self.speed = speed
+        #     self.rewrite_speed = False
+        #     instruction += "G1" + " X" +str(A[0]) + " Y" +str(A[1]) + " E" + str(self.truncate5(self.E)) + " F" +str(self.speed) + "\n"
+        
+        if not self.rewrite_speed:
+            instruction += "G1" + " X" +str(A[0]) + " Y" +str(A[1]) + " E" + str(self.truncate5(self.E)) + "\n"
+        elif self.speed != speed: # self.rewrite_speed is true
             self.speed = speed
-            self.rewrite_speed = False
-            instruction += "G1" + " X" +str(A[0]) + " Y" +str(A[1]) + " E" + self.truncate_return_str(self.E, 5) + " F" +str(self.speed) + "\n"
+            instruction += "G1" + " X" +str(A[0]) + " Y" +str(A[1]) + " E" + str(self.truncate5(self.E)) + " F" +str(self.speed) + "\n"
         else:
-            instruction += "G1" + " X" +str(A[0]) + " Y" +str(A[1]) + " E" + self.truncate_return_str(self.E, 5) + "\n"
+            instruction += "G1" + " X" +str(A[0]) + " Y" +str(A[1]) + " E" + str(self.truncate5(self.E)) + "\n"
 
         self.X = A[0]
         self.Y = A[1]

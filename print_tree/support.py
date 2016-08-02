@@ -18,8 +18,8 @@ class Last_point:
         return [self.point]
     @staticmethod
     def offset_value():
-        return 0 # testing
-        return 0.1
+        return 0 # one empty layer
+        # return 0.1
 
 
 class SupportVerticallines:
@@ -36,7 +36,7 @@ class SupportVerticallines:
             for each_svl_data in each_svl_data_group:
                 z_start = each_svl_data.z_start
                 z_end = each_svl_data.z_end
-                if z_end - z_start > 2*config.line_width:
+                if z_end - z_start > 2*config.layerThickness:
                     new_svl_data.append(each_svl_data)
                 else:
                     pass    
@@ -56,10 +56,10 @@ class SupportVerticallines:
             each_group = sorted(each_group, key = lambda d:d.x)
 
             groups = []
-            flip_flop = 0
             for _, g in groupby(each_group, key = lambda d:d.x):
                 groups.append(list(g))      # Store group iterator as a list
 
+            flip_flop = 0
             for each_data in groups:
                 flip_flop += 1
                 if flip_flop % 2:
@@ -67,8 +67,8 @@ class SupportVerticallines:
                 else:
                     res += each_data[::-1]
             return res
-        res = list(map(reorder_each_group, self.svl_data_group))
-        self.svl_data_group = res
+
+        self.svl_data_group = list(map(reorder_each_group, self.svl_data_group))
 
     def index_list_intersect_with_plane(self, plane_height):
 
@@ -367,15 +367,16 @@ class Support:
         return support_required_mask # returns a boolen list indicated which triangles require support
 
     def group_support_area(self, large_triangle_area_threshold = 5):
+        import datetime
+        start_time = datetime.datetime.now()
         # group them together by connected group component algorithm 
         # from http://eddmann.com/posts/depth-first-search-and-breadth-first-search-in-python/
 
-        # closeThreshold is average_length_of_triangle * 2
+        # closeThreshold is average_length_of_triangle
         avg_x = sum(self.mesh.max_x - self.mesh.min_x)/len(self.mesh.min_x)
         avg_y = sum(self.mesh.max_y - self.mesh.min_y)/len(self.mesh.min_y)
         avg_z = sum(self.mesh.max_z - self.mesh.min_z)/len(self.mesh.min_z)
-        # closeThreshold = np.sqrt(avg_x**2 + avg_y**2 + avg_z**2) # test
-        closeThreshold = np.sqrt(avg_x**2 + avg_y**2 + avg_z**2)*2
+        closeThreshold = np.sqrt(avg_x**2 + avg_y**2 + avg_z**2)
 
         def connect_connected_component(graph):
             def dfs(graph, start):
@@ -408,101 +409,83 @@ class Support:
         centers = get_center(self.mesh.triangles[support_triangles_index])
 
         large_triangles_mask = self.mesh.areas.flatten()>large_triangle_area_threshold
+        large_triangles_mask = large_triangles_mask[self.support_required_mask]
+
         triangle_index_and_its_neighbour = {}
 
         for tri_index in support_triangles_index:
-            neighbour = set()
-            triangle_index_and_its_neighbour[tri_index] = neighbour
+            if tri_index in triangle_index_and_its_neighbour:
+                neighbour = triangle_index_and_its_neighbour[tri_index] 
+            else:
+                neighbour = set()
+                triangle_index_and_its_neighbour[tri_index] = neighbour
 
             triangle = self.mesh.triangles[tri_index]
+
             this_trangle_center = np.array([triangle[0]+triangle[1]+triangle[2]])/3
-            # todo: think about the close limit on the next line
 
             # check with large triangles and the close (in terms of center distance) triangle to this triangle and 
             # see whether it is neighbour, check large triangles is because some triangle might not be close to this triangle
             # because one triangle is large so the centers will be far away
             close_triangles_mask = norm(centers - this_trangle_center, axis=1)<closeThreshold
-            large_triangle_mask = large_triangles_mask[self.support_required_mask]
-            test_triangle_mask = np.logical_or(close_triangles_mask, large_triangle_mask)
+            test_triangle_mask = np.logical_or(close_triangles_mask, large_triangles_mask)
 
-            # test_triangle_mask = close_triangles_mask
             test_index = support_triangles_index[test_triangle_mask]
-            x = list(triangle[0])
-            y = list(triangle[1])
-            z = list(triangle[2])
+            x, y, z = triangle.tolist()
 
             for tri_detect_index in test_index:
+
+                try:
+                    if tri_index in triangle_index_and_its_neighbour[tri_detect_index]:
+                        neighbour.add(tri_detect_index)
+                        continue
+                except KeyError:
+                    triangle_index_and_its_neighbour[tri_detect_index] = set()
+                
+
                 tri = self.mesh.triangles[tri_detect_index]
 
-                x_test = list(tri[0])
-                y_test = list(tri[1])
-                z_test = list(tri[2])
+                x_test, y_test, z_test = tri.tolist()
 
                 # one vertex equal then neighbour
                 if x == x_test:
                     neighbour.add(tri_detect_index)
+                    triangle_index_and_its_neighbour[tri_detect_index].add(tri_index)
                     continue # check for next triangle, this triangle is already a neighbour, no need to check further
                 elif x == y_test:
                     neighbour.add(tri_detect_index)
+                    triangle_index_and_its_neighbour[tri_detect_index].add(tri_index)
                     continue
                 elif x == z_test:
                     neighbour.add(tri_detect_index)
+                    triangle_index_and_its_neighbour[tri_detect_index].add(tri_index)
                     continue
                 elif y == x_test:
                     neighbour.add(tri_detect_index)
+                    triangle_index_and_its_neighbour[tri_detect_index].add(tri_index)
                     continue
                 elif y == y_test:
                     neighbour.add(tri_detect_index)
+                    triangle_index_and_its_neighbour[tri_detect_index].add(tri_index)
                     continue
                 elif y == z_test:
                     neighbour.add(tri_detect_index)
+                    triangle_index_and_its_neighbour[tri_detect_index].add(tri_index)
                     continue
                 elif z == x_test:
                     neighbour.add(tri_detect_index)
+                    triangle_index_and_its_neighbour[tri_detect_index].add(tri_index)
                     continue
                 elif z == y_test:
                     neighbour.add(tri_detect_index)
+                    triangle_index_and_its_neighbour[tri_detect_index].add(tri_index)
                     continue
                 elif z == z_test:
                     neighbour.add(tri_detect_index)
+                    triangle_index_and_its_neighbour[tri_detect_index].add(tri_index)
                     continue
                 else:
                     pass
-
-
-                # edge equal then neighbour
-                # if [x, y] == [x_test, y_test] or [y, x] == [x_test, y_test]:
-                #     neighbour.add(tri_detect_index)
-                #     continue # check for next triangle, this triangle is already a neighbour, no need to check further
-                # elif [x, y] == [x_test, z_test] or [y, x] == [x_test, z_test]:
-                #     neighbour.add(tri_detect_index)
-                #     continue
-                # elif [x, y] == [y_test, z_test] or [y, x] == [y_test, z_test]:
-                #     neighbour.add(tri_detect_index)
-                #     continue
-                # elif [x, z] == [x_test, y_test] or [z, x] == [x_test, y_test]:
-                #     neighbour.add(tri_detect_index)
-                #     continue # check for next triangle, this triangle is already a neighbour, no need to check further
-                # elif [x, z] == [x_test, z_test] or [z, x] == [x_test, z_test]:
-                #     neighbour.add(tri_detect_index)
-                #     continue
-                # elif [x, z] == [y_test, z_test] or [z, x] == [y_test, z_test]:
-                #     neighbour.add(tri_detect_index)
-                #     continue
-                # elif [y, z] == [x_test, y_test] or [z, y] == [x_test, y_test]:
-                #     neighbour.add(tri_detect_index)
-                #     continue # check for next triangle, this triangle is already a neighbour, no need to check further
-                # elif [y, z] == [x_test, z_test] or [z, y] == [x_test, z_test]:
-                #     neighbour.add(tri_detect_index)
-                #     continue
-                # elif [y, z] == [y_test, z_test] or [z, y] == [y_test, z_test]:
-                #     neighbour.add(tri_detect_index)
-                #     continue
-                # else:
-                #     pass
-                # if len(neighbour) == 4: # including itself
-                #     neighbour.remove(tri_index) # remove itself
-                #     break
 
         # print('------- grouping time -------------')
         # print(datetime.datetime.now() - start_time)
@@ -667,7 +650,7 @@ class Support:
         svl = SupportVerticallines(Support_Vertical_Line_Data_group)
 
         return svl
-
+ 
     def visulisation(self, require_group = False, require_support_lines = False):
 
         ############# visulisation ####################
