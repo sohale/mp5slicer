@@ -1,13 +1,13 @@
 import inspect
+import json
 import os
 import sys
-import json
 
 sys.path.append(os.path.split(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))))[0])
 
 from slicer.config.config_factory import config_factory
 from slicer.Print_pipeline import print_mesh
-from solidmodeler.clean_code.mp5tostl import puppy_magic
+from slicer.shapes.mp5tostl import puppy_magic
 
 
 def print_from_pipe():

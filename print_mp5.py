@@ -4,7 +4,7 @@ import sys
 
 
 sys.path.append(os.path.split(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))))[0])
-from solidmodeler.clean_code.mp5tostl import puppy_magic
+from slicer.shapes.mp5tostl import puppy_magic
 from slicer.Print_pipeline import print_mesh
 from slicer.config.config_factory import config_factory
 import json
