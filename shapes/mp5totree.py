@@ -1,27 +1,23 @@
 
 from slicer.shapes.Boundingbox import *
 
-def get_mc_params(mp5source):
+def get_mc_params(mp5source, son_position):
 
 
     root_node = get_root_node(mp5source)
-    bbox = get_fonuky(root_node)
+    bbox = get_fonuky(root_node, son_position)
 
 
 
 
     return bbox
 
-    # display_simple_using_mayavi_2([(vertex_before_qem, faces), (new_vertex_qem, faces), ],
-    #    pointcloud_list=[],
-    #    mayavi_wireframe=[False, False], opacity=[0.4*0, 1, 0.9], gradients_at=None, separate=False, gradients_from_iobj=None,
-
 def get_root_node(tree):
     return tree["root"]
 
 
 
-def get_fonuky(node):
+def get_fonuky(node, params = None):
     type = node["type"]
 
 
@@ -37,9 +33,11 @@ def get_fonuky(node):
         "Intersection": intersection,
 
     }
-    bbox = switch[type](node)
+    if params is not None:
+        bbox = switch[type](node, params)
+    else :
+        bbox = switch[type](node)
     return bbox
-
 
 
 def subtract(node):
@@ -106,15 +104,20 @@ def cylinder(node):
     return bbox
 
 
-def root(node):
+def root(node, son_position):
     matrix = np.eye(4)
     result_bbox = Bbox(Coords(float("inf"), float("inf"), float("inf")),
                        Coords(float("-inf"), float("-inf"), float("-inf")))
 
+    # sons = node["children"]
+    # for i in range(len(sons)):
+    #     sbbox = get_fonuky(sons[i])
+    #     result_bbox = updateBoundingBoxForSubBoundingBox(result_bbox, None, sbbox)  # just update, dont apply the matrix
+
     sons = node["children"]
-    for i in range(len(sons)):
-        sbbox = get_fonuky(sons[i])
-        result_bbox = updateBoundingBoxForSubBoundingBox(result_bbox, None, sbbox)  # just update, dont apply the matrix
+
+    sbbox = get_fonuky(sons[son_position])
+    result_bbox = updateBoundingBoxForSubBoundingBox(result_bbox, None, sbbox)  # just update, dont apply the matrix
 
     bbox = updateBoundingBoxForSubBoundingBox(None, matrix, result_bbox)
     return bbox

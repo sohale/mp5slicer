@@ -10,6 +10,7 @@ from slicer.shapes.mp5totree import get_mc_params
 import json
 import numpy as np
 import pymplicit
+from stl import mesh
 
 
 def print_from_mp5():
@@ -19,24 +20,30 @@ def print_from_mp5():
     import slicer.config.config as config
     config.reset()
 
-
+    stls = []
     mp5 = json.load(open(mp5_file_name))
-    mc = get_mc_params(mp5)
-    mc_params = to_json_mc_params(mc)
-    mp5_string = json.dumps(mp5["root"]["children"][0])
+    for son_position in range(len(mp5["root"]["children"])):
+        mc = get_mc_params(mp5,son_position)
+        mc_params = to_json_mc_params(mc)
+        mp5_string = json.dumps(mp5["root"]["children"][son_position])
 
 
-    pymplicit.build_geometry(mp5_string, mc_params)
-    verts = pymplicit.get_verts()
-    faces = pymplicit.get_faces()
+        pymplicit.build_geometry(mp5_string, mc_params)
+        verts = pymplicit.get_verts()
+        faces = pymplicit.get_faces()
+        pymplicit.finish_geometry()
 
-    stl = m2stl_mesh(verts, faces)
-    stl.save("mp5.stl")
-    print_mesh(stl, "mp5")
+        stl = m2stl_mesh(verts, faces)
+        stls.append(stl.data)
+
+    combined_stl = mesh.Mesh(np.concatenate(stls))
+
+    combined_stl.save("mp5.stl")
+    print_mesh(combined_stl, "mp5")
 
 
 def m2stl_mesh(verts, faces):
-    from stl import mesh
+
     fv = verts[faces, :]
 
     data = np.zeros(fv.shape[0], dtype=mesh.Mesh.dtype)

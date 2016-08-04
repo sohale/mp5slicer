@@ -14,7 +14,7 @@
   "infillSpeed" : 1200,
   "skinSpeed" : 1200,
   "raftSpeed" : 2000,
-  "useSupport" : true,
+  "useSupport" : false,
   "supportSamplingDistance" : 1,
   "supportOverhangangle" : -0.7,
   "upSkinsCount" : 5,
