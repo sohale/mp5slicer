@@ -5,7 +5,7 @@ import sys
 
 sys.path.append(os.path.split(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))))[0])
 from slicer.config.config_factory import config_factory
-from slicer.Print_pipeline import *
+from slicer.Print_pipeline import print_mesh
 
 def print_from_file():
     args = sys.argv
