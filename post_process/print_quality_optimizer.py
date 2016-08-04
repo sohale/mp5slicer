@@ -1,8 +1,8 @@
 import slicer.config.config as config
-
+import numpy as np
 
 def dist(point1, point2):
-     return pow((point1[0]-point2[0]),2) + pow((point1[1]-point2[1]),2)
+     return np.sqrt(pow((point1[0]-point2[0]),2) + pow((point1[1]-point2[1]),2))
 
 def shorten_last_line(line_group, shorten_length):
     if config.inner_boundary_coast_at_end_length <= 0:
@@ -91,16 +91,32 @@ def reorder_lines_close_to_point(line_group, point):
         new_line.append(new_line[0]) # forcing the format for line_group
         line_group.sub_lines[line_index] = new_line
 
-def retract_at_point_inside_boundary(line_group, retraction_point):
+def retract_at_point_inside_boundary(line_group, inner_boundary_first_point_list):
     if config.outline_outside_in:
         return None
     if not config.boundary_retraction_inside:
         return None
-    if retraction_point == None:
+    if inner_boundary_first_point_list == None:
+        return None
+    if config.shellSize == 0:
+        return None
+    if inner_boundary_first_point_list == []:
         return None
 
-    if len(line_group.sub_lines) == 1:
-        line_group.sub_lines[0].append(retraction_point) 
-    else: # this is the case where shorten outer boundary line
-        assert config.outer_boundary_coast_at_end_length > 0
-        line_group.sub_lines[-1].append(retraction_point)
+    epsilon = 0.1
+
+    for outer_boundary_index in range(len(line_group.sub_lines)):
+        outer_boundary_first_point = line_group.sub_lines[outer_boundary_index][0]
+        
+        for point in inner_boundary_first_point_list:
+            if config.line_width*(config.shellSize-1) + epsilon < dist(point, line_group.sub_lines[0][0]) <= config.line_width*config.shellSize + epsilon:
+                retraction_point = point
+            else:
+                pass
+
+        try:
+            retraction_point
+        except UnboundLocalError:
+            return None
+
+        line_group.sub_lines[outer_boundary_index].append(retraction_point) 

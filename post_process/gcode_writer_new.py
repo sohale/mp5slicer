@@ -149,7 +149,7 @@ class Gcode_writer(Tree_task):
         self.type_gcode_start('skin')
         length_threshold = config.line_width * 2.5
         self.writing_gcode_with_length_filter(line_group, config.layerThickness, config.skinSpeed, config.interiorFanSpeed, length_threshold)
-        self.type_gcode_end('hole')
+        self.type_gcode_end('skin')
 
     def hole(self, line_group): # done
         self.type_gcode_start('hole')
