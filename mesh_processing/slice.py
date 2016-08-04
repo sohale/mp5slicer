@@ -38,7 +38,7 @@ def intersection_with_line(z, vertice_0, vertice_1):
         elif z == v_1_z:
             return [v_1_x, v_1_y]
         else:
-            raise StandardError("this should be happen")
+            raise StandardError("this should never happen")
     elif v_0_z == z:
         return [v_0_x, v_0_y]
     elif z > v_1_z: # we know v_0_z > z  

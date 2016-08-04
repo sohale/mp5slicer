@@ -46,14 +46,16 @@ extrusion_multiplier = 1.1
 initial_extrusion = 0.2
 toFile = False
 
-# outline
-coast_at_end_length = 0
+# outline / boundary
 outline_outside_in = False
+boundary_starts_close_to_point = [100, 0]
+inner_boundary_coast_at_end_length = 1
+outer_boundary_coast_at_end_length = 0
+boundary_retraction_inside = True
 
 # new
 z_movement_speed = 9000
 retraction_at_change_layer = True
-boundary_starts_close_to_point = None
 
 # first layer
 first_layer_line_width = 0.44

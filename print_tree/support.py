@@ -145,14 +145,19 @@ class SupportVerticallines:
         return pl
 
     def return_polylines(self, sampled_point, plane_height):
-
         pl = Support_Line_Stack()
         group_counter = 0
         for each_group in sampled_point:
             pl.new_line()
             element_counter = 0
+            print("----------")
+            print(each_group)
             for this_point_ucscaled in each_group:
                 this_point_scaled = pyclipper.scale_to_clipper(this_point_ucscaled)
+                print("--")
+                print(self.last_height[group_counter])
+                print(element_counter)
+                self.last_height[group_counter][element_counter]
 
                 if self.last_height[group_counter][element_counter] == plane_height: 
                     # this point is last point
@@ -223,6 +228,8 @@ class SupportVerticallines:
                 for height_f, height_t in zip(self.sliceplanes_height,self.sliceplanes_height[1:]):
                     if height_f <= each_svl.z_end <= height_t:
                         res.append(height_f)
+                    else:
+                        pass
             return res
 
         # last_height = []
@@ -235,6 +242,14 @@ class SupportVerticallines:
 
         # self.last_height = last_height
         self.last_height = list(map(get_last_layer_each_group, self.svl_data_group))
+        assert len(self.last_height) == len(self.svl_data_group)
+        for i,j in zip(self.last_height, self.svl_data_group):
+            if len(i) != len(j):
+                print(len(i))
+                print(len(j))
+                print(i)
+                print(j)
+                raise
         # return last_height
 
 
@@ -566,7 +581,7 @@ class Support:
             # if len(y_sample) > 0 and max_y - y_sample[-1] > offset:
                 # y_sample.append(max_y)
 
-            epsilon = 0.3
+            epsilon = 0.01
             for x in x_sample:
                 for y in y_sample:
                     x_mask = np.logical_and(self.mesh.min_x[group] <= x, x <= self.mesh.max_x[group])
@@ -645,6 +660,9 @@ class Support:
                 z = support_point[2]
                 z_start = self_support_z
                 z_end = z
+                if np.isclose(z_end,self.mesh.bbox.zmax):
+                    z_end = z - 0.198768976
+
                 Support_Vertical_Line_Data_group[-1].append(Support_Vertical_Line_Data(x, y, z_start, z_end))
 
         svl = SupportVerticallines(Support_Vertical_Line_Data_group)
@@ -741,7 +759,7 @@ def main():
     # import slicer.config.config as config
     config.reset()
     start_time = datetime.datetime.now()
-    mesh_name = "overhang_test_stl/icarus_10.stl"
+    mesh_name = "mp5-1.stl"
     stl_mesh = np_mesh.Mesh.from_file(mesh_name)
     our_mesh = mesh_operations.mesh(stl_mesh.vectors, fix_mesh=True)
     sup = Support(our_mesh)

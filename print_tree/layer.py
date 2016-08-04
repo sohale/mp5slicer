@@ -23,7 +23,7 @@ class Layer():
         else:
             self.support_open_path, self.support_boundary_ps = Line_stack(), Polygon_stack()
 
-        self.support_polylines = self.support_polygon_union_with_outline(support_polylines)
+        self.support_polylines = self.support_polygon_difference_with_outline(support_polylines)
         config.reset()
 
     def get_raft_base(self):
@@ -159,7 +159,7 @@ class Layer():
                 ps.add_polygons(island.get_outterbounds().polygons)
         return ps.union_self()
 
-    def support_polygon_union_with_outline(self, support_polylines):
+    def support_polygon_difference_with_outline(self, support_polylines):
 
         outline = self.get_outline()
         offseted_outline = outline.offset(config.line_width)
@@ -173,6 +173,7 @@ class Layer():
         # open_path
         # offseted_outline.visualize()
         solution_open_path_ls = self.support_open_path.difference_with(offseted_outline)
+        
         polylines += solution_open_path_ls.get_print_line()
 
         # solution_open_path_ls.visualize()

@@ -260,6 +260,7 @@ class GCodeEnvironment:
 
         self.speed = config.inAirSpeed
         self.rewrite_speed = True
+        self.rewrite_fan_speed = True
         return instruction
 
     def retract(self):
@@ -281,6 +282,7 @@ class GCodeEnvironment:
 
         self.speed = 2400
         self.rewrite_speed = True
+        self.rewrite_fan_speed = True
         return instruction
     # draw to point A
     # @profile

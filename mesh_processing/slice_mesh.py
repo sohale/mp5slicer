@@ -14,7 +14,7 @@ def move_to_center(mesh):
         platform_center["x"] = printer_config.build_platformX / 2
         platform_center["y"] = printer_config.build_platformY / 2
     objet_center = {}
-    objet_center["x"] = (bbox.xmax - bbox.xmin)/2
+    objet_center["x"] = (bbox.xmax - bbox.xmin)/2 + 50
     objet_center["y"] = (bbox.ymax - bbox.ymin)/2
     objet_center["x"] += bbox.xmin
     objet_center["y"] += bbox.ymin
