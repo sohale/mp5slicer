@@ -150,13 +150,8 @@ class SupportVerticallines:
         for each_group in sampled_point:
             pl.new_line()
             element_counter = 0
-            print("----------")
-            print(each_group)
             for this_point_ucscaled in each_group:
                 this_point_scaled = pyclipper.scale_to_clipper(this_point_ucscaled)
-                print("--")
-                print(self.last_height[group_counter])
-                print(element_counter)
                 self.last_height[group_counter][element_counter]
 
                 if self.last_height[group_counter][element_counter] == plane_height: 
@@ -242,14 +237,9 @@ class SupportVerticallines:
 
         # self.last_height = last_height
         self.last_height = list(map(get_last_layer_each_group, self.svl_data_group))
-        assert len(self.last_height) == len(self.svl_data_group)
-        for i,j in zip(self.last_height, self.svl_data_group):
-            if len(i) != len(j):
-                print(len(i))
-                print(len(j))
-                print(i)
-                print(j)
-                raise
+        # assert len(self.last_height) == len(self.svl_data_group)
+        # for i,j in zip(self.last_height, self.svl_data_group):
+        #     assert len(i) == len(j)
         # return last_height
 
 
