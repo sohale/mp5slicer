@@ -121,7 +121,6 @@ def retract_at_point_inside_boundary(line_group, inner_boundary_first_point_list
         try:
             retraction_point
         except UnboundLocalError:
-            print(None)
             return None
 
         # line_group.sub_lines[outer_boundary_index].append(retraction_point) 
