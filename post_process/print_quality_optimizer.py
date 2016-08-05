@@ -103,13 +103,17 @@ def retract_at_point_inside_boundary(line_group, inner_boundary_first_point_list
     if inner_boundary_first_point_list == []:
         return None
 
-    epsilon = 0.1
-
+    epsilon = 0.01
+    index_change = 0
     for outer_boundary_index in range(len(line_group.sub_lines)):
+        outer_boundary_index += index_change
         outer_boundary_first_point = line_group.sub_lines[outer_boundary_index][0]
         
         for point in inner_boundary_first_point_list:
-            if config.line_width*(config.shellSize-1) + epsilon < dist(point, line_group.sub_lines[0][0]) <= config.line_width*config.shellSize + epsilon:
+            if config.line_width*(config.shellSize) - epsilon <= dist(point, line_group.sub_lines[0][0]) <= config.line_width*config.shellSize + epsilon:
+                retraction_point = point # this is the optimal retraction point so exit the loop
+                break
+            elif config.line_width*(config.shellSize-1) <= dist(point, line_group.sub_lines[0][0]) <= config.line_width*config.shellSize + epsilon:
                 retraction_point = point
             else:
                 pass
@@ -117,6 +121,11 @@ def retract_at_point_inside_boundary(line_group, inner_boundary_first_point_list
         try:
             retraction_point
         except UnboundLocalError:
+            print(None)
             return None
 
-        line_group.sub_lines[outer_boundary_index].append(retraction_point) 
+        # line_group.sub_lines[outer_boundary_index].append(retraction_point) 
+        if retraction_point != None:
+            line_group.sub_lines.insert(outer_boundary_index+1,[retraction_point]) # tricking the gcode write to go to a new point
+            index_change += 1
+
