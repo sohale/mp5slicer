@@ -1,19 +1,13 @@
 #!/bin/env python3
 
-import datetime
-import json
 import logging
 import mysql.connector
 import os
-import random
 import redis
 import requests
 import signal
 import subprocess
 import sys
-import time
-
-from io import StringIO
 
 sys.path.append(os.getcwd() + os.sep + os.pardir)
 from wedesignAPI.wedesignAPI import settings
@@ -24,6 +18,35 @@ REDIS_DB = 1
 REDIS_JOB_KEY = 'slice_jobs'
 
 SLICES_DIR = settings.SLICES_ROOT
+
+
+def init_logging():
+    """
+    Initialize the logging module, output detailed logs in
+    /logs/slicer_worker.log.
+    """
+    file_directory = os.path.dirname(os.path.realpath(__file__))
+    if not os.path.isdir(file_directory + os.sep + 'logs'):
+        os.mkdir(file_directory + os.sep + 'logs')
+
+    # Basic logging set-up, based on the logging cookbook:
+    # https://docs.python.org/3/howto/logging-cookbook.html
+
+    # Set up logging to file - see previous section for more details
+    logging.basicConfig(level=logging.DEBUG,
+                        format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
+                        datefmt='%m-%d %H:%M',
+                        filename='{}/logs/slicer_worker.log'.format(file_directory),
+                        filemode='w')
+
+    console = logging.StreamHandler()
+    console.setLevel(logging.INFO)
+    # Set a format which is simpler for console use
+    formatter = logging.Formatter('%(name)-12s: %(levelname)-8s %(message)s')
+    # Tell the handler to use this format
+    console.setFormatter(formatter)
+    # Add the handler to the root logger
+    logging.getLogger('').addHandler(console)
 
 
 def get_django_route():
@@ -41,7 +64,7 @@ def get_django_projects_route():
     return get_django_route() + '/api/projects/'
 
 
-def get_authentication(username='Admin', password='J70jK6RNSbQ5NFmtNJKAFCNRRulA4hWD'):
+def get_authentication(username='Admin', password=os.environ['ADMIN_PASSWORD']):
     """
     Gets an authentication token in order to be able to post slices (if admin)
     or retrieve private projects.
@@ -87,27 +110,34 @@ def get_mp5_data(project):
     return mp5_data
 
 
-def slice_mp5(mp5_data, id):
+def slice_mp5(mp5_data, project_id):
 
+    logger = logging.getLogger('{}.slice_mp5'.format(__file__))
     if mp5_data == '{"root":{"type":"root","children":[]}}':
-        print(id, "EMPTY TREE")
+        logger.warning('Project {}\'s tree is empty.'.format(project_id))
         return
 
     print(mp5_data)
-    output_file = open(os.path.join(SLICES_DIR, 'result_{}.gcode'.format(id)), 'w')
+    output_file = open(os.path.join(SLICES_DIR, 'result_{}.gcode'.format(project_id)), 'w')
 
-    p = subprocess.Popen(['python2', 'print_from_pipe.py', 'config/config.json'], stdin=subprocess.PIPE, stdout=output_file)
+    logger.info('Running slicing script for project {}.'.format(project_id))
+    p = subprocess.Popen(['python2', 'print_from_pipe.py', 'config/config.json'],
+                         stdin=subprocess.PIPE, stdout=output_file)
     p.communicate(bytes(mp5_data, 'utf-8'))
 
     output_file.close()
+    logger.info('Project {} sliced.'.format(project_id))
 
 
 def main():
-    print("WRAPPER")
+    init_logging()
+
+    logger = logging.getLogger('{}.main'.format(__file__))
+    logger.info("Initializing worker.")
+
     django_slices_route = get_django_slices_route()
     print(requests.get(django_slices_route + '1/').json())
     r = redis.StrictRedis(host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB)
-    print("Redis initialized")
 
     running = True
 
@@ -116,11 +146,12 @@ def main():
         running = False
     signal.signal(signal.SIGINT, stop_loop)
 
+    logger.info("Entering main loop.")
     while running:
-        print('Retrieving a project from redis.')
+        logger.info("Retrieving a project from Redis...")
         project = int(r.blpop(REDIS_JOB_KEY, 0)[1])
 
-        print('Retrieved project:', project)
+        logger.info("Project retrieved: {}".format(project))
         mp5_data = get_mp5_data(project)
         slice_mp5(mp5_data, project)
 
