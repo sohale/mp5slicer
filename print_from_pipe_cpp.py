@@ -54,21 +54,18 @@ def m2stl_mesh(verts, faces):
     m = mesh.Mesh(data)
     return m
 
+
 def to_json_mc_params(bbox):
-    bb = {}
-    bb["xmin"] = bbox.min.x.item(0)
-    bb["xmax"] = bbox.max.x.item(0)
+    bb = {
+        'xmin': bbox.min.x.item(0), 'xmax': bbox.max.x.item(0),
+        'ymin': bbox.min.y.item(0), 'ymax': bbox.max.y.item(0),
+        'zmin': bbox.min.z.item(0), 'zmax': bbox.max.z.item(0)
+    }
 
-    bb["ymin"] = bbox.min.y.item(0)
-    bb["ymax"] = bbox.max.y.item(0)
-
-    bb["zmin"] = bbox.min.z.item(0)
-    bb["zmax"] = bbox.max.z.item(0)
     ignore_root_matrix = False
     mc_params = {"resolution": 40, "box": bb, "ignore_root_matrix": ignore_root_matrix}
     mc_params = json.dumps(mc_params)
     return mc_params
-
 
 
 if __name__ == '__main__':

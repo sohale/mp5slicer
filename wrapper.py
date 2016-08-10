@@ -38,7 +38,7 @@ def init_logging():
                         format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
                         datefmt='%m-%d %H:%M',
                         filename='{}/logs/slicer_worker.log'.format(file_directory),
-                        filemode='w')
+                        filemode='a')
 
     console = logging.StreamHandler()
     console.setLevel(logging.INFO)
@@ -115,13 +115,13 @@ def slice_mp5(mp5_data, project_id):
 
     logger = logging.getLogger('{}.slice_mp5'.format(__file__))
     if mp5_data == '{"root":{"type":"root","children":[]}}':
-        logger.warning('Project {}\'s tree is empty.'.format(project_id))
+        logger.warning("Project {}\'s tree is empty.".format(project_id))
         return
 
-    print(mp5_data)
+    #print(mp5_data)
     output_file = open(os.path.join(SLICES_DIR, 'result_{}.gcode'.format(project_id)), 'w')
 
-    logger.info('Running slicing script for project {}.'.format(project_id))
+    logger.info("Running slicing script for project {}.".format(project_id))
     # p = subprocess.Popen(['python2', 'print_from_pipe.py', 'config/config.json'],
     #                      stdin=subprocess.PIPE, stdout=output_file, stderr=subprocess.PIPE)
     p = subprocess.Popen(['python2', 'mock_print_from_pipe.py', 'config/config.json'],
@@ -130,14 +130,14 @@ def slice_mp5(mp5_data, project_id):
 
     if p.wait() != 0:
         with open(os.path.join(SLICES_DIR, 'error_{}.log'.format(project_id)), 'wb') as f:
-            logger.error('Slicing project {0} failed, traceback in error_{0}.log.'.format(project_id))
+            logger.error("Slicing project {0} failed, traceback in error_{0}.log.".format(project_id))
             f.write(err)
 
         output_file.close()
         os.remove(os.path.join(SLICES_DIR, 'result_{}.gcode'.format(project_id)))
     else:
         output_file.close()
-        logger.info('Project {} sliced.'.format(project_id))
+        logger.info("Project {} sliced.".format(project_id))
 
 
 def main():
@@ -154,6 +154,7 @@ def main():
 
     def stop_loop(*args):
         nonlocal running
+        logging.warning("Main loop interrupted.")
         running = False
     signal.signal(signal.SIGINT, stop_loop)
 
