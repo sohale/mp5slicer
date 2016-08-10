@@ -162,7 +162,7 @@ class Layer():
     def support_polygon_difference_with_outline(self, support_polylines):
 
         outline = self.get_outline()
-        offseted_outline = outline.offset(config.line_width)
+        offseted_outline = outline.offset(config.support_horizontal_offset_from_parts)
         # offseted_outline = outline # testing
 
         polylines = []

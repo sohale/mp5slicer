@@ -7,7 +7,7 @@
   "retractionLength" : 4.5,
   "speedRate" : 3000,
   "filamentDiameter" : 2.85,
-  "shellSize" : 3,
+  "shellSize" : 2,
   "boundarySpeed" : 1200,
   "holeSpeed" : 1200,
   "shellSpeed" : 1200,
@@ -17,7 +17,7 @@
   "supportSpeed" : 1200,
   "useSupport" : true,
   "supportSamplingDistance" : 1,
-  "supportOverhangangle" : -0.7,
+  "supportOverhangangle" : -0.8,
   "upSkinsCount" : 5,
   "downSkinsCount" : 5,
   "firstLayerOffset" : 0,
@@ -25,9 +25,11 @@
   "exteriorFanSpeed" : 0.4,
   "initial_extrusion" : 0.2,
   "raft" : false,
-  "extrusion_multiplier" : 1.15,
-  "bed_support_strengthen_number" : 5,
-  "default_fan_speed" : 1,
-  "toFile" : true
+  "extrusion_multiplier" : 1.1,
+  "bed_support_strengthen_number" : 1,
+  "default_fan_speed" : 0.5,
+  "toFile" : true,
+  "platform_bound" : "skirts",
+  "platform_bound_count" : 5
 }
 

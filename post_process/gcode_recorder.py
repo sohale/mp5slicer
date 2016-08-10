@@ -1,0 +1,329 @@
+import slicer.config.config as config
+import numpy as np
+import slicer.config.printer_config as printer_config
+import sys
+
+
+class G():
+    def __init__(self):
+        self.commands = []
+
+    def append_g(self,x,y):
+        self.commands.append([x,y])
+
+    def calculE(self, extrusion_multiplier_list):
+        commands = np.array(self.commands)[:,:2]
+        layerThickness = np.array([config.layerThickness for i in range(len(commands)-1)])
+
+        # truncation
+        commands = np.floor(commands*1000)/1000
+        self.commands = commands
+        commands_next_point = commands[1:]
+        commands = commands[:-1]
+
+
+        distance = np.linalg.norm(commands - commands_next_point, axis = 1)
+        section_surface = layerThickness * config.nozzle_size # layerThickness is possible to change for each layer
+        volume = section_surface * distance * extrusion_multiplier_list
+        filament_length = volume / config.crossArea
+        self.E = filament_length.tolist()
+        self.E.insert(0, 0)
+
+'''
+Problems of gcode recorder, need to store lots of imformation in a list form, 
+this uses too much of memory?
+
+And a specific index for commands 5,6,7,8, if this ever gets more, the code will be messy. 
+
+'''
+class Gcode_recorder():
+    def __init__(self, gcode_filename = "test.gcode"):
+        self.G = G()
+        self.E = 0
+        self.gcode_filename = gcode_filename
+
+        if config.toFile:
+            self.gcode_output = open(self.gcode_filename, "w")
+        else:
+            self.gcode_output = sys.stdout
+
+        '''
+        Commands is a place to tell printer what to do in progressive order.
+        Commands is a list of value 0, 1, 2, 3, 4, 5, 6
+
+        0 - write G0 with retraction
+        1 - write G1
+        2 - write retract
+        3 - write unretract
+        4 - write change z 
+        5 - rewrite speed signal
+        6 - rewrite fan speed signal
+        7 - comments type starts
+        8 - comments type ends
+        9 - change extrusion multiplier
+        10 - write G0 with no retraction
+        '''
+        self.commands = [] 
+
+        self.Z = []
+        self.z_index = 0
+        self.current_layer_height = 0
+
+        self.fan_speed = []
+        self.fan_speed_function = self.prepare_change_fanspeed_function(printer_config.model)
+        self.fan_speed_index = 0
+        self.current_fanspeed = 0
+
+        self.speed = []
+        self.speed_index = 0
+        self.current_speed = 0
+
+        self.type_start = []
+        self.type_start_index = 0
+        self.type_end = []
+        self.type_end_index = 0
+
+        self.extrusion_multiplier = []
+        self.extrusion_multiplier_index = 0
+
+        self.retract_string = "G92 E0\nG1 E-4.0000\n"
+        self.unretract_string =  "G1 E0.0000\n"
+
+        self.rewrite_speed = True
+
+        self.g0 = self.prepare_g0_function()
+
+    def reset_E(self):
+        self.E = 0
+
+    def make_extrusion_multiplier_array(self):
+        extrusion_multiplier_list = []
+        for i in self.commands:
+            if i in [0, 10]:
+                extrusion_multiplier_list.append(0)
+            elif i == 1:
+                extrusion_multiplier_list.append(extrusion_multiplier)
+            elif i == 9:
+                extrusion_multiplier = self.extrusion_multiplier[self.extrusion_multiplier_index]
+                self.extrusion_multiplier_index += 1
+
+        extrusion_multiplier_list = extrusion_multiplier_list[1:] # hack : first one is always, prepare for calculE
+        return np.array(extrusion_multiplier_list)
+    ########### prepare function for specific printer ###########
+    def prepare_change_fanspeed_function(self, printer):
+        if printer_config.model == "r2x":
+            return lambda fan_speed : "M126 S" + str(fan_speed) + "\n"
+
+        else:
+            return lambda fan_speed :  "M106 S" + str(int(fan_speed*255)) + "\n"
+
+    def prepare_g0_function(self):
+        speed = "F{}\n".format(config.inAirSpeed)
+        return lambda x, y : "G0 X{} Y{} ".format(x, y) + speed
+
+    ########### function to append information into gcode recorder ###########
+    def append_retract(self):
+        self.commands.append(2)
+
+    def append_unretract(self):
+        self.commands.append(3)
+
+    def append_g0(self, line, skip_retraction):
+        if not skip_retraction:
+            self.commands.append(0)
+        else:
+            self.commands.append(10)
+
+        self.G.append_g(line[0],line[1])
+
+    def append_g1(self,line,speed):
+        self.commands.append(1)
+        self.G.append_g(line[0],line[1])
+
+    def append_change_z(self, z):
+        self.commands.append(4)
+        self.Z.append(z)
+
+    def append_rewrite_speed(self, speed):
+        self.commands.append(5)
+        self.speed.append(speed)
+
+    def append_rewrite_fanspeed(self, fan_speed):
+        self.commands.append(6)
+        self.fan_speed.append(fan_speed)
+
+    def append_rewrite_both_speed_and_extrusion_multiplier(self, speed, fan_speed, extrusion_multiplier):
+        self.append_rewrite_speed(speed)
+        self.append_rewrite_fanspeed(fan_speed)
+        self.append_change_extrusion_multiplier(extrusion_multiplier)
+
+    def append_type_start(self, type_str):
+        self.commands.append(7)
+        self.type_start.append(type_str)
+
+    def append_type_end(self, type_str):
+        self.commands.append(8)
+        self.type_end.append(type_str)
+
+    def append_change_extrusion_multiplier(self, extrusion_multiplier):
+        self.commands.append(9)
+        self.extrusion_multiplier.append(extrusion_multiplier)
+
+    ########### functions to get the gcode instruction ###########
+    def get_change_z_gcode(self):
+        assert len(str(self.Z[self.z_index]).split('.')[1]) in [1, 2] # only support 1 decimal place now
+        self.current_layer_height += self.Z[self.z_index]
+        self.current_layer_height = np.around(self.current_layer_height, decimals = 2)
+        instruction = "G0 Z{} F{}\n".format(self.current_layer_height, config.z_movement_speed)
+        self.z_index += 1
+        return instruction
+
+    def get_startcode(self, printer):
+
+        if printer == "r2x":
+            start_code_name = "gcode_writer/r2xstart"
+            startString = "M104 S"+str(confistag.temperature)+" T1 (set extruder temperature)\n"
+        else:
+            start_code_name = "gcode_writer/startcode"
+            startString = "M109 S"+str(config.temperature)+"\n"
+
+
+        startCode = open(start_code_name + ".gcode","r")
+        for line in startCode:
+            startString += line
+        startCode.close()
+        return startString
+
+    def get_endcode(self, printer):
+        if printer == "r2x":
+            end_code_name = "gcode_writer/r2xend"
+        else:
+            end_code_name = "gcode_writer/endcode"
+
+        endString = ""
+        endCode = open(end_code_name + ".gcode","r")
+        for line in endCode:
+            endString += line
+        endCode.close()
+        return endString    
+
+    def get_config(self):
+        instruction = ""
+        for attr in dir(config):
+            if not attr.startswith('__'):
+                instruction += ";" +str(attr)+ " : "+str(getattr(config, attr)) +" \n"
+        return instruction
+
+    def get_change_fanspeed_code(self):
+
+        fan_speed = self.fan_speed[self.fan_speed_index]
+        if self.current_fanspeed == fan_speed:
+            instruction = ""
+        else:
+            instruction = self.fan_speed_function(fan_speed)
+            self.current_fanspeed = fan_speed
+
+        self.fan_speed_index += 1
+        return instruction
+
+    def get_type_gcode_start(self):
+        type_str = self.type_start[self.type_start_index]
+        self.type_start_index += 1
+        return  "; {} starts \n".format(type_str)
+
+    def get_type_gcode_end(self):
+        type_str = self.type_end[self.type_end_index]
+        self.type_end_index += 1
+        return "; {} ends \n".format(type_str)
+
+    def get_g0(self, x, y):
+        self.rewrite_speed = True
+        return self.g0(x, y)
+
+    def get_g1(self):
+        pass
+
+    def write_Gcode(self):
+
+        self.G.calculE(self.make_extrusion_multiplier_array())
+
+        # if config.toFile:
+        #     instruction = self.get_config()
+        #     self.gcode_output.write(instruction)
+
+        instruction = self.get_startcode(printer_config.model)
+        instruction += "G1 F200 E" + str(config.initial_extrusion) + "\n"
+        self.gcode_output.write(instruction)
+
+        g_index = 0
+        for commands_identifier in self.commands:
+            if commands_identifier == 0 or commands_identifier == 1:
+                self.E += self.G.E[g_index]
+                # self.E = np.floor(self.E*100000)/100000 # truncate
+                self.E = np.around(self.E, decimals = 5)
+                g_data = self.G.commands[g_index]
+
+                if commands_identifier == 0: # write g0 with retraction
+
+                    instruction = self.retract_string
+                    instruction += self.get_g0(g_data[0], g_data[1])
+                    instruction += self.unretract_string
+
+                    self.gcode_output.write(instruction)
+                else: # write g1
+                    if not self.rewrite_speed:
+                        instruction = "G1" + " X"+str(g_data[0]) + " Y"+str(g_data[1]) + " E"+ str(self.E)+"\n"
+                    else:
+                        instruction = "G1" + " X"+str(g_data[0]) + " Y"+str(g_data[1]) +  " F"+ str(self.current_speed) + " E"+ str(self.E)+"\n"
+                        self.rewrite_speed = False
+
+                    self.gcode_output.write(instruction)
+                g_index += 1
+
+            elif commands_identifier == 2: # write retraction
+                self.gcode_output.write(self.retract_string)
+
+            elif commands_identifier == 3: # write unretraction
+                self.gcode_output.write(self.unretract_string)
+                self.reset_E()
+
+            elif commands_identifier == 4: # write change z
+                instruction = self.get_change_z_gcode()
+                self.gcode_output.write(instruction)
+
+            elif commands_identifier == 5: # notify change speed actual change speed is written in g1
+                speed = self.speed[self.speed_index]
+                if speed == self.current_speed:
+                    self.rewrite_speed = False
+                else:
+                    self.rewrite_speed = True
+                    self.current_speed = speed
+                self.speed_index += 1
+
+            elif commands_identifier == 6: # write change fan speed
+                instruction = self.get_change_fanspeed_code()
+                self.gcode_output.write(instruction)
+
+            elif commands_identifier == 7: # write change fan speed
+                instruction = self.get_type_gcode_start()
+                self.gcode_output.write(instruction)
+
+            elif commands_identifier == 8: # write change fan speed
+                instruction = self.get_type_gcode_end()
+                self.gcode_output.write(instruction)
+
+            elif commands_identifier == 9: # change extrusion multiplier
+                pass
+
+            elif commands_identifier == 10:
+                g_data = self.G.commands[g_index]
+                instruction = self.get_g0(g_data[0], g_data[1])
+                self.gcode_output.write(instruction)
+                g_index += 1
+
+            else:
+                raise NotImplementedError
+
+        instruction = self.get_endcode(printer_config.model)
+        self.gcode_output.write(instruction)
+        self.gcode_output.close()

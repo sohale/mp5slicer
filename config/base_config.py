@@ -26,7 +26,7 @@ useSupport = True
 exteriorFanSpeed = 0.3
 bridgeFanSpeed = 0.4
 interiorFanSpeed = 0
-supportFanSpeed = 1
+supportFanSpeed = 0.5
 skirtFanSpeed = 0.2
 raftFanSpeed = 0
 upSkinsCount = 4
@@ -37,9 +37,10 @@ supportSamplingDistance = 2
 link_threshold = 5*np.sqrt(2*(supportSamplingDistance**2))
 bed_support_strengthen_number = 5
 supportOverhangangle = -0.7 # cos(155), 75 degree to building direction requires support
+support_horizontal_offset_from_parts = 0.4
 
 platform_bound = "brim"
-platform_bound_count = 10
+platform_bound_count = 3
 raft = False
 raftLayerThickness = 0.15
 extrusion_multiplier = 1.1
@@ -48,8 +49,8 @@ toFile = False
 
 # outline / boundary
 outline_outside_in = False
-boundary_starts_close_to_point = [100, 0]
-inner_boundary_coast_at_end_length = 1
+boundary_starts_close_to_point = None
+inner_boundary_coast_at_end_length = 0.2
 outer_boundary_coast_at_end_length = 0
 boundary_retraction_inside = True
 
