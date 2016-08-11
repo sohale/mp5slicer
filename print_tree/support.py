@@ -193,7 +193,9 @@ class SupportVerticallines:
         pyclipper_formatting = Polygon_stack([])
 
         # offset points
-        # pyclipper_formatting.add_polygon_stack(ls.offset_point(config.line_width))
+        # print(plane_height)
+        if 10 <= plane_height <= 49:
+            pyclipper_formatting.add_polygon_stack(ls.offset_point(config.line_width))
 
          # remove the contacting layer, i.e. one empty layer between support and object
         pyclipper_formatting.add_polygon_stack(ls.offset_last_point())
@@ -744,15 +746,16 @@ class Support:
 
 def main():
     from stl import mesh as np_mesh
-    import mesh_operations
+    from slicer.mesh_processing import mesh_operations
     import datetime
     # import slicer.config.config as config
     config.reset()
     start_time = datetime.datetime.now()
-    mesh_name = "mp5-1.stl"
+    mesh_name = "budda_head.stl"
     stl_mesh = np_mesh.Mesh.from_file(mesh_name)
     our_mesh = mesh_operations.mesh(stl_mesh.vectors, fix_mesh=True)
-    sup = Support(our_mesh)
+    bbox = our_mesh.bounding_box()
+    sup = Support(our_mesh, bbox)
     sup.visulisation(require_group=True, require_support_lines=True)
 
 if __name__ == '__main__':

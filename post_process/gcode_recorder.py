@@ -86,12 +86,15 @@ class Gcode_recorder():
         self.extrusion_multiplier = []
         self.extrusion_multiplier_index = 0
 
-        self.retract_string = "G92 E0\nG1 E-4.0000\n"
-        self.unretract_string =  "G1 E0.0000\n"
+        self.retract_string = "G92 E0\nG1 E-4.0000 F{}\n".format(config.retractionSpeed)
+        self.unretract_string =  "G1 E0.0000 F{}\n".format(config.retractionSpeed)
 
         self.rewrite_speed = True
 
         self.g0 = self.prepare_g0_function()
+
+        self.X = 0
+        self.Y = 0
 
     def reset_E(self):
         self.E = 0
@@ -243,6 +246,15 @@ class Gcode_recorder():
     def get_g1(self):
         pass
 
+
+    @staticmethod
+    def calculE(A, B, layerThickness):
+        distance = np.sqrt( (pow((A[0]-B[0]),2)) + pow((A[1]-B[1]),2))
+        section_surface = layerThickness * config.nozzle_size # layerThickness is possible to change for each layer
+        volume = section_surface * distance * config.extrusion_multiplier
+        filament_length = volume / config.crossArea
+        return filament_length
+
     def write_Gcode(self):
 
         self.G.calculE(self.make_extrusion_multiplier_array())
@@ -259,6 +271,7 @@ class Gcode_recorder():
         for commands_identifier in self.commands:
             if commands_identifier == 0 or commands_identifier == 1:
                 self.E += self.G.E[g_index]
+                self.added_E = self.G.E[g_index]
                 # self.E = np.floor(self.E*100000)/100000 # truncate
                 self.E = np.around(self.E, decimals = 5)
                 g_data = self.G.commands[g_index]
@@ -267,15 +280,23 @@ class Gcode_recorder():
 
                     instruction = self.retract_string
                     instruction += self.get_g0(g_data[0], g_data[1])
+
+                    self.X, self.Y = g_data[0], g_data[1]
+
                     instruction += self.unretract_string
 
                     self.gcode_output.write(instruction)
+                    self.rewrite_speed = True
+                    self.reset_E()
                 else: # write g1
-                    if not self.rewrite_speed:
-                        instruction = "G1" + " X"+str(g_data[0]) + " Y"+str(g_data[1]) + " E"+ str(self.E)+"\n"
-                    else:
-                        instruction = "G1" + " X"+str(g_data[0]) + " Y"+str(g_data[1]) +  " F"+ str(self.current_speed) + " E"+ str(self.E)+"\n"
-                        self.rewrite_speed = False
+                    # if not self.rewrite_speed:
+                        # instruction = "G1" + " X"+str(g_data[0]) + " Y"+str(g_data[1]) + " E"+ str(self.E)+"\n"
+                    # else:
+                    instruction = "G1" + " X"+str(g_data[0]) + " Y"+str(g_data[1]) +  " F"+ str(self.current_speed) + " E"+ str(self.E)+"\n"
+
+                    self.X, self.Y = g_data[0], g_data[1]
+
+                    self.rewrite_speed = False
 
                     self.gcode_output.write(instruction)
                 g_index += 1
@@ -318,8 +339,13 @@ class Gcode_recorder():
             elif commands_identifier == 10:
                 g_data = self.G.commands[g_index]
                 instruction = self.get_g0(g_data[0], g_data[1])
+
+                self.X, self.Y = g_data[0], g_data[1]
+
                 self.gcode_output.write(instruction)
                 g_index += 1
+                self.rewrite_speed = True
+
 
             else:
                 raise NotImplementedError
