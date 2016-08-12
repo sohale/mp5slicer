@@ -193,9 +193,6 @@ class SupportVerticallines:
         pyclipper_formatting = Polygon_stack([])
 
         # offset points
-        # print(plane_height)
-        if 10 <= plane_height <= 49:
-            pyclipper_formatting.add_polygon_stack(ls.offset_point(config.line_width))
 
          # remove the contacting layer, i.e. one empty layer between support and object
         pyclipper_formatting.add_polygon_stack(ls.offset_last_point())
@@ -735,7 +732,7 @@ class Support:
         polylines_all = []
         layer_counter = 0
         for height in sliceplanes_height:
-            if layer_counter <= config.bed_support_strengthen_number:
+            if layer_counter <= config.bed_support_strengthen_number - 1:
                 polylines_all.append(svl.return_polyline_by_height(height, first_layer = True))
             else:
                 polylines_all.append(svl.return_polyline_by_height(height, first_layer = False))

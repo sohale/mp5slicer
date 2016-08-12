@@ -30,20 +30,30 @@ class Gcode_writer(Tree_task):
         self.gcode_recorder.append_type_end(type_str)
 
     def basic_writing_gcode(self, line_group, speed, fan_speed, extrusion_multiplier):
-        self.gcode_recorder.append_rewrite_both_speed_and_extrusion_multiplier(speed, fan_speed, extrusion_multiplier)
-
         for line in line_group.sub_lines:
+
+            # self.gcode_recorder.append_rewrite_both_speed_and_extrusion_multiplier(speed, fan_speed, extrusion_multiplier)
             if len(line) > 0:
                 dist = self.calculDis(line[0])
                 if dist > config.min_retraction_distance and not self.skip_retraction:
-                    self.gcode_recorder.append_g0(line[0], False) # new
+                    self.gcode_recorder.append_retract()
+                    self.gcode_recorder.append_g0(line[0]) # new
+                    self.gcode_recorder.append_unretract()
+                    # self.gcode_recorder.append_rewrite_speed(speed)
                 else:
-                    self.gcode_recorder.append_g0(line[0], True) # new
+                    self.gcode_recorder.append_g0(line[0]) # new
+                    # self.gcode_recorder.append_rewrite_speed(speed)
 
                 self.X, self.Y = line[0]
-                for point_index in range(1, len(line)):
-                    self.gcode_recorder.append_g1(line[point_index],speed) # new
-                    self.X, self.Y = line[point_index]
+
+                
+
+            for point_index in range(1, len(line)):
+                if point_index == 1:
+                    self.gcode_recorder.append_g1_change_speed(line[point_index],speed) # new
+                else:
+                    self.gcode_recorder.append_g1(line[point_index]) # new
+                self.X, self.Y = line[point_index]
 
         if self.skip_retraction:
             self.skip_retraction = False
@@ -56,26 +66,36 @@ class Gcode_writer(Tree_task):
                 dist = self.calculDis(line[0])
                 
                 if dist < length_threshold:
-                    self.gcode_recorder.append_g1(line[0], speed)
+                    # self.gcode_recorder.append_g1(line[0], speed)
+                    self.gcode_recorder.append_g1_change_speed(line[0],speed) # new
                     self.X, self.Y = line[0]
 
                 else:
                     distance = self.calculDis(line[0])
                     if distance > config.min_retraction_distance and not self.skip_retraction:
-                        self.gcode_recorder.append_g0(line[0], False) # new
+                        self.gcode_recorder.append_retract()
+                        self.gcode_recorder.append_g0(line[0]) # new
+                        self.gcode_recorder.append_unretract()
+                        # self.gcode_recorder.append_rewrite_speed(speed)
                         self.X, self.Y = line[0]
 
                     else:
-                        self.gcode_recorder.append_g0(line[0], True) # new
+                        self.gcode_recorder.append_g0(line[0]) # new
+                        # self.gcode_recorder.append_rewrite_speed(speed)
                         self.X, self.Y = line[0]
-
 
 
                 if self.skip_retraction:
                     self.skip_retraction = False
 
+
                 for point_index in range(1,len(line)):
-                    self.gcode_recorder.append_g1(line[point_index],speed)
+
+                    if point_index == 1:
+                        self.gcode_recorder.append_g1_change_speed(line[point_index],speed) # new
+                    else:
+                        self.gcode_recorder.append_g1(line[point_index])
+
                     self.X, self.Y = line[point_index]
 
     def infill(self,line_group): # done
@@ -119,6 +139,8 @@ class Gcode_writer(Tree_task):
 
 
         self.gcode_recorder.append_unretract() # gcode_recorder
+        speed = config.speedRate
+        self.gcode_recorder.append_rewrite_speed(speed)
 
         self.type_gcode_end('layer')
         self.layer_index += 1
@@ -151,7 +173,7 @@ class Gcode_writer(Tree_task):
         self.type_gcode_start('skin')
         length_threshold = config.line_width * 2.5
         self.writing_gcode_with_length_filter(line_group, config.skinSpeed, config.interiorFanSpeed, config.extrusion_multiplier, length_threshold)
-        self.type_gcode_end('skin')
+        # self.type_gcode_end('skin')
 
     def hole(self, line_group): # done
         self.type_gcode_start('hole')
@@ -190,28 +212,6 @@ class Gcode_writer(Tree_task):
         # self.gcode_output.write(self.gcodeEnvironment.wait_for_cooling(196, 60000))
         self.type_gcode_end('top_raft')  
         config.reset()
-
-
-# def goToNextPoint(self, A, skip_retract):
-#         A = [self.truncate3(A[0]), self.truncate3(A[1])]
-#         distance = self.calculDis(A)
-#         if distance > config.min_retraction_distance and not skip_retract:
-#             instruction = self.retract()
-
-#             instruction +=  "G0" + " X"+str(A[0]) + " Y"+str(A[1]) + " F"+str(config.inAirSpeed)+"\n"
-#             instruction += self.unretract()
-#         else :
-#             instruction =  "G0" + " X"+str(A[0]) + " Y"+str(A[1]) + " F"+str(config.inAirSpeed)+"\n"
-
-
-
-#         self.X = A[0]
-#         self.Y = A[1]
-
-#         self.speed = config.inAirSpeed
-#         self.rewrite_speed = True
-#         self.rewrite_fan_speed = True
-#         return instruction
 
 
 '''
