@@ -194,7 +194,7 @@ class Gcode_recorder():
 
     ########### functions to get the gcode instruction ###########
     def get_change_z_gcode(self):
-        assert len(str(self.Z[self.z_index]).split('.')[1]) in [1, 2] # only support 1 decimal place now
+        assert self.Z[self.z_index] == 0 or len(str(self.Z[self.z_index]).split('.')[1]) in [1, 2] # only support 1 decimal place now
         self.current_layer_height += self.Z[self.z_index]
         self.current_layer_height = np.around(self.current_layer_height, decimals = 2)
         instruction = "G0 Z{} F{}\n".format(self.current_layer_height, config.z_movement_speed)

@@ -116,6 +116,7 @@ class Gcode_writer(Tree_task):
             config.shellSpeed = config.first_layer_shellSpeed
             config.supportSpeed = config.first_layer_supportSpeed
             config.raftSpeed = config.first_layer_raftSpeed
+            config.layerThickness = config.first_layer_height
 
         elif self.layer_index == 1:
             config.reset()

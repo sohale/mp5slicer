@@ -35,7 +35,7 @@ downSkinsCount = 3
 # support
 supportSamplingDistance = 2
 link_threshold = 5*np.sqrt(2*(supportSamplingDistance**2))
-bed_support_strengthen_number = 5
+bed_support_strengthen_number = 2
 supportOverhangangle = -0.7 # cos(155), 75 degree to building direction requires support
 support_horizontal_offset_from_parts = 0.4
 
@@ -59,7 +59,7 @@ z_movement_speed = 9000
 retraction_at_change_layer = True
 
 # first layer
-first_layer_line_width = 0.44
+first_layer_line_width = 0.42
 first_layer_infillSpeed = 750
 first_layer_skinSpeed = 750
 first_layer_boundarySpeed = 750 
@@ -67,3 +67,4 @@ first_layer_holeSpeed = 750
 first_layer_supportSpeed = 750
 first_layer_raftSpeed = 750
 first_layer_shellSpeed = 750
+first_layer_height = 0.2 # only allow maximun two decimal places
