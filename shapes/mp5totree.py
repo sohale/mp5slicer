@@ -31,6 +31,7 @@ def get_fonuky(node, params = None):
         "root" : root,
         "Union" : union,
         "Intersection": intersection,
+        "itorus": torus,
 
     }
     if params is not None:
@@ -100,6 +101,12 @@ def cone(node):
 def cylinder(node):
     matrix = make_matrix4(node["matrix"])
     bbox = getBoundingBoxForSingleShapeMatrix(matrix)
+
+    return bbox
+
+def torus(node):
+    matrix = make_matrix4(node["matrix"])
+    bbox = getBoundingBoxForSingleShapeMatrix_torus(matrix)
 
     return bbox
 

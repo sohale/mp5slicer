@@ -69,6 +69,37 @@ def getBoundingBoxForSingleShapeMatrix(this_matrix) :
                 if (new_z > result_bbox.max.z): result_bbox.max.z = new_z
     return result_bbox
 
+def getBoundingBoxForSingleShapeMatrix_torus(this_matrix) :
+    pass
+#
+
+    result_bbox = Bbox(Coords(float("inf"),float("inf"),float("inf")), Coords(float("-inf"),float("-inf"),float("-inf")))
+
+
+    v = np.array([0, 0, 0,1])
+    v = np.reshape(v,(4,1))
+
+    for x in [-1, 1]:
+        for y in [-1, 1]:
+            for z in [-0.5, 0.5]:
+                v[0] = x
+                v[1] = y
+                v[2] = z
+
+                v = np.matmul(this_matrix,v)
+
+                new_x = copy.copy(v[0])
+                new_y = copy.copy(v[1])
+                new_z = copy.copy(v[2])
+
+                if (new_x < result_bbox.min.x): result_bbox.min.x = new_x
+                if (new_y < result_bbox.min.y): result_bbox.min.y = new_y
+                if (new_z < result_bbox.min.z): result_bbox.min.z = new_z
+                if (new_x > result_bbox.max.x): result_bbox.max.x = new_x
+                if (new_y > result_bbox.max.y): result_bbox.max.y = new_y
+                if (new_z > result_bbox.max.z): result_bbox.max.z = new_z
+    return result_bbox
+
 #
 # /* Multiplies the this_matrix into input_sbbox and updates result_bbox
 # */
