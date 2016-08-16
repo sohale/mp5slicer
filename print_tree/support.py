@@ -149,17 +149,21 @@ class Support_Vertical_lines:
     # def clean(self):
     #     ''' remove the short svls which will only be printed on x number of layer'''
     #     def clean_each_group(each_svl_data_group):
-    #         new_svl_data = []
-    #         for each_svl_data in each_svl_data_group:
-    #             z_start = each_svl_data.z_start
-    #             z_end = each_svl_data.z_end
-    #             if z_end - z_start > 2*config.layerThickness:
-    #                 new_svl_data.append(each_svl_data)
+    #         element_counter = 0
+    #         while element_counter < len(each_svl_data_group):
+    #             each_svl_data = each_svl_data_group[element_counter]
+        
+    #             if each_svl_data.z_low <= 2*config.layerThickness:
+    #                 element_counter += 1
     #             else:
-    #                 pass    
-    #         return new_svl_data
+    #                 if each_svl_data.z_high - each_svl_data.z_low <= 2*config.layerThickness:
+    #                     print("deleted one")
+    #                     print(each_svl_data)
+    #                     del each_svl_data_group[element_counter]  
+    #                 else:
+    #                     element_counter += 1
 
-    #     self.svl_data_group = list(map(clean_each_group, self.svl_data_group))
+    #     self.apply_function_on_group(clean_each_group)
 
     def append_group(self):
         self.svl_data_group.append([])
@@ -219,9 +223,7 @@ class Support_Vertical_lines:
                     intersected_svl_data.append(svl_data)
             return intersected_svl_data
 
-        # change name
-        result = self.apply_function_on_group(return_intersected_svl_data_each_group)
-        return result # change name
+        return self.apply_function_on_group(return_intersected_svl_data_each_group)
 
     def return_polylines(self, sampled_point, plane_height):
 
@@ -291,6 +293,7 @@ class Support_Vertical_lines:
         self.reorder()
         self.add_sliceplanes_height(sliceplanes_height)
         self.get_last_layer()
+        # self.clean()
 
     class Support_Vertical_Line_Data:
         def __init__(self, x, y, z_high):

@@ -134,7 +134,6 @@ class Gcode_recorder():
     def prepare_change_fanspeed_function(self, printer):
         if printer_config.model == "r2x":
             return lambda fan_speed : "M126 S{}\n".format(fan_speed)
-
         else:
             return lambda fan_speed :  "M106 S{:d}\n".format(int(fan_speed*255))
 
@@ -157,9 +156,7 @@ class Gcode_recorder():
         self.commands.append(1)
         self.G.append_g(line[0],line[1])
 
-    def append_g1_change_speed(self, line, speed):
-        self.commands.append(5)
-        self.speed.append(speed)
+    def append_g1_change_speed(self, line):
         self.commands.append(10)
         self.G.append_g(line[0],line[1])
 
@@ -174,11 +171,6 @@ class Gcode_recorder():
     def append_rewrite_fanspeed(self, fan_speed):
         self.commands.append(6)
         self.fan_speed.append(fan_speed)
-
-    def append_rewrite_both_speed_and_extrusion_multiplier(self, speed, fan_speed, extrusion_multiplier):
-        self.append_rewrite_speed(speed)
-        self.append_rewrite_fanspeed(fan_speed)
-        self.append_change_extrusion_multiplier(extrusion_multiplier)
 
     def append_type_start(self, type_str):
         self.commands.append(7)
@@ -240,13 +232,9 @@ class Gcode_recorder():
     def get_change_fanspeed_code(self):
 
         fan_speed = self.fan_speed[self.fan_speed_index]
-        if self.current_fanspeed == fan_speed:
-            instruction = ""
-        else:
-            instruction = self.fan_speed_function(fan_speed)
-            self.current_fanspeed = fan_speed
-
+        instruction = self.fan_speed_function(fan_speed)
         self.fan_speed_index += 1
+
         return instruction
 
     def get_type_gcode_start(self):

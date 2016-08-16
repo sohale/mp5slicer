@@ -12,7 +12,11 @@ class Gcode_writer(Tree_task):
         self.layer_index = 0
         self.layerThickness_list = layerThickness_list
         self.skip_retraction = False
+
         self.gcode_recorder = Gcode_recorder(gcode_filename)
+        self.fan_speed = config.default_fan_speed
+        self.speed = config.speedRate
+        self.extrusion_multiplier = config.extrusion_multiplier
 
         self.X, self.Y = 0, 0 # this is only for calculDis
 
@@ -29,7 +33,25 @@ class Gcode_writer(Tree_task):
     def type_gcode_end(self, type_str):
         self.gcode_recorder.append_type_end(type_str)
 
+    def append_rewrite_speed_fanspeed_extrusion_multiplier(self, speed, fan_speed, extrusion_multiplier):
+        if self.speed != speed:
+            self.gcode_recorder.append_rewrite_speed(speed)
+            self.speed = speed
+        else:
+            pass
+        if self.fan_speed != fan_speed:
+            self.gcode_recorder.append_rewrite_fanspeed(fan_speed)
+            self.fan_speed = fan_speed
+        else:
+            pass
+        if self.extrusion_multiplier != extrusion_multiplier:
+            self.gcode_recorder.append_change_extrusion_multiplier(extrusion_multiplier)
+            self.extrusion_multiplier = extrusion_multiplier
+        else:
+            pass
+
     def basic_writing_gcode(self, line_group, speed, fan_speed, extrusion_multiplier):
+        self.append_rewrite_speed_fanspeed_extrusion_multiplier(speed, fan_speed, extrusion_multiplier)
         for line in line_group.sub_lines:
 
             # self.gcode_recorder.append_rewrite_both_speed_and_extrusion_multiplier(speed, fan_speed, extrusion_multiplier)
@@ -50,7 +72,7 @@ class Gcode_writer(Tree_task):
 
             for point_index in range(1, len(line)):
                 if point_index == 1:
-                    self.gcode_recorder.append_g1_change_speed(line[point_index],speed) # new
+                    self.gcode_recorder.append_g1_change_speed(line[point_index]) # new
                 else:
                     self.gcode_recorder.append_g1(line[point_index]) # new
                 self.X, self.Y = line[point_index]
@@ -59,7 +81,7 @@ class Gcode_writer(Tree_task):
             self.skip_retraction = False
 
     def writing_gcode_with_length_filter(self, line_group, speed, fan_speed, extrusion_multiplier, length_threshold):
-        self.gcode_recorder.append_rewrite_both_speed_and_extrusion_multiplier(speed, fan_speed, extrusion_multiplier)
+        self.append_rewrite_speed_fanspeed_extrusion_multiplier(speed, fan_speed, extrusion_multiplier)
 
         for line in line_group.sub_lines:
             if len(line) > 0:
@@ -67,7 +89,7 @@ class Gcode_writer(Tree_task):
                 
                 if dist < length_threshold:
                     # self.gcode_recorder.append_g1(line[0], speed)
-                    self.gcode_recorder.append_g1_change_speed(line[0],speed) # new
+                    self.gcode_recorder.append_g1_change_speed(line[0]) # new
                     self.X, self.Y = line[0]
 
                 else:
@@ -92,7 +114,7 @@ class Gcode_writer(Tree_task):
                 for point_index in range(1,len(line)):
 
                     if point_index == 1:
-                        self.gcode_recorder.append_g1_change_speed(line[point_index],speed) # new
+                        self.gcode_recorder.append_g1_change_speed(line[point_index]) # new
                     else:
                         self.gcode_recorder.append_g1(line[point_index])
 
@@ -116,7 +138,7 @@ class Gcode_writer(Tree_task):
             config.shellSpeed = config.first_layer_shellSpeed
             config.supportSpeed = config.first_layer_supportSpeed
             config.raftSpeed = config.first_layer_raftSpeed
-            config.layerThickness = config.first_layer_height
+            config.layerThickness = config.first_layer_thickness
 
         elif self.layer_index == 1:
             config.reset()
@@ -141,6 +163,7 @@ class Gcode_writer(Tree_task):
 
         self.gcode_recorder.append_unretract() # gcode_recorder
         speed = config.speedRate
+        self.speed = config.speedRate
         self.gcode_recorder.append_rewrite_speed(speed)
 
         self.type_gcode_end('layer')
@@ -181,9 +204,9 @@ class Gcode_writer(Tree_task):
         self.basic_writing_gcode(line_group, config.holeSpeed, config.exteriorFanSpeed, config.extrusion_multiplier)
         self.type_gcode_end('hole')
     def inner_boundary(self, line_group): # done
-        self.type_gcode_start('infill')
+        self.type_gcode_start('inner boundary')
         self.basic_writing_gcode(line_group, config.boundarySpeed, config.default_fan_speed, config.extrusion_multiplier)
-        self.type_gcode_end('infill')
+        self.type_gcode_end('inner boundary')
     def inner_hole(self, line_group): # done
         self.type_gcode_start('inner_hole')
         self.basic_writing_gcode(line_group, config.boundarySpeed, config.exteriorFanSpeed, config.extrusion_multiplier)
@@ -198,7 +221,7 @@ class Gcode_writer(Tree_task):
         self.type_gcode_end('skirt')
     def support(self, line_group): # done
         self.type_gcode_start('support')
-        self.basic_writing_gcode(line_group, config.supportSpeed,config.supportFanSpeed, config.extrusion_multiplier)
+        self.basic_writing_gcode(line_group, config.supportSpeed, config.supportFanSpeed, config.extrusion_multiplier)
         self.type_gcode_end('support')
     def raft(self, line_group): # done
         self.type_gcode_start('raft')

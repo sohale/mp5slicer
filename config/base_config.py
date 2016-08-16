@@ -67,4 +67,4 @@ first_layer_holeSpeed = 750
 first_layer_supportSpeed = 750
 first_layer_raftSpeed = 750
 first_layer_shellSpeed = 750
-first_layer_height = 0.2 # only allow maximun two decimal places
+first_layer_thickness = 0.2 # only allow maximun two decimal places
