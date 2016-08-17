@@ -23,9 +23,9 @@ default_fan_speed = 0.5
 hasControllableFanSpeed  = True
 useAdaptiveSlicing = False
 useSupport = True
-exteriorFanSpeed = 0.3
+exteriorFanSpeed = 0.5
 bridgeFanSpeed = 0.4
-interiorFanSpeed = 0
+interiorFanSpeed = 0.5
 supportFanSpeed = 0.5
 skirtFanSpeed = 0.2
 raftFanSpeed = 0
@@ -50,7 +50,7 @@ toFile = False
 # outline / boundary
 outline_outside_in = False
 boundary_starts_close_to_point = None
-inner_boundary_coast_at_end_length = 0.2
+inner_boundary_coast_at_end_length = 0.5
 outer_boundary_coast_at_end_length = 0
 boundary_retraction_inside = True
 

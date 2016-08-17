@@ -82,12 +82,11 @@ class Gcode_writer(Tree_task):
 
     def writing_gcode_with_length_filter(self, line_group, speed, fan_speed, extrusion_multiplier, length_threshold):
         self.append_rewrite_speed_fanspeed_extrusion_multiplier(speed, fan_speed, extrusion_multiplier)
-
         for line in line_group.sub_lines:
             if len(line) > 0:
                 dist = self.calculDis(line[0])
                 
-                if dist < length_threshold:
+                if dist < length_threshold: 
                     # self.gcode_recorder.append_g1(line[0], speed)
                     self.gcode_recorder.append_g1_change_speed(line[0]) # new
                     self.X, self.Y = line[0]
@@ -123,6 +122,8 @@ class Gcode_writer(Tree_task):
     def infill(self,line_group): # done
         self.type_gcode_start('infill')
         length_threshold = config.line_width * 2.5
+
+        self.skip_retraction = True
         self.writing_gcode_with_length_filter(line_group, config.infillSpeed, config.interiorFanSpeed, config.extrusion_multiplier,  length_threshold)
         self.type_gcode_end('infill')
 
@@ -153,7 +154,7 @@ class Gcode_writer(Tree_task):
 
         self.type_gcode_start('layer')
 
-        self.gcode_recorder.append_retract() # gcode_recorder
+        # self.gcode_recorder.append_retract() # gcode_recorder
         
         if self.layerThickness_list: # open happen if it is adaptive slicing
             self.gcode_recorder.append_change_z(self.layerThickness_list[self.layer_index])
@@ -161,7 +162,7 @@ class Gcode_writer(Tree_task):
             self.gcode_recorder.append_change_z(config.layerThickness)
 
 
-        self.gcode_recorder.append_unretract() # gcode_recorder
+        # self.gcode_recorder.append_unretract() # gcode_recorder
         speed = config.speedRate
         self.speed = config.speedRate
         self.gcode_recorder.append_rewrite_speed(speed)
@@ -196,8 +197,9 @@ class Gcode_writer(Tree_task):
     def skin(self, line_group): # done
         self.type_gcode_start('skin')
         length_threshold = config.line_width * 2.5
+        self.skip_retraction = True
         self.writing_gcode_with_length_filter(line_group, config.skinSpeed, config.interiorFanSpeed, config.extrusion_multiplier, length_threshold)
-        # self.type_gcode_end('skin')
+        self.type_gcode_end('skin')
 
     def hole(self, line_group): # done
         self.type_gcode_start('hole')

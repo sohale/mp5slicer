@@ -110,10 +110,11 @@ def retract_at_point_inside_boundary(line_group, inner_boundary_first_point_list
         outer_boundary_first_point = line_group.sub_lines[outer_boundary_index][0]
         
         for point in inner_boundary_first_point_list:
-            if config.line_width*(config.shellSize) - epsilon <= dist(point, line_group.sub_lines[0][0]) <= config.line_width*config.shellSize + epsilon:
+            distance = dist(point, line_group.sub_lines[0][0]) 
+            if config.line_width*(config.shellSize) - epsilon <= distance <= config.line_width*config.shellSize + epsilon:
                 retraction_point = point # this is the optimal retraction point so exit the loop
                 break
-            elif config.line_width*(config.shellSize-1) <= dist(point, line_group.sub_lines[0][0]) <= config.line_width*config.shellSize + epsilon:
+            elif config.line_width*(config.shellSize-1) <= distance <= config.line_width*(config.shellSize) + epsilon:
                 retraction_point = point
             else:
                 pass

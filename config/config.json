@@ -27,7 +27,6 @@
   "bed_support_strengthen_number" : 3,
   "toFile" : true,
   "platform_bound" : "brim",
-  "platform_bound_count" : 5,
-  "boundary_starts_close_to_point" : [125, 300]
+  "platform_bound_count" : 5
 }
 

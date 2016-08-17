@@ -1,7 +1,6 @@
 from slicer.post_process.Tree_post_processor import Tree_post_processor
 from slicer.post_process.simple_routing import Simple_router
 from slicer.post_process.boundary_finishing_touch import Boundary_finish
-# from slicer.post_process.extrusion_calculation import Cal_extrusion
 from slicer.post_process.gcode_writer_new import Gcode_writer
 
 def refine_print_tree(print_tree ,stl_file_name):
