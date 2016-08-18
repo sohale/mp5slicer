@@ -1,5 +1,5 @@
-import vector3
-from basic_functions import make_vector4
+import solidmodeler.clean_code.vector3 as vector3
+from solidmodeler.clean_code.basic_functions import make_vector4
 import  numpy as np
 
 def get_root_node(tree):

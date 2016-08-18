@@ -12,7 +12,7 @@ def puppy_magic(mp5source):
     root_node = get_root_node(mp5source)
     iobj = get_fonuky(root_node)
 
-    from stl_tests import make_mc_values_grid
+    from solidmodeler.clean_code.stl_tests import make_mc_values_grid
     gridvals = make_mc_values_grid(iobj, -60., 60., 1., old=False)
     vertex, faces = vtk_mc(gridvals, (-60., 60., 1.))
     sys.stdout.flush()

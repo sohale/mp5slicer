@@ -147,7 +147,7 @@ class Island():
                             bbox = pc.GetBounds()
                             middle_points.append(get_center(bbox))
                         dx = middle_points[1][0] - middle_points[0][0]
-                        d= distance(middle_points[0], middle_points[1])
+                        d= distance([0], middle_points[1])
                         if d > 0:
                             orientation = acos(dx/d)
 
