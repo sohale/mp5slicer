@@ -1,9 +1,9 @@
 from slicer.post_process.Tree_task import Tree_task
 import slicer.config.config as config
 import slicer.config.printer_config as printer_config
-import math
 import sys
 from slicer.post_process.gcode_recorder import Gcode_recorder
+import numpy as np
 
 class Gcode_writer(Tree_task):
 
@@ -20,11 +20,13 @@ class Gcode_writer(Tree_task):
 
         self.X, self.Y = 0, 0 # this is only for calculDis
 
+        self.Z = 0
+
     def __del__(self):        
         self.gcode_recorder.write_Gcode()
 
     def calculDis(self,A):
-        distance = math.sqrt( (pow((self.X-A[0]),2)) + pow((self.Y-A[1]),2))
+        distance = np.sqrt( (pow((self.X-A[0]),2)) + pow((self.Y-A[1]),2))
         return distance
 
     def type_gcode_start(self, type_str):
@@ -140,6 +142,7 @@ class Gcode_writer(Tree_task):
             config.supportSpeed = config.first_layer_supportSpeed
             config.raftSpeed = config.first_layer_raftSpeed
             config.layerThickness = config.first_layer_thickness
+            config.interiorFanSpeed = 0 # for sticking in the line 
 
         elif self.layer_index == 1:
             config.reset()
@@ -157,15 +160,26 @@ class Gcode_writer(Tree_task):
         # self.gcode_recorder.append_retract() # gcode_recorder
         
         if self.layerThickness_list: # open happen if it is adaptive slicing
-            self.gcode_recorder.append_change_z(self.layerThickness_list[self.layer_index])
+            z_change = self.layerThickness_list[self.layer_index]
         else:
-            self.gcode_recorder.append_change_z(config.layerThickness)
+            z_change = config.layerThickness
+
+        import copy
+        assert z_change == 0 or len(str(z_change).split('.')[1]) in [1, 2] # only support 1 decimal place now
+        old_height = copy.copy(self.Z)
+        self.Z += z_change
+        self.Z = np.around(self.Z, decimals = 2)
+        # delete next line, for debug only 
+        assert np.around(self.Z - old_height, decimals = 2) == config.layerThickness
+    
+        self.gcode_recorder.append_change_z(self.Z)
+   
 
 
         # self.gcode_recorder.append_unretract() # gcode_recorder
         speed = config.speedRate
         self.speed = config.speedRate
-        self.gcode_recorder.append_rewrite_speed(speed)
+        self.gcode_recorder.ap6pend_rewrite_speed(speed)
 
         self.type_gcode_end('layer')
         self.layer_index += 1
@@ -261,7 +275,7 @@ class Gcode_writer(Tree_task):
     #     if printer_config.model == "r2x":
     #         instruction += "M126 S" + str(self.fan_speed) + "\n"
     #     else:
-    #         instruction += "M106 S" + str(int(math.floor(self.fan_speed * 255))) + "\n"
+    #         instruction += "M106 S" + str(int(np.floor(self.fan_speed * 255))) + "\n"
     #     instruction += "M104 S"+ str(temp) +" \n"
     #     instruction += "G4 P" + str(time) +" \n"
     #     instruction += self.unretract()

@@ -108,7 +108,7 @@ class Gcode_recorder():
         self.unretract_string =  "G1 E0.0000 F{}\nG92 E0\n".format(config.retractionSpeed)
 
         self.g0 = self.prepare_g0_function()
-
+        self.change_z = self.prepare_change_z_function()
         # testing 
         self.X, self.Y = 0, 0
 
@@ -141,6 +141,9 @@ class Gcode_recorder():
         func = lambda x, y : "G0 X{:.3f} Y{:.3f} F{}\n".format(x, y, config.inAirSpeed)
         return func
 
+    def prepare_change_z_function(self):
+        func = lambda z : "G0 Z{:.3f} F{}\n".format(z, config.z_movement_speed)
+        return func
     ########### function to append information into gcode recorder ###########
     def append_retract(self):
         self.commands.append(2)
@@ -186,10 +189,7 @@ class Gcode_recorder():
 
     ########### functions to get the gcode instruction ###########
     def get_change_z_gcode(self):
-        assert self.Z[self.z_index] == 0 or len(str(self.Z[self.z_index]).split('.')[1]) in [1, 2] # only support 1 decimal place now
-        self.current_layer_height += self.Z[self.z_index]
-        self.current_layer_height = np.around(self.current_layer_height, decimals = 2)
-        instruction = "G0 Z{} F{}\n".format(self.current_layer_height, config.z_movement_speed)
+        instruction = self.change_z(self.Z[self.z_index])
         self.z_index += 1
         return instruction
 
