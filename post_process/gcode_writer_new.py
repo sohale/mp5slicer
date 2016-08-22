@@ -170,8 +170,10 @@ class Gcode_writer(Tree_task):
         self.Z += z_change
         self.Z = np.around(self.Z, decimals = 2)
         # delete next line, for debug only 
-        assert np.around(self.Z - old_height, decimals = 2) == config.layerThickness
-    
+        if self.layer_index not in [0, 1]:
+            assert np.around(self.Z - old_height, decimals = 2) == config.layerThickness
+            pass
+
         self.gcode_recorder.append_change_z(self.Z)
    
 
@@ -179,7 +181,7 @@ class Gcode_writer(Tree_task):
         # self.gcode_recorder.append_unretract() # gcode_recorder
         speed = config.speedRate
         self.speed = config.speedRate
-        self.gcode_recorder.ap6pend_rewrite_speed(speed)
+        self.gcode_recorder.append_rewrite_speed(speed)
 
         self.type_gcode_end('layer')
         self.layer_index += 1
