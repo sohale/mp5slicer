@@ -2,7 +2,7 @@ import slicer.config.config as config
 from slicer.post_process.path_planner import *
 from slicer.print_tree.Line_stack import *
 from slicer.print_tree.infill_paterns import *
-
+from slicer.commons.utils import scale_line_to_clipper
 
 class Raft_layer():
 
@@ -25,9 +25,9 @@ class Raft_layer():
         polylines.add_group(raft_polylines)
         XorY = False
         if self.is_bottom_raft:
-            infill_pattern = Line_stack(pyclipper.scale_to_clipper(linear_infill2(config.line_width,135,self.BBox)))
+            infill_pattern = Line_stack(scale_line_to_clipper(linear_infill2(config.line_width,135,self.BBox)))
         else:
-            infill_pattern = Line_stack(pyclipper.scale_to_clipper(linear_infill2(config.line_width * 2, 135, self.BBox)))
+            infill_pattern = Line_stack(scale_line_to_clipper(linear_infill2(config.line_width * 2, 135, self.BBox)))
         infill = Line_stack(infill_pattern.intersect_with(self.polygons))
         raft_polylines.add_chains(infill.get_print_line())
         arrange_path(raft_polylines)

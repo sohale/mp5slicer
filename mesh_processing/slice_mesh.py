@@ -1,6 +1,6 @@
 from slicer.mesh_processing.mesh_operations import mesh as MPmesh
 from slicer.mesh_processing.slice import adaptive_slicing, slicer_from_mesh_as_dict
-from slicer.commons.utils import polygonize_layers_from_trimed_dict
+from slicer.commons.utils import polygonize_layers_from_trimed_dict, scale_list_to_clipper
 import pyclipper
 
 def move_to_center(mesh):
@@ -24,6 +24,7 @@ def move_to_center(mesh):
 
 
 def slice_mesh(stl_mesh):
+
     import slicer.config.config as config
 
 
@@ -43,11 +44,14 @@ def slice_mesh(stl_mesh):
     layers_as_polygons = polygonize_layers_from_trimed_dict(slice_layers)
 
     for layer_index in range(len(layers_as_polygons)):
+        # scale test
+        layers_as_polygons[layer_index] = scale_list_to_clipper(layers_as_polygons[layer_index])
+        # layers_as_polygons[layer_index] = pyclipper.scale_to_clipper(layers_as_polygons[layer_index])
 
-        layers_as_polygons[layer_index] = pyclipper.scale_to_clipper(layers_as_polygons[layer_index])
         # polygon_layers[layer_index] = pyclipper.SimplifyPolygons(polygon_layers[layer_index])
         # polygon_layers[layer_index] = pyclipper.CleanPolygons(polygon_layers[layer_index])
 
+    # raise Tiger
 
     if config.useAdaptiveSlicing:
         return layers_as_polygons, this_mesh, BBox, adaptive_thickness

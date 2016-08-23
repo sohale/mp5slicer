@@ -1,6 +1,5 @@
 import slicer.config.config as config
-from slicer.commons.utils import distance
-from slicer.commons.utils import get_center
+from slicer.commons.utils import distance, get_center, visualise_polygon_list, does_bounding_box_intersect
 from slicer.print_tree.Elements import Outline
 from slicer.print_tree.Line_group import *
 from slicer.print_tree.Parts import Infill, Skin
@@ -8,7 +7,7 @@ from slicer.print_tree.Polygon_stack import *
 from slicer.print_tree.Polynode import *
 
 
-class Island():
+class Island:
     def __init__(self,print_tree, polynode, layers,layer_index,BBox, layer ):
         self.layer = layer
         self.print_tree = print_tree
@@ -28,12 +27,15 @@ class Island():
         try:
 
             pc.AddPath(polynode.Contour,pyclipper.PT_SUBJECT, True)
-            self.obb = pc.GetBounds()
+            self.island_bbox = pc.GetBounds()
+
         except:
-            self.obb = [0,0,0,0]
+            self.island_bbox = None
+
         if len(polynode.Childs) != 0:
             self.polygons += [poly.Contour for poly in polynode.Childs]
 
+        # visualise_polygon_list(self.polygons, self.obb)
 
         self.process_outlines(self.polygons)
         self.process_shells()
@@ -91,12 +93,13 @@ class Island():
 
         up_shells = Polygon_stack()
         for island in up_islands:
-            up_shells.add_polygon_stack(island.get_innershells())
+            if does_bounding_box_intersect(self.island_bbox, island.island_bbox):
+                up_shells.add_polygon_stack(island.get_innershells())
 
         down_shells = Polygon_stack()
         for island in down_islands:
-            outterbounds = island.get_innershells()
-            down_shells.add_polygon_stack(outterbounds)
+            if does_bounding_box_intersect(self.island_bbox, island.island_bbox):
+                down_shells.add_polygon_stack(island.get_innershells())
 
         this_shells = Polygon_stack(self.get_innerbounds())
 
@@ -119,12 +122,32 @@ class Island():
         downskins = Polygon_stack()
         perimeter = self.outline.get_inner_bounds()
 
+        # for layer_index in top_layers_indexes_to_agregate:
+        #     other_skins = self.print_tree[layer_index].get_upskins()
+        #     upskins = upskins.union_with(other_skins)
+
+        # for layer_index in top_layers_indexes_to_agregate:
+        #     other_skins = self.print_tree[layer_index].get_downskins()
+        #     downskins = downskins.union_with(other_skins)
+
+        other_skins = Polygon_stack()
         for layer_index in top_layers_indexes_to_agregate:
-            other_skins = self.print_tree[layer_index].get_upskins()
+            # layer = self.print_tree[layer_index]
+            for island in self.print_tree[layer_index].islands:
+                if not island.upskins.isEmpty and \
+                   does_bounding_box_intersect(island.island_bbox, self.island_bbox):
+                    other_skins.add_polygon_stack(island.upskins)
             upskins = upskins.union_with(other_skins)
 
+
+        other_skins = Polygon_stack()
         for layer_index in reversed(bottom_layers_indexes_to_agregate):
-            other_skins = self.print_tree[layer_index].get_downskins()
+            # layer = self.print_tree[layer_index]
+            other_skins = Polygon_stack()
+            for island in self.print_tree[layer_index].islands:
+                if not island.downskins.isEmpty and \
+                   does_bounding_box_intersect(island.island_bbox, self.island_bbox):
+                    other_skins.add_polygon_stack(island.downskins)
             downskins = downskins.union_with(other_skins)
 
         middle_points = []

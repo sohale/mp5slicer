@@ -17,16 +17,16 @@
   "supportSpeed" : 1200,
   "useSupport" : false,
   "supportSamplingDistance" : 1,
-  "supportOverhangangle" : -0.7,
+  "supportOverhangangle" : -0.8,
   "upSkinsCount" : 5,
   "downSkinsCount" : 5,
   "firstLayerOffset" : 0,
   "initial_extrusion" : 0.2,
   "raft" : false,
-  "extrusion_multiplier" : 1.1,
+  "extrusion_multiplier" : 1,
   "bed_support_strengthen_number" : 3,
   "toFile" : true,
-  "platform_bound" : "brim",
+  "platform_bound" : "skirts",
   "platform_bound_count" : 5
 }
 

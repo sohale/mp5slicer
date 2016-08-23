@@ -11,6 +11,8 @@ from slicer.print_tree.Line_stack import *
 from slicer.print_tree.Line_group import *
 import slicer.config.config as config
 
+from slicer.commons.utils import scale_list_to_clipper
+
 
 #
 # class Outline:
@@ -251,7 +253,9 @@ class Infill:
     def make_polyline(self,polygons,skin_islands, layer_index):
 
         teta = 45 if self.XorY else 135
-        self.pattern = Line_stack(pyclipper.scale_to_clipper(linear_infill2(5,teta,self.BBox)))
+        # scale test
+        # self.pattern = Line_stack(pyclipper.scale_to_clipper(linear_infill2(5,teta,self.BBox)))
+        self.pattern = Line_stack(scale_list_to_clipper(linear_infill2(5,teta,self.BBox)))
 
         if not skin_islands.isEmpty:
             innerlines = self.pattern.intersect_with(polygons)
@@ -340,7 +344,20 @@ class Skin:
         teta = 45 if self.XorY else 135
         if self.orientation is not None:
             teta = self.orientation
-        self.pattern = Line_stack(pyclipper.scale_to_clipper(linear_infill2(config.line_width,teta,self.BBox)))
+        # scale test
+        # self.pattern = Line_stack(pyclipper.scale_to_clipper(linear_infill2(config.line_width,teta,self.BBox)))
+        self.pattern = Line_stack(scale_list_to_clipper(linear_infill2(config.line_width,teta,self.BBox)))
+        # delete me, debug only
+        # assert pyclipper.scale_to_clipper(linear_infill2(config.line_width,teta,self.BBox)) == scale(linear_infill2(config.line_width,teta,self.BBox))
+
+        # for index in range(len(scale(linear_infill2(config.line_width,teta,self.BBox)))):
+        #     for i, j in zip(scale(linear_infill2(config.line_width,teta,self.BBox))[index],
+        #                  pyclipper.scale_to_clipper(linear_infill2(config.line_width,teta,self.BBox))[index]):
+        #         if i != j:
+        #             print(i, j)
+
+
+
         innerlines =  Line_stack(self.pattern.intersect_with(self.skins_as_polygon_stack))
 
         innerlines = innerlines.intersect_with(perimeter)

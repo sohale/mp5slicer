@@ -1,5 +1,5 @@
 import slicer.config.config as config
-from slicer.commons.utils import overlap
+from slicer.commons.utils import overlap, does_bounding_box_intersect, scale_value_to_clipper
 from slicer.print_tree.Line_group import *
 from slicer.print_tree.Line_stack import *
 from slicer.print_tree.island import Island
@@ -131,7 +131,7 @@ class Layer():
         empty_poly = Polygon_stack([[[base, base], [base + 1, base], [base + 1, base + 1], [base, base + 1]]])
         polys = pyclipper.PolyTreeToPaths(diff_layers_as_polytree(self.layers[self.index], empty_poly.polygons, True))
         po.AddPaths(polys, pyclipper.JT_MITER, pyclipper.ET_CLOSEDPOLYGON)
-        islandStack = Island_stack(po.Execute2(pyclipper.scale_to_clipper(-config.line_width/2)))
+        islandStack = Island_stack(po.Execute2(scale_value_to_clipper(-config.line_width/2)))
         return  islandStack.get_islands()
 
 
@@ -141,7 +141,7 @@ class Layer():
         if len(self.layers[self.index]) != 0:
             islands = self.detect_islands()
             for island in islands:
-                pc = pyclipper.Pyclipper()
+                # pc = pyclipper.Pyclipper()
 
                 isle = Island(self.print_tree,island, self.layers,self.index,self.BBox,self)
                 self.islands.append(isle)
@@ -155,7 +155,7 @@ class Layer():
     def get_restricted_outline(self, bbox):
         ps = Polygon_stack()
         for island in self.islands:
-            if overlap(island.obb, bbox):
+            if overlap(island.island_bbox, bbox):
                 ps.add_polygons(island.get_outterbounds().polygons)
         return ps.union_self()
 

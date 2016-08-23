@@ -2,6 +2,7 @@ import pyclipper
 import inspect, os
 import sys
 sys.path.append(os.path.split(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))))[0])
+from slicer.commons.utils import scale_value_to_clipper
 
 
 
@@ -129,7 +130,7 @@ def offset_default(polygon_stack,val):
     po.AddPaths(path,pyclipper.JT_SQUARE,pyclipper.ET_CLOSEDPOLYGON)
 
 
-    offseted = po.Execute(pyclipper.scale_to_clipper(val))
+    offseted = po.Execute(scale_value_to_clipper(val))
 
     return offseted
 
@@ -143,8 +144,7 @@ def offset(polygon_stack,val):
     po = pyclipper.PyclipperOffset()
     po.AddPaths(path,pyclipper.JT_MITER,pyclipper.ET_CLOSEDPOLYGON)
 
-
-    offseted = po.Execute(pyclipper.scale_to_clipper(val))
+    offseted = po.Execute(scale_value_to_clipper(val))
 
     return offseted
 
@@ -158,7 +158,7 @@ def SinglePolygonOffset(single_line,val):
     po.AddPath(path,pyclipper.JT_SQUARE,pyclipper.ET_CLOSEDPOLYGON)
 
 
-    offseted = po.Execute(pyclipper.scale_to_clipper(float(val)))
+    offseted = po.Execute(scale_value_to_clipper(float(val)))
 
     return offseted
 
@@ -218,12 +218,11 @@ def SinglePolygonOffset(single_line,val):
 #     return solution
 
 def LinesOffset(lines, offset_value,does_visualize=False):
-    # scaled_lines = pyclipper.scale_to_clipper(lines)
 
     pc = pyclipper.PyclipperOffset()
     pc.AddPaths(lines, pyclipper.JT_SQUARE, pyclipper.ET_OPENSQUARE)
 
-    solution = pc.Execute(pyclipper.scale_to_clipper(offset_value))
+    solution = pc.Execute(scale_value_to_clipper(offset_value))
     # solution = pyclipper.scale_from_clipper(solution)
 
     if does_visualize:

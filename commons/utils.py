@@ -2,7 +2,28 @@ import sys
 from math import sqrt,pow
 
 from slicer.print_tree.clipper_operations import *
+import pyclipper
 
+def scale_list_to_clipper(array): # faster then pyclipper.scale_to_clipper
+    def scale_list(l):
+        return [[int(i[0]*(2**32)/2), int(i[1]*(2**32)/2)] for i in l]
+    return list(map(scale_list, array))
+
+def scale_point_to_clipper(point):
+    return [int(point[0]*(2**32)/2), int(point[1]*(2**32)/2)]
+
+def scale_line_to_clipper(array): # faster then pyclipper.scale_to_clipper
+    return list(map(scale_point, array))
+
+def scale_value_to_clipper(val):  # faster then pyclipper.scale_to_clipper
+    return int(val*(2**32)/2)
+
+is_64bits = sys.maxsize > 2**32
+if not is_64bits:
+    scale_list_to_clipper = pyclipper.scale_to_clipper
+    scale_point_to_clipper = pyclipper.scale_to_clipper
+    scale_line_to_clipper = pyclipper.scale_to_clipper
+    scale_value_to_clipper = pyclipper.scale_to_clipper
 
 def copy_module(module):
     copy = conf_module
@@ -27,6 +48,20 @@ def get_center(BBox):
 # rectangle[3] : bottom
 def overlap(bb1, bb2):
     return not ( bb2[0] > bb1[2] or bb2[2] < bb1[0] or bb2[1] > bb1[3] or bb2[3] < bb1[1])
+
+def does_bounding_box_intersect(RectA, RectB):
+
+    if RectA == None or RectB == None:
+        return True
+
+    if (RectA.left < RectB.right and \
+        RectA.right > RectB.left and \
+        RectA.top < RectB.bottom and \
+        RectA.bottom > RectB.top):
+        return True
+    else:
+        return False
+
 
 
 def getPath(bound, holes,path):
@@ -94,7 +129,7 @@ def getMiddlePoint(points):
 
 def getVector(points):
     val = sqrt(pow(points[0][0] - points[1][0],2) + pow(points[0][1] - points[1][1],2))
-    return [pyclipper.scale_to_clipper((points[0][1] - points[1][1])/val)*0.1,pyclipper.scale_to_clipper((points[1][0] - points[0][0])/val)*0.1]
+    return [scale_value_to_clipper((points[0][1] - points[1][1])/val)*0.1, scale_value_to_clipper((points[1][0] - points[0][0])/val)*0.1]
 
 def getInsidePoint(startPoint,vect,polygon):
     point = startPoint
@@ -228,6 +263,23 @@ def vizz_2d_multi(layers,img):
     plt.show()
     plt.savefig(img)
 
+def visualise_polygon_list(polygon_list, obb):
+    import matplotlib.pyplot as plt
+    print(polygon_list)
+    first_polygon = polygon_list[0]
+    for i, j in zip(first_polygon, first_polygon[1:]):
+        plt.plot([i[0],j[0]], [i[1], j[1]])
+
+
+    attr = ['left', 'right', 'top','bottom'] 
+    print(obb)
+    plt.plot( obb.left, obb.bottom, 'o')
+    plt.plot(obb.right, obb.bottom, 'o')
+    plt.plot( obb.left, obb.top, 'o')
+    plt.plot(obb.right, obb.top, 'o')
+
+    plt.show()
+    raise Tiger
 
 def poly1_in_poly2(poly1,poly2):
     point = poly1[0]
@@ -304,7 +356,7 @@ if __name__ == '__main__':
     for skin_index in range(len(downskins)):
         po = pyclipper.PyclipperOffset()
         po.AddPaths(downskins[skin_index],pyclipper.JT_SQUARE,pyclipper.ET_CLOSEDPOLYGON)
-        downskins[skin_index] = po.Execute(pyclipper.scale_to_clipper(-0.5))
+        downskins[skin_index] = po.Execute(scale_value_to_clipper(-0.5))
 
     for downskin in downskins:
 
@@ -323,5 +375,6 @@ if __name__ == '__main__':
     # print("--- %s seconds ---" % (time.time() - start_time))
     # isIn = pyclipper.PointInPolygon(point, poly)
     # print("--- %s seconds ---" % (time.time() - start_time))
+
 
 

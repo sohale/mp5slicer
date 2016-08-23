@@ -10,6 +10,8 @@ from slicer.print_tree.Polygon_stack import *
 from slicer.print_tree.Line_stack import Support_Line_Stack
 from itertools import groupby
 from collections import namedtuple
+from slicer.commons.utils import scale_point_to_clipper
+
 
 
 def ray_triangle_intersection(ray_near, triangle):
@@ -235,7 +237,7 @@ class Support_Vertical_lines:
             pl.new_line()
             for svl_data in each_group:
                 this_point_ucscaled = svl_data.return_x_y_2d_point()
-                this_point_scaled = pyclipper.scale_to_clipper(this_point_ucscaled)
+                this_point_scaled = pyclipper.scale_point_to_clipper(this_point_ucscaled)
 
                 if svl_data.last_z_height == plane_height: 
                     # this point is last point
