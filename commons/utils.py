@@ -53,11 +53,16 @@ def does_bounding_box_intersect(RectA, RectB):
 
     if RectA == None or RectB == None:
         return True
-
-    if (RectA.left < RectB.right and \
-        RectA.right > RectB.left and \
-        RectA.top < RectB.bottom and \
-        RectA.bottom > RectB.top):
+    try:
+        RectA.xmin < RectB.xmax 
+    except TypeError:
+        print(RectA.xmin)
+        print(RectB.xmax)
+        
+    if (RectA.xmin < RectB.xmax and \
+        RectA.xmax > RectB.xmin and \
+        RectA.ymax < RectB.ymin and \
+        RectA.ymin > RectB.ymax):
         return True
     else:
         return False

@@ -257,6 +257,7 @@ class Infill:
         # self.pattern = Line_stack(pyclipper.scale_to_clipper(linear_infill2(5,teta,self.BBox)))
         self.pattern = Line_stack(scale_list_to_clipper(linear_infill2(5,teta,self.BBox)))
 
+
         if not skin_islands.isEmpty:
             innerlines = self.pattern.intersect_with(polygons)
             innerlines = innerlines.difference_with(skin_islands)
@@ -319,7 +320,7 @@ class Infill:
         return polylines
 
 class Skin:
-    def __init__(self,downskins, upskins,layers,layer_index,BBox, orientation = None):
+    def __init__(self,downskins, upskins,layers,layer_index, island_bbox, orientation = None):
         self.layers = layers
         self.layer_index = layer_index
         downskins = Polygon_stack(offset(downskins,1))
@@ -329,7 +330,8 @@ class Skin:
         self.skins_as_polygon_stack = self.skins_as_polygon_stack.union_with(upskins)
         self.downskins = downskins
         self.upskins = upskins
-        self.BBox = BBox
+        self.island_bbox = island_bbox
+
         self.XorY = (layer_index+1)%2
         self.pattern = None
         self.startPoint = None
@@ -346,7 +348,8 @@ class Skin:
             teta = self.orientation
         # scale test
         # self.pattern = Line_stack(pyclipper.scale_to_clipper(linear_infill2(config.line_width,teta,self.BBox)))
-        self.pattern = Line_stack(scale_list_to_clipper(linear_infill2(config.line_width,teta,self.BBox)))
+
+        self.pattern = Line_stack(scale_list_to_clipper(linear_infill2(config.line_width,teta,self.island_bbox)))
         # delete me, debug only
         # assert pyclipper.scale_to_clipper(linear_infill2(config.line_width,teta,self.BBox)) == scale(linear_infill2(config.line_width,teta,self.BBox))
 

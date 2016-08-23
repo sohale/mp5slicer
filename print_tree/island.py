@@ -1,22 +1,23 @@
 import slicer.config.config as config
-from slicer.commons.utils import distance, get_center, visualise_polygon_list, does_bounding_box_intersect
+from slicer.commons.utils import distance, get_center, visualise_polygon_list, does_bounding_box_intersect, scale_value_to_clipper
 from slicer.print_tree.Elements import Outline
 from slicer.print_tree.Line_group import *
 from slicer.print_tree.Parts import Infill, Skin
 from slicer.print_tree.Polygon_stack import *
 from slicer.print_tree.Polynode import *
-
+from collections import namedtuple
+Island_bbox = namedtuple('Island_bbox', 'xmax xmin ymax ymin') 
 
 class Island:
-    def __init__(self,print_tree, polynode, layers,layer_index,BBox, layer ):
+    def __init__(self,print_tree, polynode, layers,layer_index, BBox, layer ):
         self.layer = layer
         self.print_tree = print_tree
         self.outline = None
         self.skins = None
         self.infill = None
         self.layer_index = layer_index
-        self.layers = layers
-        self.BBox = BBox
+        self.layers = layers 
+        self.BBox = BBox # bounding box for mesh
         self.polygons = []
         try:
             self.polygons.append(polynode.Contour)
@@ -25,12 +26,15 @@ class Island:
             raise RuntimeError
         pc = pyclipper.Pyclipper()
         try:
-
             pc.AddPath(polynode.Contour,pyclipper.PT_SUBJECT, True)
             self.island_bbox = pc.GetBounds()
+            self.island_bbox = Island_bbox(pyclipper.scale_from_clipper(self.island_bbox.right),
+                         pyclipper.scale_from_clipper(self.island_bbox.left),
+                         pyclipper.scale_from_clipper(self.island_bbox.top),
+                         pyclipper.scale_from_clipper(self.island_bbox.bottom))
 
-        except:
-            self.island_bbox = None
+        except pyclipper.ClipperException:
+            self.island_bbox = Island_bbox(BBox.xmax, BBox.xmin, BBox.ymax, BBox.ymin)
 
         if len(polynode.Childs) != 0:
             self.polygons += [poly.Contour for poly in polynode.Childs]
@@ -115,6 +119,7 @@ class Island:
 
     # @profile
     def process_skins(self):
+
         # if self.layer_index != 0 and self.layer_index != len(self.layers)-2 and self.layer_index != len(self.layers)-1:
         top_layers_indexes_to_agregate = range(self.layer_index , min(self.layer_index + config.upSkinsCount, len(self.layers)))
         bottom_layers_indexes_to_agregate = range(max(self.layer_index - config.downSkinsCount, 0),self.layer_index +1)
@@ -130,9 +135,9 @@ class Island:
         #     other_skins = self.print_tree[layer_index].get_downskins()
         #     downskins = downskins.union_with(other_skins)
 
-        other_skins = Polygon_stack()
         for layer_index in top_layers_indexes_to_agregate:
             # layer = self.print_tree[layer_index]
+            other_skins = Polygon_stack()
             for island in self.print_tree[layer_index].islands:
                 if not island.upskins.isEmpty and \
                    does_bounding_box_intersect(island.island_bbox, self.island_bbox):
@@ -140,7 +145,6 @@ class Island:
             upskins = upskins.union_with(other_skins)
 
 
-        other_skins = Polygon_stack()
         for layer_index in reversed(bottom_layers_indexes_to_agregate):
             # layer = self.print_tree[layer_index]
             other_skins = Polygon_stack()
@@ -174,7 +178,7 @@ class Island:
                         if d > 0:
                             orientation = acos(dx/d)
 
-        self.skins = Skin(downskins, upskins, self.layers, self.layer_index,self.BBox, orientation)
+        self.skins = Skin(downskins, upskins, self.layers, self.layer_index, self.island_bbox, orientation)
         self.skins.process(Polygon_stack(), perimeter)
 
 
