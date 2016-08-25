@@ -3,7 +3,7 @@ import numpy as np
 layerThickness = 0.2
 nozzle_size = 0.4 # for calculation extrusion
 line_width = 0.4 # for caluculating the offset for polygons
-temperature =  210
+temperature =  220
 inAirSpeed = 9000
 retractionSpeed = 2400
 retractionLength = 4.5
@@ -19,18 +19,20 @@ holeSpeed = 1800
 shellSpeed = 1800
 supportSpeed = 1800
 min_retraction_distance = 5
-default_fan_speed = 0.5
-hasControllableFanSpeed  = True
 useAdaptiveSlicing = False
 useSupport = True
-exteriorFanSpeed = 0.3
-bridgeFanSpeed = 0.4
-interiorFanSpeed = 0.3
-supportFanSpeed = 0.3
-skirtFanSpeed = 0.2
-raftFanSpeed = 0
 upSkinsCount = 4
 downSkinsCount = 3
+
+# fan speed
+hasControllableFanSpeed  = True
+default_fan_speed = 1
+exteriorFanSpeed = 1
+bridgeFanSpeed = 1
+interiorFanSpeed = 1
+supportFanSpeed = 1
+skirtFanSpeed = 1
+raftFanSpeed = 1
 
 # support
 supportSamplingDistance = 2

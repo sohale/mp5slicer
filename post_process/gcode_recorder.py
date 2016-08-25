@@ -33,13 +33,13 @@ class G():
         def calculE_slow(A, B, layerThickness):
             distance = np.sqrt( (pow((A[0]-B[0]),2)) + pow((A[1]-B[1]),2))
             section_surface = layerThickness * config.nozzle_size # layerThickness is possible to change for each layer
-            volume = section_surface * distance * config.extrusion_multiplier
+            volume = section_surface * distance
             filament_length = volume / config.crossArea
             return filament_length
 
         res = []
-        for i,j in zip(self.commands, self.commands[1:]):
-            res.append(calculE_slow(i, j, config.layerThickness))
+        for i,j,k in zip(self.commands, self.commands[1:], extrusion_multiplier_list):
+            res.append(calculE_slow(i, j, config.layerThickness)*k)
         res = np.array(res)
         res = res.tolist()
         res.insert(0, 0)
@@ -267,7 +267,12 @@ class Gcode_recorder():
 
     def write_Gcode(self):
 
-        self.G.calculE(self.make_extrusion_multiplier_array())
+        self.G.calculE(self.make_extrusion_multiplier_array()) 
+        # code for testing E
+        # res = self.G.calculE_test(self.make_extrusion_multiplier_array())
+        # for i,j in zip(self.G.E, res):
+        #     print(i,j)
+
         instruction = self.get_startcode(printer_config.model)
         instruction += "G1 F200 E{}\n".format(config.initial_extrusion)
         self.gcode_output.write(instruction)

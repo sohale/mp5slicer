@@ -24,15 +24,8 @@ class Island:
 
         except:
             raise RuntimeError
-        pc = pyclipper.Pyclipper()
         try:
-            pc.AddPath(polynode.Contour,pyclipper.PT_SUBJECT, True)
-            self.island_bbox = pc.GetBounds()
-            self.island_bbox = Island_bbox(pyclipper.scale_from_clipper(self.island_bbox.right),
-                         pyclipper.scale_from_clipper(self.island_bbox.left),
-                         pyclipper.scale_from_clipper(self.island_bbox.top),
-                         pyclipper.scale_from_clipper(self.island_bbox.bottom))
-
+            self.island_bbox = Polygon_stack(polynode.Contour).bounding_box()
         except pyclipper.ClipperException:
             self.island_bbox = Island_bbox(BBox.xmax, BBox.xmin, BBox.ymax, BBox.ymin)
 

@@ -55,9 +55,17 @@ class Line_stack:
             return Line_stack([])
         return Line_stack(inter_layers(self.lines,other.polygons , False))
 
-    def union_with(self, other):
-        pass
-
+    # def combine(self, other): # danger this is not union, this is only add two linestack together
+    #     if self.is_empty() and other.is_empty():
+    #         return Line_stack()
+    #     elif self.is_empty():
+    #         return other
+    #     elif other.is_empty():
+    #         return self
+    #     else:
+    #         lines = self.lines + other.lines
+    #         return Line_stack(lines)
+        
     def difference_with(self, other):
         if other.is_empty():
             return Line_stack(self.lines) # same return format

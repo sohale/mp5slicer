@@ -127,10 +127,44 @@ class Polygon_stack():
         return polylines
     def is_empty(self):
         return self.isEmpty
-    def visualize(self):
+
+    def visualize(self, bbox):
         import matplotlib.pyplot as plt
+        ax = plt.axes()
         for each_polygon in self.polygons:
             for this_vertex, next_vertex in zip(each_polygon, each_polygon[1:]):
-                plt.plot([this_vertex[0],next_vertex[0]], [this_vertex[1],next_vertex[1]])
-            plt.plot([each_polygon[-2][0],each_polygon[-1][0]],[each_polygon[-2][1],each_polygon[-1][1]])
+                this_vertex = pyclipper.scale_from_clipper(this_vertex)
+                next_vertex = pyclipper.scale_from_clipper(next_vertex)
+                plt.plot([this_vertex[0], next_vertex[0]],[this_vertex[1], next_vertex[1]])
+                ax.arrow(this_vertex[0], 
+                            this_vertex[1], 
+                            next_vertex[0] - this_vertex[0], 
+                            next_vertex[1] - this_vertex[1], head_width=0.05, head_length=0.05, fc='k', ec='k')
+            last_vertex = pyclipper.scale_from_clipper(each_polygon[-1])
+            first_vertex = pyclipper.scale_from_clipper(each_polygon[0])
+            ax.arrow(last_vertex[0], 
+                        last_vertex[1], 
+                        first_vertex[0] - last_vertex[0], 
+                        first_vertex[1] - last_vertex[1], head_width=0.05, head_length=0.05, fc='k', ec='k')
         plt.show()
+
+    def total_area(self):
+        total_area = 0
+        for polygon in self.polygons:
+            # note that area is positive if orientation is anticlockwise
+            # negative if orientation is clockwise, which means this polygon is hole
+            # the result here will be the remaining area of all the polygon
+            total_area += pyclipper.Area(pyclipper.scale_from_clipper(polygon))
+        
+        return total_area
+
+
+    def bounding_box(self):
+        pc = pyclipper.Pyclipper()
+        for polygon in self.polygons:
+            pc.AddPath(polygon,pyclipper.PT_SUBJECT, True)
+        clipper_bounding_rectangle = pc.GetBounds()
+        return Bounding_box(pyclipper.scale_from_clipper(clipper_bounding_rectangle.right),
+                         pyclipper.scale_from_clipper(clipper_bounding_rectangle.left),
+                         pyclipper.scale_from_clipper(clipper_bounding_rectangle.top),
+                         pyclipper.scale_from_clipper(clipper_bounding_rectangle.bottom))

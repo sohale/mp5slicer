@@ -5,7 +5,7 @@ import sys
 sys.path.append(os.path.split(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))))[0])
 
 from slicer.print_tree.infill_paterns import *
-from slicer.post_process.path_planner import *
+from slicer.post_process.path_planner import arrange_path
 from slicer.print_tree.Line_stack import *
 
 from slicer.print_tree.Line_group import *
@@ -325,7 +325,7 @@ class Skin:
         self.layer_index = layer_index
         downskins = Polygon_stack(offset(downskins,1))
         upskins = Polygon_stack(offset(upskins, 1))
-        self.skins_as_polygon_stack =Polygon_stack()
+        self.skins_as_polygon_stack = Polygon_stack()
         self.skins_as_polygon_stack = self.skins_as_polygon_stack.union_with(downskins)
         self.skins_as_polygon_stack = self.skins_as_polygon_stack.union_with(upskins)
         self.downskins = downskins
@@ -343,29 +343,33 @@ class Skin:
 
     def process(self, skins, perimeter):
         self.skins_as_polygon_stack = self.skins_as_polygon_stack.union_with(skins)
+        skin_bbox = self.skins_as_polygon_stack.bounding_box()
+        # self.skins_as_polygon_stack.visualize(self.island_bbox)
+
         teta = 45 if self.XorY else 135
         if self.orientation is not None:
             teta = self.orientation
+
+        # self.pattern = Line_stack()
+        # for polygon in self.skins_as_polygon_stack.polygons:
+        #     # two things are done in the following if
+        #     # 1. area possitive means it's not hole 
+        #     # 2. and check it is not a very small area
+        #     if pyclipper.Orientation(polygon): # area possitive means it's not hole and if it's not a very small area
+        #         skin_bbox = bbox_for_single_polygon(polygon)
+        #         pattern = Line_stack(scale_list_to_clipper(linear_infill2(config.line_width,teta,skin_bbox)))
+        #         pattern = pattern.intersect_with(Polygon_stack(polygon))
+        #         self.pattern = self.pattern.combine(pattern)
+
         # scale test
         # self.pattern = Line_stack(pyclipper.scale_to_clipper(linear_infill2(config.line_width,teta,self.BBox)))
+        if self.skins_as_polygon_stack.total_area() > 0:
+            self.pattern = Line_stack(scale_list_to_clipper(linear_infill2(config.line_width,teta,skin_bbox)))
 
-        self.pattern = Line_stack(scale_list_to_clipper(linear_infill2(config.line_width,teta,self.island_bbox)))
-        # delete me, debug only
-        # assert pyclipper.scale_to_clipper(linear_infill2(config.line_width,teta,self.BBox)) == scale(linear_infill2(config.line_width,teta,self.BBox))
-
-        # for index in range(len(scale(linear_infill2(config.line_width,teta,self.BBox)))):
-        #     for i, j in zip(scale(linear_infill2(config.line_width,teta,self.BBox))[index],
-        #                  pyclipper.scale_to_clipper(linear_infill2(config.line_width,teta,self.BBox))[index]):
-        #         if i != j:
-        #             print(i, j)
-
-
-
-        innerlines =  Line_stack(self.pattern.intersect_with(self.skins_as_polygon_stack))
-
-        innerlines = innerlines.intersect_with(perimeter)
-
-        # innerlines = pyclipper.scale_from_clipper(innerlines)
+            innerlines =  Line_stack(self.pattern.intersect_with(self.skins_as_polygon_stack))
+            innerlines = innerlines.intersect_with(perimeter)
+        else:
+            innerlines = Line_stack()
 
         self.polylines = innerlines.get_print_line()
         self.startPoint, self.endPoint = innerlines.return_start_end_point()

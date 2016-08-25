@@ -42,6 +42,7 @@ def union_layers( _subj,_clip,closed):
 
     return solution
 
+
 def union_itself( _subj,closed):
 
 
@@ -236,6 +237,23 @@ def LinesOffset(lines, offset_value,does_visualize=False):
         plt.show()
 
     return solution
+
+from collections import namedtuple
+Bounding_box = namedtuple('Bounding_box', 'xmax xmin ymax ymin') 
+
+def bbox_for_single_polygon(polygon):
+
+    pc = pyclipper.Pyclipper()
+    try:
+        pc.AddPath(polygon,pyclipper.PT_SUBJECT, True)
+        clipper_bounding_rectangle = pc.GetBounds()
+        return Bounding_box(pyclipper.scale_from_clipper(clipper_bounding_rectangle.right),
+                         pyclipper.scale_from_clipper(clipper_bounding_rectangle.left),
+                         pyclipper.scale_from_clipper(clipper_bounding_rectangle.top),
+                         pyclipper.scale_from_clipper(clipper_bounding_rectangle.bottom))
+    except pyclipper.ClipperException:
+        return None
+
 
 def main():
     pass

@@ -1,5 +1,4 @@
 
-from slicer.post_process.path_planner import arrange_path
 from slicer.post_process.Tree_task import Tree_task
 from slicer.post_process.print_quality_optimizer import shorten_last_line, reorder_lines_close_to_point, retract_at_point_inside_boundary
 import slicer.config.config as config

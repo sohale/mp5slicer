@@ -237,7 +237,7 @@ class Support_Vertical_lines:
             pl.new_line()
             for svl_data in each_group:
                 this_point_ucscaled = svl_data.return_x_y_2d_point()
-                this_point_scaled = pyclipper.scale_point_to_clipper(this_point_ucscaled)
+                this_point_scaled = scale_point_to_clipper(this_point_ucscaled)
 
                 if svl_data.last_z_height == plane_height: 
                     # this point is last point
@@ -274,7 +274,7 @@ class Support_Vertical_lines:
         pyclipper_formatting = Polygon_stack([])
 
         # offset points
-        pyclipper_formatting.add_polygon_stack(ls.offset_point(config.line_width))
+        # pyclipper_formatting.add_polygon_stack(ls.offset_point(config.line_width))
          # remove the contacting layer, i.e. one empty layer between support and object
         pyclipper_formatting.add_polygon_stack(ls.offset_last_point())
 

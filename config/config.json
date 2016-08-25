@@ -1,7 +1,7 @@
 {
   "layerThickness" : 0.2,
   "line_width" : 0.4,
-  "temperature" : 210,
+  "temperature" : 220,
   "inAirSpeed" : 7000,
   "retractionSpeed" : 2400,
   "retractionLength" : 4.5,
@@ -15,7 +15,7 @@
   "skinSpeed" : 1200,
   "raftSpeed" : 1200,
   "supportSpeed" : 1200,
-  "useSupport" : false,
+  "useSupport" : true,
   "supportSamplingDistance" : 1,
   "supportOverhangangle" : -0.8,
   "upSkinsCount" : 5,
@@ -23,10 +23,10 @@
   "firstLayerOffset" : 0,
   "initial_extrusion" : 0.2,
   "raft" : false,
-  "extrusion_multiplier" : 1,
+  "extrusion_multiplier" : 1.1,
   "bed_support_strengthen_number" : 3,
   "toFile" : true,
   "platform_bound" : "skirts",
-  "platform_bound_count" : 5
+  "platform_bound_count" : 10
 }
 
