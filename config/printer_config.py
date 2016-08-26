@@ -1,4 +1,4 @@
-model = "ultimaker"
+model = "um2"
 gcode_flavor = "marlin"
 max_extrusion_200 = 3 #mm3.s-1
 max_extrusion_210 = 3 #mm3.s-1

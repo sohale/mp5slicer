@@ -197,11 +197,15 @@ class Gcode_recorder():
 
         if printer == "r2x":
             start_code_name = "gcode_writer/r2xstart"
-            startString = "M104 S"+str(config.temperature)+" T1 (set extruder temperature)\n"
-        else:
+            startString = "M104 S{} T1 (set extruder temperature)\n".format(config.temperature)
+        elif printer == "um2":
+            start_code_name = "gcode_writer/um2_startcode"
+            startString = "M109 S{}\n".format(config.temperature)
+        elif printer == "umo":
             start_code_name = "gcode_writer/startcode"
-            startString = "M109 S"+str(config.temperature)+"\n"
-
+            startString = "M109 S{}\n".format(config.temperature)
+        else:
+            raise NotImplementedError("only support r2x, um2, umo")
 
         startCode = open(start_code_name + ".gcode","r")
         for line in startCode:
@@ -212,8 +216,12 @@ class Gcode_recorder():
     def get_endcode(self, printer):
         if printer == "r2x":
             end_code_name = "gcode_writer/r2xend"
-        else:
+        elif printer == "um2":
+            end_code_name = "gcode_writer/um2_endcode"
+        elif printer == "umo":
             end_code_name = "gcode_writer/endcode"
+        else:
+            raise NotImplementedError("Supports for Printer models r2x, um2, umo")
 
         endString = ""
         endCode = open(end_code_name + ".gcode","r")
