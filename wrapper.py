@@ -167,20 +167,6 @@ def main():
         mp5_data = get_mp5_data(project)
         slice_mp5(mp5_data, project)
 
-    # slicer_instances = []
-    #
-    # input_file = open('mp5test.mp5', 'r')
-    # output_file = open(os.path.join(SLICES_DIR, 'result.gcode'), 'w')
-    #
-    # slicer_instances.append(subprocess.Popen(['python2', 'print_from_pipe.py', 'config/config.json'],
-    #                                          stdin=input_file, stdout=output_file))
-    #
-    # for process in slicer_instances:
-    #     process.wait()
-    #
-    # input_file.close()
-    # output_file.close()
-
 
 if __name__ == "__main__":
     main()
