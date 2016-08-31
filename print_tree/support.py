@@ -339,8 +339,9 @@ class Support:
         # threshold is cos(theta) value
         # if building_direction is vector [[0], [0], [1]]
         # if threshold is cos(-135 degree) = sqrt(2)/2 = -0.70710678118, means if angle is between 135 and 225 degree then these facet requres support
+        cos_overhang_angle = -1 * np.cos(config.supportOverhangangle)
         normal_cos_theta = self.mesh.dot_building_direction()
-        exceed_threshold_mask = (normal_cos_theta<config.supportOverhangangle) # boolean list indicating which triangle requires support 
+        exceed_threshold_mask = (normal_cos_theta<cos_overhang_angle) # boolean list indicating which triangle requires support 
 
         # also ignore the facet too close to the bed
         not_too_close_to_bed_mask = (self.mesh.max_z > self.mesh.bed_z + support_starts_height)

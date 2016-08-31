@@ -20,7 +20,6 @@ shellSpeed = 1800
 supportSpeed = 1800
 min_retraction_distance = 5
 useAdaptiveSlicing = False
-useSupport = True
 upSkinsCount = 4
 downSkinsCount = 3
 
@@ -35,11 +34,15 @@ skirtFanSpeed = 1
 raftFanSpeed = 1
 
 # support
+useSupport = True
 supportSamplingDistance = 2
 link_threshold = 5*np.sqrt(2*(supportSamplingDistance**2))
-bed_support_strengthen_number = 2
-supportOverhangangle = -0.7 # cos(155), 75 degree to building direction requires support
+bed_support_strengthen_offset_number = 2
+bed_support_strengthen_layer_number = 2
+supportOverhangangle = 85
 support_horizontal_offset_from_parts = 0.4
+support_area_enlarge_value = 0.4
+one_empty_layer_between_support_and_model = True
 
 platform_bound = "brim"
 platform_bound_count = 3
@@ -51,7 +54,7 @@ toFile = False
 
 # outline / boundary
 outline_outside_in = False
-boundary_starts_close_to_point = None # [150, 300]
+boundary_starts_close_to_point = [150, 300]
 inner_boundary_coast_at_end_length = 0.5
 outer_boundary_coast_at_end_length = 0
 boundary_retraction_inside = True

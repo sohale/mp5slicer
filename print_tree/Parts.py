@@ -258,7 +258,7 @@ class Infill:
         self.pattern = Line_stack(scale_list_to_clipper(linear_infill2(5,teta,self.BBox)))
 
 
-        if not skin_islands.isEmpty:
+        if not skin_islands.is_empty():
             innerlines = self.pattern.intersect_with(polygons)
             innerlines = innerlines.difference_with(skin_islands)
         else:

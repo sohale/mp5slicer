@@ -82,10 +82,10 @@ class Outline:
             pstackhole = Polygon_stack(offset(poly_hole_stack,i*config.line_width))
 
             pc = pyclipper.Pyclipper()
-            if not pstack.isEmpty:
+            if not pstack.is_empty():
 
                 pc.AddPaths(pstack.polygons, pyclipper.PT_SUBJECT,True)
-                if not poly_hole_stack.isEmpty:
+                if not poly_hole_stack.is_empty():
                     pc.AddPaths(pstackhole.polygons, pyclipper.PT_CLIP, True)
                 shell = pc.Execute(pyclipper.CT_DIFFERENCE, pyclipper.PFT_EVENODD, pyclipper.PFT_EVENODD)
                 if len(shell) == 0:

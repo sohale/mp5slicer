@@ -5,61 +5,49 @@ from slicer.print_tree.clipper_operations import *
 #Polygon stack are generally used when a clipper operation is made on a group of polygon
 class Polygon_stack():
     def __init__(self, polygons = None):
-        self.isEmpty = True
         if sys.version_info[0] == 3:
             if polygons is None:
                 self.polygons = []
             elif isinstance(polygons,Polygon_stack):
                 self.polygons  = polygons.polygons
-                self.isEmpty = polygons.isEmpty
             elif isinstance(polygons, list) and len(polygons) == 0:
                 self.polygons  = []
             elif isinstance(polygons[0][0],int) :
                 self.polygons  = [polygons]
-                self.isEmpty = False
             elif isinstance(polygons[0][0][0],int) :
                 self.polygons = polygons
-                self.isEmpty = False
             else: raise TypeError
         else:
             if polygons is None:
                 self.polygons = []
             elif isinstance(polygons,Polygon_stack):
                 self.polygons  = polygons.polygons
-                self.isEmpty = polygons.isEmpty
             elif isinstance(polygons, list) and len(polygons) == 0:
                 self.polygons  = []
             elif isinstance(polygons[0][0],int) or isinstance(polygons[0][0],long):
                 self.polygons  = [polygons]
-                self.isEmpty = False
             elif isinstance(polygons[0][0][0],int) or isinstance(polygons[0][0][0],long):
                 self.polygons = polygons
-                self.isEmpty = False
             else: raise TypeError
 
     def add_polygons(self,polygons):
         if sys.version_info[0] == (3):
             if isinstance(polygons[0][0][0],int):
                 self.polygons += polygons
-                self.isEmpty = False
             else: raise TypeError
         else:
             if isinstance(polygons[0][0][0],int) or isinstance(polygons[0][0][0],long):
                 self.polygons += polygons
-                self.isEmpty = False
             else: raise TypeError
 
     def add_polygon(self,polygon):
         if isinstance(polygon[0][0],int):
             self.polygons.append(polygon)
-            self.isEmpty = False
         else: raise TypeError
 
     def add_polygon_stack(self,polygon_stack):
         if isinstance(polygon_stack,Polygon_stack):
             self.polygons += polygon_stack.polygons
-            if self.isEmpty:
-                self.isEmpty = polygon_stack.isEmpty
         else: raise TypeError
 
     def split_in_islands(self):
@@ -77,37 +65,40 @@ class Polygon_stack():
     #     return contours
 
     def intersect_with(self, other):
-        if self.isEmpty or other.isEmpty:
+        if self.is_empty() or other.is_empty():
             return Polygon_stack()
         return Polygon_stack(inter_layers(self.polygons, other.polygons, True))
 
     def union_with(self, other):
-        if self.isEmpty and other.isEmpty:
+        if self.is_empty() and other.is_empty():
             return Polygon_stack()
-        elif self.isEmpty:
+        elif self.is_empty():
             return other
-        elif other.isEmpty:
+        elif other.is_empty():
             return self
         else:
             return Polygon_stack(union_layers(self.polygons, other.polygons, True))
 
     def union_self(self):
-        if self.isEmpty:
+        if self.is_empty():
             return Polygon_stack()
         else:
             return Polygon_stack(union_itself(self.polygons, True))
 
     def difference_with(self, other):
-        if self.isEmpty :
+        if self.is_empty() :
             return Polygon_stack()
-
-        if other.isEmpty:
+        elif other.is_empty():
             return self
-        return  Polygon_stack(diff_layers(self.polygons, other.polygons, True))
+        else:
+            return  Polygon_stack(diff_layers(self.polygons, other.polygons, True))
 
     def offset(self, val):
         return Polygon_stack(offset(self,val))
 
+    def offset_default(self, val):
+        return Polygon_stack(offset_default(self,val))
+        
     # //protoype
     def get_print_line(self):
         polylines = []
@@ -126,9 +117,14 @@ class Polygon_stack():
             polylines.append(polyline)
         return polylines
     def is_empty(self):
-        return self.isEmpty
+        if self.polygons:
+            return False
+        else:
+            return True
 
-    def visualize(self, bbox):
+    def visualize(self, bounding_box = None):
+        if bounding_box == None:
+            bounding_box = self.bounding_box()
         import matplotlib.pyplot as plt
         ax = plt.axes()
         for each_polygon in self.polygons:
@@ -158,6 +154,12 @@ class Polygon_stack():
         
         return total_area
 
+    def remove_small_polygons(self, small_area_threshold):
+        polygons = []
+        for polygon in self.polygons:
+            if pyclipper.Area(polygon) > 5:
+                polygons.append(polygon)
+        return Polygon_stack(polygons)
 
     def bounding_box(self):
         pc = pyclipper.Pyclipper()

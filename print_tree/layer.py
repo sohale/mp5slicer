@@ -23,7 +23,8 @@ class Layer():
         else:
             self.support_open_path, self.support_boundary_ps = Line_stack(), Polygon_stack()
 
-        self.support_polylines = self.support_polygon_difference_with_outline(support_polylines)
+        # self.support_line_stack = support_polylines[0]
+        # self.support_polylines = self.support_polygon_difference_with_outline(support_polylines)
         config.reset()
 
     def get_raft_base(self):
@@ -44,10 +45,15 @@ class Layer():
             skirts = Polygon_stack()
             for island in self.islands:
                 skirts = skirts.union_with(island.get_platform_bound())
-            if config.platform_bound == "skirts" and not self.support_boundary_ps.isEmpty:
+            if config.platform_bound == "skirts" and not self.support_boundary_ps.is_empty():
                     skirts = skirts.union_with(self.support_boundary_ps.offset(config.line_width*3))
-            elif config.platform_bound == "brim" and not self.support_boundary_ps.isEmpty:
+                    # self.support_open_path.difference_with(skirts)
+                    # pass
+            elif config.platform_bound == "brim" and not self.support_boundary_ps.is_empty():
                     skirts = skirts.union_with(self.support_boundary_ps.offset(0))
+                    # self.support_open_path.difference_with(skirts)
+                    # pass
+
             else:
                 pass
                 # raise NotImplementedError
@@ -56,6 +62,8 @@ class Layer():
             for count in range(config.platform_bound_count):
                 skirts = skirts.offset(config.line_width)
                 skirts_all.append(skirts)
+            # self.support_open_path = self.support_open_path.difference_with(skirts)
+            
             for skirts in skirts_all[::-1]:# reverse order from outside to inside
                 skirtPolylines.add_chains(skirts.get_print_line())
             polylines.add_group(skirtPolylines)
@@ -64,6 +72,10 @@ class Layer():
             polylines.add_group(island.g_print())
 
         support_line_group = Line_group('support', True, config.line_width)
+
+        self.support_polylines = self.support_polygon_difference_with_outline()
+        # self.support_polylines = self.support_line_stack.get_print_line()
+
         for polyline in self.support_polylines:
             support_line_group.add_chain(polyline)
         polylines.add_group(support_line_group)
@@ -88,6 +100,8 @@ class Layer():
             island.prepare_skins()
         config.reset()
 
+    def prepare_support(self):
+        self.detect_support_area = self.layers[self.index]
     # def get_skins(self):
     #     skins = Polygon_stack()
     #     for island in self.islands:
@@ -98,14 +112,14 @@ class Layer():
     def get_downskins(self):
         skins = Polygon_stack()
         for island in self.islands:
-            if not island.downskins.isEmpty:
+            if not island.downskins.is_empty():
                 skins.add_polygon_stack(island.downskins)
         return skins
 
     def get_upskins(self):
         skins = Polygon_stack()
         for island in self.islands:
-            if not island.upskins.isEmpty:
+            if not island.upskins.is_empty():
                 skins.add_polygon_stack(island.upskins)
         return skins
 
@@ -159,60 +173,19 @@ class Layer():
                 ps.add_polygons(island.get_outterbounds().polygons)
         return ps.union_self()
 
-    def support_polygon_difference_with_outline(self, support_polylines):
+    def support_polygon_difference_with_outline(self):
 
         outline = self.get_outline()
         offseted_outline = outline.offset(config.support_horizontal_offset_from_parts)
-        # offseted_outline = outline # testing
 
         polylines = []
+
         # polygons
         solution_polygons_ps = self.support_boundary_ps.difference_with(offseted_outline)
         polylines += solution_polygons_ps.get_print_line()
 
         # open_path
-        # offseted_outline.visualize()
         solution_open_path_ls = self.support_open_path.difference_with(offseted_outline)
-        
         polylines += solution_open_path_ls.get_print_line()
 
-        # solution_open_path_ls.visualize()
-        def distance(x, y):
-            import numpy as np 
-            x = np.array(x)
-            y = np.array(y)
-            return np.linalg.norm(x-y)
-        from collections import namedtuple        
-
-        if polylines != []:
-            data_dict = [] # integer key: {start:,end:,line:}
-            Line_Data = namedtuple('Line_Data', 'start end line')
-            # print(len(polylines))
-            for each_line in polylines:
-                if len(each_line) >1:
-                    data_dict.append(Line_Data(each_line[0], each_line[-1], each_line))
-
-            # start at first element
-            arranged_line = Line_stack() 
-            # print(len(data_dict))
-            first_line = data_dict.pop()
-            end = pyclipper.scale_from_clipper(first_line.end)
-            arranged_line.add_line(first_line.line)
-            while data_dict:
-                shortest_distance = 999999999999999
-                delete_index = None
-                for i in range(len(data_dict)):
-                    start_point = pyclipper.scale_from_clipper(data_dict[i].start)
-                    if distance(start_point, end) < shortest_distance:
-                        shortest_distance = distance(start_point, end)
-                        delete_index = i
-
-                
-                arranged_line.add_line(data_dict[delete_index].line)
-                end = pyclipper.scale_from_clipper(data_dict[delete_index].end)
-                del data_dict[delete_index]
-            return arranged_line.lines
         return polylines
-
-        # else:
-        #     return []

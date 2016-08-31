@@ -125,7 +125,7 @@ class Gcode_writer(Tree_task):
         self.type_gcode_start('infill')
         length_threshold = config.line_width * 2.5
 
-        self.skip_retraction = True
+        # self.skip_retraction = True
         self.writing_gcode_with_length_filter(line_group, config.infillSpeed, config.interiorFanSpeed, config.extrusion_multiplier,  length_threshold)
         self.type_gcode_end('infill')
 
@@ -213,7 +213,7 @@ class Gcode_writer(Tree_task):
     def skin(self, line_group): # done
         self.type_gcode_start('skin')
         length_threshold = config.line_width * 2.5
-        self.skip_retraction = True
+        # self.skip_retraction = True
         self.writing_gcode_with_length_filter(line_group, config.skinSpeed, config.interiorFanSpeed, config.extrusion_multiplier, length_threshold)
         self.type_gcode_end('skin')
 

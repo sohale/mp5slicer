@@ -132,7 +132,7 @@ class Island:
             # layer = self.print_tree[layer_index]
             other_skins = Polygon_stack()
             for island in self.print_tree[layer_index].islands:
-                if not island.upskins.isEmpty and \
+                if not island.upskins.is_empty() and \
                    does_bounding_box_intersect(island.island_bbox, self.island_bbox):
                     other_skins.add_polygon_stack(island.upskins)
             upskins = upskins.union_with(other_skins)
@@ -142,7 +142,7 @@ class Island:
             # layer = self.print_tree[layer_index]
             other_skins = Polygon_stack()
             for island in self.print_tree[layer_index].islands:
-                if not island.downskins.isEmpty and \
+                if not island.downskins.is_empty() and \
                    does_bounding_box_intersect(island.island_bbox, self.island_bbox):
                     other_skins.add_polygon_stack(island.downskins)
             downskins = downskins.union_with(other_skins)
@@ -151,7 +151,7 @@ class Island:
 
         orientation = None
         pc = pyclipper.Pyclipper()
-        if not self.downskins.isEmpty:
+        if not self.downskins.is_empty():
             from math import acos
             for skin in downskins.polygons:
                 skin_ps = Polygon_stack(skin)
