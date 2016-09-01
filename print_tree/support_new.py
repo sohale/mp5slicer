@@ -15,7 +15,7 @@ def generate_support(polygon_layers, mesh_BBox):
     support_required_ps_list = [Polygon_stack() for i in range(len(polygon_layers))]
 
     if config.useSupport:
-        innerlines_whole_bbox = Line_stack(scale_list_to_clipper(linear_infill2(config.supportSamplingDistance,0,mesh_BBox)))
+        innerlines_whole_bbox = Line_stack(scale_list_to_clipper(linear_infill2(config.supportSamplingDistance,config.support_line_angle,mesh_BBox)))
         support_required_ps = Polygon_stack(polygon_layers[-1])
         for layer_index in reversed(range(len(polygon_layers))):
             this_layer_index = layer_index
@@ -37,6 +37,10 @@ def generate_support(polygon_layers, mesh_BBox):
 
             support_required_ps = support_required_ps.difference_with(this_layer_outline)
             support_required_ps = support_required_ps.union_with(this_layer_support_required_ps)
+
+            if config.does_remove_small_area:
+                # clean small area
+                support_required_ps = support_required_ps.remove_small_polygons(config.small_area)
 
             support_required_ps_list[one_below_layer_index] = support_required_ps
 

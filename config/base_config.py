@@ -3,7 +3,8 @@ import numpy as np
 layerThickness = 0.2
 nozzle_size = 0.4 # for calculation extrusion
 line_width = 0.4 # for caluculating the offset for polygons
-temperature =  220
+extruder_temperature =  210
+bed_temperature = 70
 inAirSpeed = 9000
 retractionSpeed = 2400
 retractionLength = 4.5
@@ -43,6 +44,9 @@ supportOverhangangle = 85
 support_horizontal_offset_from_parts = 0.4
 support_area_enlarge_value = 0.4
 one_empty_layer_between_support_and_model = True
+support_line_angle = 0
+does_remove_small_area = True
+small_area = 5
 
 platform_bound = "brim"
 platform_bound_count = 3

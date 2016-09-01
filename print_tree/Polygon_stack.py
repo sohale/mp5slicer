@@ -160,7 +160,7 @@ class Polygon_stack():
             if pyclipper.Area(polygon) > 5:
                 polygons.append(polygon)
         return Polygon_stack(polygons)
-
+    
     def bounding_box(self):
         pc = pyclipper.Pyclipper()
         for polygon in self.polygons:

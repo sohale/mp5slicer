@@ -1,7 +1,7 @@
 {
   "layerThickness" : 0.2,
   "line_width" : 0.4,
-  "temperature" : 220,
+  "extruder_temperature" : 210,
   "inAirSpeed" : 7000,
   "retractionSpeed" : 2400,
   "retractionLength" : 4.5,
@@ -17,7 +17,7 @@
   "supportSpeed" : 1200,
   "useSupport" : true,
   "supportSamplingDistance" : 2,
-  "supportOverhangangle" : 45,
+  "supportOverhangangle" : 65,
   "upSkinsCount" : 5,
   "downSkinsCount" : 5,
   "firstLayerOffset" : 0,

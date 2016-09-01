@@ -197,13 +197,13 @@ class Gcode_recorder():
 
         if printer == "r2x":
             start_code_name = "gcode_writer/r2xstart"
-            startString = "M104 S{} T1 (set extruder temperature)\n".format(config.temperature)
+            startString = "M104 S{} T1 (set extruder temperature)\n".format(config.extruder_temperature)
         elif printer == "um2":
             start_code_name = "gcode_writer/um2_startcode"
-            startString = "M109 S{}\n".format(config.temperature)
+            startString = "M140 S{}\nM109 S{}\n".format(config.bed_temperature, config.extruder_temperature)
         elif printer == "umo":
             start_code_name = "gcode_writer/startcode"
-            startString = "M109 S{}\n".format(config.temperature)
+            startString = "M109 S{}\n".format(config.extruder_temperature)
         else:
             raise NotImplementedError("only support r2x, um2, umo")
 
