@@ -2,6 +2,7 @@ import slicer.config.config as config
 from slicer.print_tree.Line_group import *
 from slicer.print_tree.Polygon_stack import *
 from slicer.print_tree.SingleLine import SingleLine
+from slicer.commons.utils import scale_line_from_clipper
 
 
 class Outline:
@@ -119,7 +120,7 @@ class Outline:
 
         if len(line) == 0:
             return []
-        polygon = pyclipper.scale_from_clipper(line)
+        polygon = scale_line_from_clipper(line)
 
         polyline = []
         start_point = polygon[0]  # frist vertex of the polygon

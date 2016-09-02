@@ -1,6 +1,7 @@
 import pyclipper
 from math import sqrt,pow
 from queue import Queue
+from slicer.commons.utils import distance as calulate_distance
 
 from slicer.post_process.IslandMapEdge import IslandMapEdge
 from slicer.post_process.IslandMapNode import IslandMapNode
@@ -50,7 +51,7 @@ class IslandMap:
         startIndex = 0;
         i = 1
         while i < len(poly):
-            tmpCost = self.__getDistance(poly[i-1],poly[i])
+            tmpCost = calulate_distance(poly[i-1],poly[i])
             if(tmpCost + currentCost >= self.step):
                 if(i-1 != startIndex):
                     stopIndex = i-1
@@ -80,7 +81,7 @@ class IslandMap:
                 currentCost+=tmpCost
                 currentPath.append(poly[i])
             i+=1
-        tmpCost = self.__getDistance(poly[0], poly[-1])
+        tmpCost = calulate_distance(poly[0], poly[-1])
         if(tmpCost + currentCost >= self.step):
             if not tuple(poly[-1]) in self.__graph_dict_outline:
                 graph[tuple(poly[-1])] = IslandMapNode(poly[-1], {}, poly, len(poly) - 1)
@@ -102,15 +103,11 @@ class IslandMap:
 
         #TODO : manage case where step too high
 
-
-    def __getDistance(self,point0,point1):
-        return sqrt(pow(point0[0] - point1[0], 2) + pow(point0[1] - point1[1], 2))
-
     def __generate_direct_edges(self,point,graph):
         for graphPoint in graph.keys():
             if not (graphPoint[0] == point[0] and graphPoint[1] == point[1]):
                 if(self.__check_direct_edge(graphPoint,point)):
-                    dist = self.__getDistance(point, graphPoint)
+                    dist = calulate_distance(point, graphPoint)
                     graph[tuple(point)].addNeighbour(
                         IslandMapEdge(point, graphPoint, dist, [point, graphPoint]),graphPoint)
                     graph[graphPoint].addNeighbour(

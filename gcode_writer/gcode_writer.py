@@ -2,7 +2,7 @@ import math
 
 import slicer.config.config as config
 import slicer.config.printer_config as printer_config
-
+from slicer.commons.utils import distance as calulate_distance
 
 ############################ GCodeEnvironment Taken from old slicer without any changes ###########################
 
@@ -35,9 +35,7 @@ class GCodeEnvironment:
 
 
     def calculDis(self,A):
-
-        distance = math.sqrt( (pow((self.X-A[0]),2)) + pow((self.Y-A[1]),2))
-        return distance
+        return calulate_distance([self.x, self.y], A)
 
     # go to point A without extruding filament
     # @profile

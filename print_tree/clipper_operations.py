@@ -247,10 +247,10 @@ def bbox_for_single_polygon(polygon):
     try:
         pc.AddPath(polygon,pyclipper.PT_SUBJECT, True)
         clipper_bounding_rectangle = pc.GetBounds()
-        return Bounding_box(pyclipper.scale_from_clipper(clipper_bounding_rectangle.right),
-                         pyclipper.scale_from_clipper(clipper_bounding_rectangle.left),
-                         pyclipper.scale_from_clipper(clipper_bounding_rectangle.top),
-                         pyclipper.scale_from_clipper(clipper_bounding_rectangle.bottom))
+        return Bounding_box(scale_value_from_clipper(clipper_bounding_rectangle.right),
+                         scale_value_from_clipper(clipper_bounding_rectangle.left),
+                         scale_value_from_clipper(clipper_bounding_rectangle.top),
+                         scale_value_from_clipper(clipper_bounding_rectangle.bottom))
     except pyclipper.ClipperException:
         return None
 

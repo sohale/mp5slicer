@@ -3,6 +3,7 @@ import slicer.config.config as config
 import slicer.config.printer_config as printer_config
 import sys
 from slicer.post_process.gcode_recorder import Gcode_recorder
+from slicer.commons.utils import distance as calulate_distance
 import numpy as np
 
 class Gcode_writer(Tree_task):
@@ -26,8 +27,7 @@ class Gcode_writer(Tree_task):
         self.gcode_recorder.write_Gcode()
 
     def calculDis(self,A):
-        distance = np.sqrt( (pow((self.X-A[0]),2)) + pow((self.Y-A[1]),2))
-        return distance
+        return calulate_distance([self.X, self.Y], A)
 
     def type_gcode_start(self, type_str):
         self.gcode_recorder.append_type_start(type_str)

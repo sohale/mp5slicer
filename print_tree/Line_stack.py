@@ -1,7 +1,7 @@
 import inspect
 import os
 import sys
-
+from slicer.commons.utils import scale_line_from_clipper, scale_list_from_clipper
 sys.path.append(os.path.split(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))))[0])
 
 from slicer.print_tree.Polygon_stack import *
@@ -78,7 +78,7 @@ class Line_stack:
 
     def get_print_line(self):
         if not self.is_empty():
-            return pyclipper.scale_from_clipper(self.lines)
+            return scale_list_from_clipper(self.lines)
         else:
             return []
     def return_start_end_point(self):

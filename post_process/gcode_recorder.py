@@ -2,6 +2,7 @@ import slicer.config.config as config
 import numpy as np
 import slicer.config.printer_config as printer_config
 import sys
+from slicer.commons.utils import distance as calulate_distance
 
 class G():
     def __init__(self):
@@ -31,7 +32,7 @@ class G():
     def calculE_test(self, extrusion_multiplier_list):
         '''this function is only for testing purposes'''
         def calculE_slow(A, B, layerThickness):
-            distance = np.sqrt( (pow((A[0]-B[0]),2)) + pow((A[1]-B[1]),2))
+            distance = calulate_distance(A, B)
             section_surface = layerThickness * config.nozzle_size # layerThickness is possible to change for each layer
             volume = section_surface * distance
             filament_length = volume / config.crossArea
@@ -265,13 +266,13 @@ class Gcode_recorder():
         # fun fact : this is faster then "G1 X{} Y{} E{} F{}\n".format(x, y, E, speed)
         return "G1 X{:.3f} Y{:.3f} E{:.5f} F{}\n".format(x, y, E, speed)
 
-    @staticmethod
-    def calculE(A, B, layerThickness):
-        distance = np.sqrt( (pow((A[0]-B[0]),2)) + pow((A[1]-B[1]),2))
-        section_surface = layerThickness * config.nozzle_size # layerThickness is possible to change for each layer
-        volume = section_surface * distance * config.extrusion_multiplier
-        filament_length = volume / config.crossArea
-        return filament_length
+    # @staticmethod
+    # def calculE(A, B, layerThickness):
+    #     distance = np.sqrt( (pow((A[0]-B[0]),2)) + pow((A[1]-B[1]),2))
+    #     section_surface = layerThickness * config.nozzle_size # layerThickness is possible to change for each layer
+    #     volume = section_surface * distance * config.extrusion_multiplier
+    #     filament_length = volume / config.crossArea
+    #     return filament_length
 
     def write_Gcode(self):
 

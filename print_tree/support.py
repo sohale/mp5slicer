@@ -10,7 +10,8 @@ from slicer.print_tree.Polygon_stack import *
 from slicer.print_tree.Line_stack import Support_Line_Stack
 from itertools import groupby
 from collections import namedtuple
-from slicer.commons.utils import scale_point_to_clipper
+from slicer.commons.utils import scale_point_to_clipper, scale_point_from_clipper
+from slicer.commons.utils import distance as calulate_distance
 
 
 
@@ -229,9 +230,6 @@ class Support_Vertical_lines:
 
     def return_polylines(self, sampled_point, plane_height):
 
-        def distance(point1, point2):
-            return np.sqrt(pow((point1[0]-point2[0]),2) + pow((point1[1]-point2[1]),2))
-
         pl = Support_Line_Stack()
         for each_group in sampled_point:
             pl.new_line()
@@ -251,9 +249,9 @@ class Support_Vertical_lines:
 
                 if not this_point_ucscaled == each_group[0]: # if not last point and not first point                    
                     if not pl.last_line_is_empty():
-                        last_point_unscaled = pyclipper.scale_from_clipper(pl.point_at_last_line())
+                        last_point_unscaled = scale_point_from_clipper(pl.point_at_last_line())
 
-                        if distance(last_point_unscaled, this_point_ucscaled) <= config.link_threshold: # new link line
+                        if calulate_distance(last_point_unscaled, this_point_ucscaled) <= config.link_threshold: # new link line
                             pl.add_point_in_last_line(this_point_scaled)
                         else:
                             pl.new_line()

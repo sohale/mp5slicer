@@ -1,8 +1,7 @@
 # import bintrees
 from slicer.print_tree.Line_group import *
+from slicer.commons.utils import distance as calulate_distance
 
-def dist(point1, point2):
-    return pow((point1[0]-point2[0]),2) + pow((point1[1]-point2[1]),2)
 
 def arrange_path(line_group):
     assert (isinstance(line_group, Line_group))
@@ -58,7 +57,7 @@ def get_next_point(init_point_index, end_point, start_points_list, end_points_li
 
     for point_index in range(len(start_points_list)):
         if not already_used_points[point_index]:
-            distance = dist(start_point,start_points_list[point_index])
+            distance = calulate_distance(start_point,start_points_list[point_index])
             if distance < min_dist_tuple[0] :
                 min_dist_tuple = (distance,point_index, False)
 
@@ -66,7 +65,7 @@ def get_next_point(init_point_index, end_point, start_points_list, end_points_li
 
     for point_index in range(len(end_points_list)):
         if not already_used_points[point_index]:
-            distance = dist(start_point,end_points_list[point_index])
+            distance = calulate_distance(start_point,end_points_list[point_index])
             if distance < min_dist_tuple[0] :
                 min_dist_tuple = (distance,point_index + end_offset, True)
 
@@ -96,7 +95,7 @@ def get_next_point(init_point_index, end_point, start_points_list, end_points_li
 #         for point_index in range(len(start_points_list)):
 #             if start_point_index != point_index:
 #                 if not already_used_points[point_index]:
-#                     distance = dist(start_point,start_points_list[point_index])
+#                     distance = calulate_distance(start_point,start_points_list[point_index])
 #                     if distance < dist_lists[start_point_index][0] :
 #                         dist_lists[start_point_index] = (distance,point_index, False)
 #                         used_point_index1 = point_index
@@ -106,7 +105,7 @@ def get_next_point(init_point_index, end_point, start_points_list, end_points_li
 #         for point_index in range(len(end_points_list)):
 #             if start_point_index != point_index:
 #                 if not already_used_points[point_index]:
-#                     distance = dist(start_point,end_points_list[point_index])
+#                     distance = calulate_distance(start_point,end_points_list[point_index])
 #                     if distance < dist_lists[start_point_index][0] :
 #                         dist_lists[start_point_index] = (distance,point_index + end_offset, True)
 #                         used_point_index1 = point_index
@@ -123,7 +122,7 @@ def get_next_point(init_point_index, end_point, start_points_list, end_points_li
 #         for point_index in range(len(start_points_list)):
 #             if end_point_index != point_index:
 #                 if not already_used_points[point_index]:
-#                     distance = dist(end_point,start_points_list[point_index])
+#                     distance = calulate_distance(end_point,start_points_list[point_index])
 #                     if distance < dist_lists[offseted_index][0] :
 #                         dist_lists[offseted_index] = (distance,point_index, False)
 #                         used_point_index1 = point_index
@@ -133,7 +132,7 @@ def get_next_point(init_point_index, end_point, start_points_list, end_points_li
 #         for point_index in range(len(end_points_list)):
 #             if end_point_index != point_index:
 #                 if not already_used_points[point_index]:
-#                     distance = dist(end_point,end_points_list[point_index])
+#                     distance = calulate_distance(end_point,end_points_list[point_index])
 #                     if distance < dist_lists[offseted_index][0] :
 #                         dist_lists[offseted_index] = (distance, point_index + end_offset, True)
 #                         used_point_index1 = point_index
@@ -180,12 +179,12 @@ def get_next_point(init_point_index, end_point, start_points_list, end_points_li
     #     index2 = index + len(lines)
     #     end_point_dists = dist_lists[index2]
     #     for point_index in range(len(start_points_list)):
-    #         start_point_dists.set(dist(start_point,start_points_list[point_index]),index+point_index)
-    #         end_point_dists.set(dist(end_point,start_points_list[point_index]),index+point_index)
+    #         start_point_dists.set(calulate_distance(start_point,start_points_list[point_index]),index+point_index)
+    #         end_point_dists.set(calulate_distance(end_point,start_points_list[point_index]),index+point_index)
     #
     #     for point_index in range(len(end_points_list)):
-    #         start_point_dists.set(dist(start_point,end_points_list[point_index]),index2+point_index)
-    #         end_point_dists.set(dist(end_point,end_points_list[point_index]),index2+point_index)
+    #         start_point_dists.set(calulate_distance(start_point,end_points_list[point_index]),index2+point_index)
+    #         end_point_dists.set(calulate_distance(end_point,end_points_list[point_index]),index2+point_index)
 
 
 
@@ -211,23 +210,23 @@ def arrange_path_with_sorted_lists(lines):
 
         for point_index in range(len(start_points_list)):
             if start_point_index != point_index:
-                start_point_dists.insert(dist(start_point,start_points_list[point_index]),point_index)
+                start_point_dists.insert(calulate_distance(start_point,start_points_list[point_index]),point_index)
 
 
         for point_index in range(len(end_points_list)):
             if start_point_index != point_index:
-                start_point_dists.insert(dist(start_point,end_points_list[point_index]),end_offset + point_index)
+                start_point_dists.insert(calulate_distance(start_point,end_points_list[point_index]),end_offset + point_index)
 
     for start_point_index in range(len(start_points_list)):
         end_point = end_points_list[start_point_index]
 
         end_point_dists = dist_lists[start_point_index + end_offset]
         for point_index in range(len(start_points_list)):
-            end_point_dists.insert(dist(end_point,start_points_list[point_index]),point_index)
+            end_point_dists.insert(calulate_distance(end_point,start_points_list[point_index]),point_index)
 
 
         for point_index in range(len(end_points_list)):
-            end_point_dists.insert(dist(end_point,end_points_list[point_index]),end_offset + point_index)
+            end_point_dists.insert(calulate_distance(end_point,end_points_list[point_index]),end_offset + point_index)
 
     # ordered_lines = []
     # first_point =  lines[0][len(lines[0])-1]

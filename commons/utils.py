@@ -4,26 +4,44 @@ from math import sqrt,pow
 from slicer.print_tree.clipper_operations import *
 import pyclipper
 
-def scale_list_to_clipper(array): # faster then pyclipper.scale_to_clipper
-    def scale_list(l):
-        return [[int(i[0]*(2**32)/2), int(i[1]*(2**32)/2)] for i in l]
-    return list(map(scale_list, array))
-
-def scale_point_to_clipper(point):
-    return [int(point[0]*(2**32)/2), int(point[1]*(2**32)/2)]
-
-def scale_line_to_clipper(array): # faster then pyclipper.scale_to_clipper
-    return list(map(scale_point, array))
+# rewrite scale to clipper
 
 def scale_value_to_clipper(val):  # faster then pyclipper.scale_to_clipper
-    return int(val*(2**32)/2)
+    return int(val*(2**31))
 
-is_64bits = sys.maxsize > 2**32
+def scale_point_to_clipper(point):
+    return [int(point[0]*(2**31)), int(point[1]*(2**31))]
+
+def scale_list_to_clipper(array): # faster then pyclipper.scale_to_clipper
+    return list(map(scale_line_to_clipper, array))
+
+def scale_line_to_clipper(array): # faster then pyclipper.scale_to_clipper
+    return list(map(scale_point_to_clipper, array))
+
+# rewrite scale from clipper
+def scale_value_from_clipper(value, scale = 2**31):
+    return value/scale
+
+def scale_point_from_clipper(point, scale = 2**31):
+    return [point[0]/2**31, point[1]/2**31]
+
+def scale_line_from_clipper(line, scale = 2 ** 31):
+    return list(map(scale_point_from_clipper, line))
+
+def scale_list_from_clipper(line, scale = 2 ** 31):
+    return list(map(scale_line_from_clipper, line))
+
+is_64bits = sys.maxsize > 2**31
 if not is_64bits:
-    scale_list_to_clipper = pyclipper.scale_to_clipper
-    scale_point_to_clipper = pyclipper.scale_to_clipper
-    scale_line_to_clipper = pyclipper.scale_to_clipper
     scale_value_to_clipper = pyclipper.scale_to_clipper
+    scale_point_to_clipper = pyclipper.scale_to_clipper
+    scale_list_to_clipper = pyclipper.scale_to_clipper
+    scale_line_to_clipper = pyclipper.scale_to_clipper
+
+    scale_value_from_clipper = pyclipper.scale_from_clipper
+    scale_point_from_clipper = pyclipper.scale_from_clipper
+    scale_list_from_clipper = pyclipper.scale_from_clipper
+    scale_line_from_clipper = pyclipper.scale_from_clipper
 
 def copy_module(module):
     copy = conf_module
@@ -133,7 +151,7 @@ def getMiddlePoint(points):
     return [(points[0][0]/2)+(points[1][0]/2),(points[0][1]/2)+(points[1][1]/2)]
 
 def getVector(points):
-    val = sqrt(pow(points[0][0] - points[1][0],2) + pow(points[0][1] - points[1][1],2))
+    val = distance(points[0], points[1])
     return [scale_value_to_clipper((points[0][1] - points[1][1])/val)*0.1, scale_value_to_clipper((points[1][0] - points[0][0])/val)*0.1]
 
 def getInsidePoint(startPoint,vect,polygon):
@@ -307,7 +325,7 @@ def reord_layers_multi_islands ( layers):
     return layers
 
 def distance(point1, point2):
-    return sqrt(pow((point1[0]-point2[0]),2) + pow((point1[1]-point2[1]),2))
+    return sqrt((point1[0]-point2[0])**2 + (point1[1]-point2[1])**2)
 
 def reord_layers ( layers):
     for layer in layers:

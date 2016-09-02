@@ -1,8 +1,6 @@
 import slicer.config.config as config
 import numpy as np
-
-def dist(point1, point2):
-     return np.sqrt(pow((point1[0]-point2[0]),2) + pow((point1[1]-point2[1]),2))
+from slicer.commons.utils import distance as calulate_distance
 
 def shorten_last_line(line_group, shorten_length):
     if config.inner_boundary_coast_at_end_length <= 0:
@@ -77,7 +75,7 @@ def reorder_lines_close_to_point(line_group, point):
         shortest_length = 9999999999
 
         for point_index in range(len(line)):
-            length = dist(point, line[point_index])
+            length = calulate_distance(point, line[point_index])
             if length < shortest_length:
                 shortest_length = length
                 shortest_length_index = point_index
@@ -110,7 +108,7 @@ def retract_at_point_inside_boundary(line_group, inner_boundary_first_point_list
         outer_boundary_first_point = line_group.sub_lines[outer_boundary_index][0]
         
         for point in inner_boundary_first_point_list:
-            distance = dist(point, line_group.sub_lines[0][0]) 
+            distance = calulate_distance(point, line_group.sub_lines[0][0]) 
             if config.line_width*(config.shellSize) - epsilon <= distance <= config.line_width*config.shellSize + epsilon:
                 retraction_point = point # this is the optimal retraction point so exit the loop
                 break

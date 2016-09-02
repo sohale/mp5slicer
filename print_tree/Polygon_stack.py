@@ -1,5 +1,9 @@
 from slicer.print_tree.Island_stack import *
 from slicer.print_tree.clipper_operations import *
+from slicer.commons.utils import scale_list_from_clipper, \
+                                 scale_point_from_clipper, \
+                                 scale_value_from_clipper, \
+                                 scale_line_from_clipper
 
 
 #Polygon stack are generally used when a clipper operation is made on a group of polygon
@@ -105,7 +109,7 @@ class Polygon_stack():
         for polygon in self.polygons:
             if len(polygon) == 0:
                 break
-            polygon = pyclipper.scale_from_clipper(polygon)
+            polygon = scale_line_from_clipper(polygon)
 
             polyline = []
             start_point = polygon[0]  # frist vertex of the polygon
@@ -129,15 +133,15 @@ class Polygon_stack():
         ax = plt.axes()
         for each_polygon in self.polygons:
             for this_vertex, next_vertex in zip(each_polygon, each_polygon[1:]):
-                this_vertex = pyclipper.scale_from_clipper(this_vertex)
-                next_vertex = pyclipper.scale_from_clipper(next_vertex)
+                this_vertex = scale_point_from_clipper(this_vertex)
+                next_vertex = scale_point_from_clipper(next_vertex)
                 plt.plot([this_vertex[0], next_vertex[0]],[this_vertex[1], next_vertex[1]])
                 ax.arrow(this_vertex[0], 
                             this_vertex[1], 
                             next_vertex[0] - this_vertex[0], 
                             next_vertex[1] - this_vertex[1], head_width=0.05, head_length=0.05, fc='k', ec='k')
-            last_vertex = pyclipper.scale_from_clipper(each_polygon[-1])
-            first_vertex = pyclipper.scale_from_clipper(each_polygon[0])
+            last_vertex = scale_point_from_clipper(each_polygon[-1])
+            first_vertex = scale_point_from_clipper(each_polygon[0])
             ax.arrow(last_vertex[0], 
                         last_vertex[1], 
                         first_vertex[0] - last_vertex[0], 
@@ -150,7 +154,7 @@ class Polygon_stack():
             # note that area is positive if orientation is anticlockwise
             # negative if orientation is clockwise, which means this polygon is hole
             # the result here will be the remaining area of all the polygon
-            total_area += pyclipper.Area(pyclipper.scale_from_clipper(polygon))
+            total_area += pyclipper.Area(scale_line_from_clipper(polygon))
         
         return total_area
 
@@ -166,7 +170,7 @@ class Polygon_stack():
         for polygon in self.polygons:
             pc.AddPath(polygon,pyclipper.PT_SUBJECT, True)
         clipper_bounding_rectangle = pc.GetBounds()
-        return Bounding_box(pyclipper.scale_from_clipper(clipper_bounding_rectangle.right),
-                         pyclipper.scale_from_clipper(clipper_bounding_rectangle.left),
-                         pyclipper.scale_from_clipper(clipper_bounding_rectangle.top),
-                         pyclipper.scale_from_clipper(clipper_bounding_rectangle.bottom))
+        return Bounding_box(scale_value_from_clipper(clipper_bounding_rectangle.right),
+                         scale_value_from_clipper(clipper_bounding_rectangle.left),
+                         scale_value_from_clipper(clipper_bounding_rectangle.top),
+                         scale_value_from_clipper(clipper_bounding_rectangle.bottom))
