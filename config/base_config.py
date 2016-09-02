@@ -5,24 +5,28 @@ nozzle_size = 0.4 # for calculation extrusion
 line_width = 0.4 # for caluculating the offset for polygons
 extruder_temperature =  210
 bed_temperature = 70
-inAirSpeed = 9000
-retractionSpeed = 2400
 retractionLength = 4.5
-speedRate =  1800
 filamentDiameter = 2.85
 shellSize = 3
 firstLayerOffset = 0
-infillSpeed  = 1800
-skinSpeed = 1800
-raftSpeed = 1800
-boundarySpeed = 1800
-holeSpeed = 1800
-shellSpeed = 1800
-supportSpeed = 1800
 min_retraction_distance = 5
 useAdaptiveSlicing = False
 upSkinsCount = 4
 downSkinsCount = 3
+
+# travel speed
+z_movement_speed = 9000
+inAirSpeed = 9000
+retractionSpeed = 2400
+retractionSpeed = 2400
+speedRate =  1800
+infillSpeed  = 1800
+skinSpeed = 1800
+raftSpeed = 1800
+boundarySpeed = 1800
+innerboundarySpeed = 1800
+holeSpeed = 1800
+supportSpeed = 1800
 
 # fan speed
 hasControllableFanSpeed  = True
@@ -64,16 +68,14 @@ outer_boundary_coast_at_end_length = 0
 boundary_retraction_inside = True
 
 # new
-z_movement_speed = 9000
 retraction_at_change_layer = True
 
 # first layer
 first_layer_line_width = 0.42
 first_layer_infillSpeed = 750
 first_layer_skinSpeed = 750
-first_layer_boundarySpeed = 750 
 first_layer_holeSpeed = 750
 first_layer_supportSpeed = 750
 first_layer_raftSpeed = 750
-first_layer_shellSpeed = 750
+first_layer_boundarySpeed = 750
 first_layer_thickness = 0.2 # only allow maximun two decimal places

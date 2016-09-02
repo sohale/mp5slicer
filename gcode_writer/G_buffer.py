@@ -214,7 +214,6 @@ class G_buffer:
             config.skinSpeed = 1000
             config.boundarySpeed = 1000
             config.holeSpeed = 1000
-            config.shellSpeed = 1200
             config.exteriorFanSpeed = 1
             config.interiorFanSpeed = 1
             config.extrusion_multiplier = 1.2
@@ -237,7 +236,6 @@ class G_buffer:
                 config.skinSpeed = 1500
                 config.boundarySpeed = 1500
                 config.holeSpeed = 1500
-                config.shellSpeed = 1500
                 config.supportSpeed = 1500
 
             # allow change of layerThickness for each layer

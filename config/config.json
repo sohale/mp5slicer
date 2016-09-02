@@ -14,10 +14,10 @@
   "infillSpeed" : 2400,
   "skinSpeed" : 2400,
   "raftSpeed" : 2400,
-  "supportSpeed" : 1200,
+  "supportSpeed" : 2400,
   "useSupport" : true,
   "supportSamplingDistance" : 2,
-  "supportOverhangangle" : 65,
+  "supportOverhangangle" : 55,
   "upSkinsCount" : 5,
   "downSkinsCount" : 5,
   "firstLayerOffset" : 0,
@@ -26,8 +26,9 @@
   "extrusion_multiplier" : 1.1,
   "bed_support_strengthen_number" : 3,
   "toFile" : true,
-  "platform_bound" : "brim",
+  "platform_bound" : "skirts",
   "platform_bound_count" : 10,
-  "retractionLength" : 0.1
+  "retractionLength" : 0.1,
+  "support_horizontal_offset_from_parts" : 0.5
 }
 

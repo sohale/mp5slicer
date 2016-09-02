@@ -138,7 +138,6 @@ class Gcode_writer(Tree_task):
             config.skinSpeed = config.first_layer_skinSpeed
             config.boundarySpeed = config.first_layer_boundarySpeed
             config.holeSpeed = config.first_layer_holeSpeed
-            config.shellSpeed = config.first_layer_shellSpeed
             config.supportSpeed = config.first_layer_supportSpeed
             config.raftSpeed = config.first_layer_raftSpeed
             config.layerThickness = config.first_layer_thickness
@@ -197,7 +196,6 @@ class Gcode_writer(Tree_task):
         config.skinSpeed = 1000
         config.boundarySpeed = 1000
         config.holeSpeed = 1000
-        config.shellSpeed = 1200
         config.exteriorFanSpeed = 1
         config.interiorFanSpeed = 1
         config.extrusion_multiplier = 1.2
@@ -223,7 +221,7 @@ class Gcode_writer(Tree_task):
         self.type_gcode_end('hole')
     def inner_boundary(self, line_group): # done
         self.type_gcode_start('inner boundary')
-        self.basic_writing_gcode(line_group, config.boundarySpeed, config.default_fan_speed, config.extrusion_multiplier)
+        self.basic_writing_gcode(line_group, config.innerboundarySpeed, config.default_fan_speed, config.extrusion_multiplier)
         self.type_gcode_end('inner boundary')
     def inner_hole(self, line_group): # done
         self.type_gcode_start('inner_hole')
