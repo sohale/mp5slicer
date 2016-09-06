@@ -8,6 +8,7 @@ import requests
 import signal
 import subprocess
 import sys
+import time
 
 sys.path.append(os.getcwd() + os.sep + os.pardir)
 from wedesignAPI.wedesignAPI import settings
@@ -121,12 +122,22 @@ def slice_mp5(mp5_data, project_id):
     output_file = open(os.path.join(SLICES_DIR, 'result_{}.gcode'.format(project_id)), 'w')
 
     logger.info('Running slicing script for project {}.'.format(project_id))
-    p = subprocess.Popen(['python2', 'print_from_pipe.py', 'config/config.json'],
-                         stdin=subprocess.PIPE, stdout=output_file)
-    p.communicate(bytes(mp5_data, 'utf-8'))
+    # p = subprocess.Popen(['python2', 'print_from_pipe.py', 'config/config.json'],
+    #                      stdin=subprocess.PIPE, stdout=output_file, stderr=subprocess.PIPE)
+    p = subprocess.Popen(['python2', 'mock_print_from_pipe.py', 'config/config.json'],
+                         stdin=subprocess.PIPE, stdout=output_file, stderr=subprocess.PIPE)
+    _, err = p.communicate(bytes(mp5_data, 'utf-8'))
 
-    output_file.close()
-    logger.info('Project {} sliced.'.format(project_id))
+    if p.wait() != 0:
+        with open(os.path.join(SLICES_DIR, 'error_{}.log'.format(project_id)), 'wb') as f:
+            logger.error('Slicing project {0} failed, traceback in error_{0}.log.'.format(project_id))
+            f.write(err)
+
+        output_file.close()
+        os.remove(os.path.join(SLICES_DIR, 'result_{}.gcode'.format(project_id)))
+    else:
+        output_file.close()
+        logger.info('Project {} sliced.'.format(project_id))
 
 
 def main():
@@ -155,19 +166,19 @@ def main():
         mp5_data = get_mp5_data(project)
         slice_mp5(mp5_data, project)
 
-    slicer_instances = []
-
-    input_file = open('mp5test.mp5', 'r')
-    output_file = open(os.path.join(SLICES_DIR, 'result.gcode'), 'w')
-
-    slicer_instances.append(subprocess.Popen(['python2', 'print_from_pipe.py', 'config/config.json'],
-                                             stdin=input_file, stdout=output_file))
-
-    for process in slicer_instances:
-        process.wait()
-
-    input_file.close()
-    output_file.close()
+    # slicer_instances = []
+    #
+    # input_file = open('mp5test.mp5', 'r')
+    # output_file = open(os.path.join(SLICES_DIR, 'result.gcode'), 'w')
+    #
+    # slicer_instances.append(subprocess.Popen(['python2', 'print_from_pipe.py', 'config/config.json'],
+    #                                          stdin=input_file, stdout=output_file))
+    #
+    # for process in slicer_instances:
+    #     process.wait()
+    #
+    # input_file.close()
+    # output_file.close()
 
 
 if __name__ == "__main__":

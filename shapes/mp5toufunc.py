@@ -1,10 +1,17 @@
+<<<<<<< b4911c53cbda0194ebbff5479a0396e7be3be99e
 import solidmodeler.clean_code.vector3 as vector3
 from solidmodeler.clean_code.basic_functions import make_vector4
 import  numpy as np
+=======
+import numpy as np
+
+from solidmodeler.clean_code.basic_functions import make_vector4
+from solidmodeler.clean_code import vector3
+
+>>>>>>> Minor changes.
 
 def get_root_node(tree):
     return tree["root"]
-
 
 
 def get_fonuky(node):

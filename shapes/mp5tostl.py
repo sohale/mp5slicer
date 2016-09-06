@@ -1,4 +1,8 @@
+from mp5toufunc import get_fonuky, get_root_node
+
 from solidmodeler.clean_code.ohtake_belyaev_demo_subdivision_projection_qem import *
+from solidmodeler.clean_code.stl_tests import make_mc_values_grid
+from stl import mesh
 import json
 
 mesh_correction = False
@@ -8,11 +12,13 @@ B = 1000000L
 
 def puppy_magic(mp5source):
 
-    from mp5toufunc import get_fonuky, get_root_node
     root_node = get_root_node(mp5source)
     iobj = get_fonuky(root_node)
 
+<<<<<<< b4911c53cbda0194ebbff5479a0396e7be3be99e
     from solidmodeler.clean_code.stl_tests import make_mc_values_grid
+=======
+>>>>>>> Minor changes.
     gridvals = make_mc_values_grid(iobj, -60., 60., 1., old=False)
     vertex, faces = vtk_mc(gridvals, (-60., 60., 1.))
     sys.stdout.flush()
@@ -28,7 +34,6 @@ def puppy_magic(mp5source):
 
 
 def m2stl_mesh(verts, faces):
-    from stl import mesh
     fv = verts[faces, :]
 
     data = np.zeros(fv.shape[0], dtype=mesh.Mesh.dtype)
