@@ -1,5 +1,6 @@
 #!/bin/env python3
 
+import json
 import logging
 import mysql.connector
 import os
@@ -94,7 +95,6 @@ def get_mp5_data(project):
     """
     auth_headers = get_authentication()
     requests.get(get_django_projects_route() + str(project) + '/', headers=auth_headers)
-    #print(mp5_data.json())
 
     connexion = mysql.connector.connect(host='mysql', database=os.environ['MYSQL_DATABASE'],
                                         user='root', password=os.environ['MYSQL_ROOT_PASSWORD'])
@@ -111,33 +111,80 @@ def get_mp5_data(project):
     return mp5_data
 
 
-def slice_mp5(mp5_data, project_id):
+def slice_mp5(mp5_data, output_filename, error_filename):
+    """
+    Slice mp5 data into a gcode file.
+    @param mp5_data: mp5 data of the project.
+    @param output_filename: name of the file to write gcode to.
+    @param error_filename: name of the file to write errors' traceback to.
+    @return:
+    """
 
     logger = logging.getLogger('{}.slice_mp5'.format(__file__))
     if mp5_data == '{"root":{"type":"root","children":[]}}':
-        logger.warning("Project {}\'s tree is empty.".format(project_id))
+        logger.warning("Tree is empty.")
         return
 
-    #print(mp5_data)
-    output_file = open(os.path.join(SLICES_DIR, 'result_{}.gcode'.format(project_id)), 'w')
+    output_file = open(os.path.join(SLICES_DIR, output_filename), 'w')
 
-    logger.info("Running slicing script for project {}.".format(project_id))
-    # p = subprocess.Popen(['python2', 'print_from_pipe.py', 'config/config.json'],
-    #                      stdin=subprocess.PIPE, stdout=output_file, stderr=subprocess.PIPE)
+    logger.info("Running slicing script.")
     p = subprocess.Popen(['python2', 'mock_print_from_pipe.py', 'config/config.json'],
                          stdin=subprocess.PIPE, stdout=output_file, stderr=subprocess.PIPE)
     _, err = p.communicate(bytes(mp5_data, 'utf-8'))
 
     if p.wait() != 0:
-        with open(os.path.join(SLICES_DIR, 'error_{}.log'.format(project_id)), 'wb') as f:
-            logger.error("Slicing project {0} failed, traceback in error_{0}.log.".format(project_id))
+        with open(os.path.join(SLICES_DIR, error_filename.format(error_filename)), 'wb') as f:
+            logger.error("Slicing failed, traceback in {}.".format(error_filename))
             f.write(err)
 
         output_file.close()
-        os.remove(os.path.join(SLICES_DIR, 'result_{}.gcode'.format(project_id)))
+        os.remove(os.path.join(SLICES_DIR, output_filename))
+        raise SliceError
     else:
         output_file.close()
-        logger.info("Project {} sliced.".format(project_id))
+        logger.info("Project sliced.")
+
+
+class SliceError(Exception):
+    """Exception raised on slicer failure."""
+
+
+def post_slice(project, user, filename):
+    """
+    Post the sliced project to django.
+    @param project: Sliced project id.
+    @param user: User who requested the slice.
+    @param filename: gcode file name.
+    """
+    logger = logging.getLogger('{}.post_slice'.format(__file__))
+    logger.info("Posting slice to django.")
+
+    auth_headers = get_authentication()
+    requests.post(get_django_slices_route(),
+                  headers=auth_headers,
+                  data={
+                      'maker': user,
+                      'project': project,
+                      'file_path': 'slices/{}'.format(filename)
+                  })
+
+    logger.info("Slice posted.")
+
+
+def process_job(job):
+    """
+    Process a slice job.
+    @param job: Job JSON object.
+    """
+    mp5_data = get_mp5_data(job['project'])
+    filename = 'result_{}_{}.gcode'.format(job['project'], job['user'])
+
+    try:
+        slice_mp5(mp5_data, filename, 'error_{}_{}.log'.format(job['project'], job['user']))
+    except SliceError:
+        return
+    else:
+        post_slice(job['project'], job['user'], filename)
 
 
 def main():
@@ -160,12 +207,11 @@ def main():
 
     logger.info("Entering main loop.")
     while running:
-        logger.info("Retrieving a project from Redis...")
-        project = int(r.blpop(REDIS_JOB_KEY, 0)[1])
+        logger.info("Retrieving a job from Redis...")
+        job = json.loads(r.blpop(REDIS_JOB_KEY, 0)[1].decode(encoding='utf-8'))
 
-        logger.info("Project retrieved: {}".format(project))
-        mp5_data = get_mp5_data(project)
-        slice_mp5(mp5_data, project)
+        logger.info("Job retrieved: {}".format(job))
+        process_job(job)
 
 
 if __name__ == "__main__":

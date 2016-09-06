@@ -23,6 +23,7 @@
   "firstLayerOffset" : 0,
   "initial_extrusion" : 0.2,
   "raft" : false,
+<<<<<<< b2915910be42a9da0cbe33b3313868c8346d5320
   "retractionLength" : 0.1,
   "support_horizontal_offset_from_parts" : 0.5
   "platform_bound_count" : 10
@@ -30,5 +31,13 @@
   "bed_support_strengthen_number" : 5,
   "default_fan_speed" : 1,
   "toFile" : false
+=======
+  "extrusion_multiplier" : 1.1,
+  "bed_support_strengthen_number" : 3,
+  "toFile" : false,
+  "platform_bound" : "skirts",
+  "platform_bound_count" : 10
+
+>>>>>>> Slicer integration, conflict resolutions, clean up, minor changes.
 }
 
