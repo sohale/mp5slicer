@@ -190,6 +190,7 @@ def process_job(job, redis_client):
     else:
         post_slice(job['project'], job['user'], filename)
     finally:
+        print(json.dumps(job))
         redis_client.lrem(REDIS_SLICE_RUNNING_JOBS_KEY, 0, json.dumps(job))
 
 
