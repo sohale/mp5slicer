@@ -164,7 +164,7 @@ def post_slice(project, user, filename):
     requests.post(get_django_slices_route(),
                   headers=auth_headers,
                   data={
-                      'maker': user,
+                      'user': user,
                       'project': project,
                       'file_path': 'slices/{}'.format(filename)
                   })
