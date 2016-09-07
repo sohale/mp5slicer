@@ -17,7 +17,8 @@ from wedesignAPI.wedesignAPI import settings
 REDIS_HOST = 'redis'
 REDIS_PORT = 6379
 REDIS_DB = 1
-REDIS_JOB_KEY = 'slice_jobs'
+REDIS_SLICE_JOBS_KEY = 'slice_jobs'
+REDIS_SLICE_RUNNING_JOBS_KEY = 'slice_running_jobs'
 
 SLICES_DIR = settings.SLICES_ROOT
 
@@ -171,20 +172,25 @@ def post_slice(project, user, filename):
     logger.info("Slice posted.")
 
 
-def process_job(job):
+def process_job(job, redis_client):
     """
     Process a slice job.
     @param job: Job JSON object.
+    @param redis_client: Redis client used to remove job from running jobs list.
     """
+    logger = logging.getLogger('{}.process_job'.format(__file__))
+
     mp5_data = get_mp5_data(job['project'])
     filename = 'result_{}_{}.gcode'.format(job['project'], job['user'])
 
     try:
         slice_mp5(mp5_data, filename, 'error_{}_{}.log'.format(job['project'], job['user']))
     except SliceError:
-        return
+        logger.error("Error during the slicing.")
     else:
         post_slice(job['project'], job['user'], filename)
+    finally:
+        redis_client.lrem(REDIS_SLICE_RUNNING_JOBS_KEY, 0, json.dumps(job))
 
 
 def main():
@@ -195,7 +201,7 @@ def main():
 
     django_slices_route = get_django_slices_route()
     print(requests.get(django_slices_route + '1/').json())
-    r = redis.StrictRedis(host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB)
+    redis_client = redis.StrictRedis(host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB)
 
     running = True
 
@@ -208,10 +214,13 @@ def main():
     logger.info("Entering main loop.")
     while running:
         logger.info("Retrieving a job from Redis...")
-        job = json.loads(r.blpop(REDIS_JOB_KEY, 0)[1].decode(encoding='utf-8'))
+
+        job = json.loads(redis_client.brpoplpush(REDIS_SLICE_JOBS_KEY, REDIS_SLICE_RUNNING_JOBS_KEY, 0)
+                         .decode(encoding='utf-8')
+                         )
 
         logger.info("Job retrieved: {}".format(job))
-        process_job(job)
+        process_job(job, redis_client)
 
 
 if __name__ == "__main__":
