@@ -413,7 +413,7 @@ class Skin:
                 pattern = pattern.intersect_with(Polygon_stack(polygon))
                 self.pattern = self.pattern.combine(pattern)
             else:
-                self.pattern = Line_stack()
+                pass
 
         # scale test
         # self.pattern = Line_stack(pyclipper.scale_to_clipper(linear_infill2(config.line_width,teta,self.BBox)))
