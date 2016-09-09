@@ -20,6 +20,10 @@ def generate_tree(polygon_layers, BBox , support_polylines_list):
         layer.process_skins()
         layer.process_infill()
 
+    # for layer in layer_list[::-1]: # prepare for support
+    #     layer.get_this_layer_support_area()
+    #     pass
+        
     if config.raft == True:
         raft_base = layer_list[0].get_raft_base()
 

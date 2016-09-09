@@ -25,7 +25,7 @@
   "raft" : false,
   "extrusion_multiplier" : 1.1,
   "bed_support_strengthen_number" : 3,
-  "toFile" : false,
+  "toFile" : true,
   "platform_bound" : "skirts",
   "platform_bound_count" : 10
 }

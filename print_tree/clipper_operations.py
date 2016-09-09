@@ -2,7 +2,7 @@ import pyclipper
 import inspect, os
 import sys
 sys.path.append(os.path.split(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))))[0])
-from slicer.commons.utils import scale_value_to_clipper
+from slicer.commons.utils import scale_value_to_clipper, scale_value_from_clipper
 
 
 
@@ -245,6 +245,7 @@ def bbox_for_single_polygon(polygon):
 
     pc = pyclipper.Pyclipper()
     try:
+
         pc.AddPath(polygon,pyclipper.PT_SUBJECT, True)
         clipper_bounding_rectangle = pc.GetBounds()
         return Bounding_box(scale_value_from_clipper(clipper_bounding_rectangle.right),

@@ -47,13 +47,13 @@ class Island:
         self.outline = Outline(self, polygons)
 
     def process_shells(self):
-
-        self.outline.make_shells()
+        pass
+    #     self.outline.make_shells() # make shell when initial
 
     def process_infill(self):
 
 
-        boundaries = Polygon_stack(self.outline.get_inner_bounds())
+        boundaries = self.outline.get_innerbounds()
         self.infill = Infill(boundaries,self.skins ,self.layers, self.layer_index,self.BBox)
 
     def get_innershells(self):
@@ -63,7 +63,7 @@ class Island:
 
     def get_innerbounds(self):
 
-        innerbounds = self.outline.get_inner_bounds()
+        innerbounds = self.outline.get_innerbounds()
         return innerbounds
 
     def get_outterbounds(self):
@@ -98,8 +98,7 @@ class Island:
             if does_bounding_box_intersect(self.island_bbox, island.island_bbox):
                 down_shells.add_polygon_stack(island.get_innershells())
 
-        this_shells = Polygon_stack(self.get_innerbounds())
-
+        this_shells = self.get_innerbounds()
 
         self.downskins = this_shells.difference_with(down_shells)
 
@@ -118,7 +117,7 @@ class Island:
         bottom_layers_indexes_to_agregate = range(max(self.layer_index - config.downSkinsCount, 0),self.layer_index +1)
         upskins = Polygon_stack()
         downskins = Polygon_stack()
-        perimeter = self.outline.get_inner_bounds()
+        perimeter = self.outline.get_innerbounds()
 
         # for layer_index in top_layers_indexes_to_agregate:
         #     other_skins = self.print_tree[layer_index].get_upskins()

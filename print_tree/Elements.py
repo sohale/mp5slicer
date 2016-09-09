@@ -31,6 +31,9 @@ class Outline:
             self.boundaryShells = Polygon_stack()
             self.innerShells = Polygon_stack()
 
+        self.make_shells()
+        self.innerbounds = self.make_innerbounds()
+        # self.innerbounds = self.get_innerbounds()
     def get_raft_base(self):
         return Polygon_stack(self.boundary.line.offset(config.line_width * 5))
 
@@ -96,16 +99,23 @@ class Outline:
 
                 self.innerShells = Polygon_stack(shell)
 
+
+    def make_innerbounds(self):
+        # make innerbounds
+        if self.empty:
+            return Polygon_stack()
+        else:
+            return Polygon_stack(offset(self.innerShells,-config.line_width/2))
+
     def get_innershells(self):
         if self.empty:
             return Polygon_stack()
         return self.innerShells
 
     # @profile
-    def get_inner_bounds(self):
-        if self.empty:
-            return Polygon_stack()
-        return Polygon_stack(offset(self.innerShells,-config.line_width/2))
+
+    def get_innerbounds(self):
+        return self.innerbounds
 
     def get_outterbounds(self):
         if self.empty:

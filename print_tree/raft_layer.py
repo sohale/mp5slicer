@@ -30,6 +30,5 @@ class Raft_layer():
             infill_pattern = Line_stack(scale_line_to_clipper(linear_infill2(config.line_width * 2, 135, self.BBox)))
         infill = Line_stack(infill_pattern.intersect_with(self.polygons))
         raft_polylines.add_chains(infill.get_print_line())
-        arrange_path(raft_polylines)
         raft_polylines.add_chains(self.polygons.get_print_line())
         return polylines

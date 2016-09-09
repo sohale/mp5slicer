@@ -3,7 +3,7 @@ from slicer.commons.utils import overlap, does_bounding_box_intersect, scale_val
 from slicer.print_tree.Line_group import *
 from slicer.print_tree.Line_stack import *
 from slicer.print_tree.island import Island
-
+import numpy as np
 
 class Layer():
 
@@ -26,6 +26,29 @@ class Layer():
         # self.support_line_stack = support_polylines[0]
         # self.support_polylines = self.support_polygon_difference_with_outline(support_polylines)
         config.reset()
+
+        # support
+        self.this_layer_support_area = None
+        self.aggregated_support_area = None
+
+    def get_this_layer_support_area(self): # prepare support
+        this_layer_index = self.index
+        if this_layer_index != 0:
+            one_below_layer_index = self.index - 1
+        else: # layer_index == 0
+            return None
+
+        this_layer_outline = Polygon_stack(self.layers[this_layer_index])
+        offset_value = config.layerThickness*np.tan(np.radians(config.supportOverhangangle))
+        assert offset_value >= 0
+
+        offseted_one_last_ps = Polygon_stack(self.layers[one_below_layer_index]).offset(offset_value)
+        # offseted_one_last_ps = offseted_one_last_ps.remove_small_polygons(5)
+        # old
+        this_layer_support_required_ps = this_layer_outline.difference_with(offseted_one_last_ps)
+        this_layer_support_required_ps = this_layer_support_required_ps.offset(config.support_area_enlarge_value) # think about the number
+        self.this_layer_support_area = this_layer_support_required_ps
+    
 
     def get_raft_base(self):
         raft_base = Polygon_stack()

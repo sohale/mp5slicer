@@ -1,5 +1,3 @@
-from slicer.post_process.path_planner import arrange_path
-
 
 class Tree_post_processor():
 

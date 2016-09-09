@@ -9,3 +9,9 @@ class Simple_router(Tree_task):
 
     def infill(self, line_group):
         arrange_path(line_group)
+
+    def raft(self, line_group):
+        arrange_path(line_group)
+
+    def skin(self, line_group):
+        arrange_path(line_group)
