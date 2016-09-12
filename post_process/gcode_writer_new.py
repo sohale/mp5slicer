@@ -237,7 +237,10 @@ class Gcode_writer(Tree_task):
         self.type_gcode_end('skirt')
     def support(self, line_group): # done
         self.type_gcode_start('support')
-        self.basic_writing_gcode(line_group, config.supportSpeed, config.supportFanSpeed, config.extrusion_multiplier)
+
+        length_threshold = config.line_width * 1.5
+        # self.skip_retraction = True   
+        self.writing_gcode_with_length_filter(line_group, config.supportSpeed, config.supportFanSpeed, config.extrusion_multiplier, length_threshold)
         self.type_gcode_end('support')
     def raft(self, line_group): # done
         self.type_gcode_start('raft')

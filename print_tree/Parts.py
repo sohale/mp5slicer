@@ -385,7 +385,6 @@ class Skin:
     #     self.polylines = innerlines.get_print_line()
     #     self.startPoint, self.endPoint = innerlines.return_start_end_point()
 
-
     def process(self, skins, perimeter):
         self.skins_as_polygon_stack = self.skins_as_polygon_stack.union_with(skins)
         skin_bbox = self.skins_as_polygon_stack.bounding_box()
@@ -395,39 +394,71 @@ class Skin:
         if self.orientation is not None:
             teta = self.orientation
 
-        self.pattern = Line_stack()
-        for polygon in self.islands:
-            # two things are done in the following if
-            # 1. area possitive means it's not hole 
-            # 2. and check it is not a very small area
-            # if pyclipper.Orientation(polygon): # area possitive means it's not hole and if it's not a very small area
-            if isinstance(polygon, pyclipper.PyPolyNode):
-                polygon = polygon.Contour
-            else:
-                pass
-
-            if pyclipper.Area(scale_line_from_clipper(polygon))>3:
-
-                skin_bbox = bbox_for_single_polygon(polygon)
-                pattern = Line_stack(scale_list_to_clipper(linear_infill2(config.line_width,teta,skin_bbox)))
-                pattern = pattern.intersect_with(Polygon_stack(polygon))
-                self.pattern = self.pattern.combine(pattern)
-            else:
-                pass
+        # self.pattern = Line_stack()
+        # for polygon in self.skins_as_polygon_stack.polygons:
+        #     # two things are done in the following if
+        #     # 1. area possitive means it's not hole 
+        #     # 2. and check it is not a very small area
+        #     if pyclipper.Orientation(polygon): # area possitive means it's not hole and if it's not a very small area
+        #         skin_bbox = bbox_for_single_polygon(polygon)
+        #         pattern = Line_stack(scale_list_to_clipper(linear_infill2(config.line_width,teta,skin_bbox)))
+        #         pattern = pattern.intersect_with(Polygon_stack(polygon))
+        #         self.pattern = self.pattern.combine(pattern)
 
         # scale test
         # self.pattern = Line_stack(pyclipper.scale_to_clipper(linear_infill2(config.line_width,teta,self.BBox)))
-        # if self.skins_as_polygon_stack.total_area() > 0:
-        #     self.pattern = Line_stack(scale_list_to_clipper(linear_infill2(config.line_width,teta,skin_bbox)))
+        if self.skins_as_polygon_stack.total_area() > 0:
+            self.pattern = Line_stack(scale_list_to_clipper(linear_infill2(config.line_width,teta,skin_bbox)))
 
-        #     innerlines =  Line_stack(self.pattern.intersect_with(self.skins_as_polygon_stack))
-        #     innerlines = innerlines.intersect_with(perimeter)
-        # else:
-        #     innerlines = Line_stack()
+            innerlines =  Line_stack(self.pattern.intersect_with(self.skins_as_polygon_stack))
+            innerlines = innerlines.intersect_with(perimeter)
+        else:
+            innerlines = Line_stack()
 
-        self.pattern  = self.pattern.intersect_with(perimeter)
-        self.polylines = self.pattern.get_print_line()
-        # self.startPoint, self.endPoint = self.pattern.return_start_end_point()
+        self.polylines = innerlines.get_print_line()
+        self.startPoint, self.endPoint = innerlines.return_start_end_point()
+    # def process(self, skins, perimeter):
+    #     self.skins_as_polygon_stack = self.skins_as_polygon_stack.union_with(skins)
+    #     skin_bbox = self.skins_as_polygon_stack.bounding_box()
+    #     # self.skins_as_polygon_stack.visualize(self.island_bbox)
+
+    #     teta = 45 if self.XorY else 135
+    #     if self.orientation is not None:
+    #         teta = self.orientation
+
+    #     self.pattern = Line_stack()
+    #     for polygon in self.islands:
+    #         # two things are done in the following if
+    #         # 1. area possitive means it's not hole 
+    #         # 2. and check it is not a very small area
+    #         # if pyclipper.Orientation(polygon): # area possitive means it's not hole and if it's not a very small area
+    #         if isinstance(polygon, pyclipper.PyPolyNode):
+    #             polygon = polygon.Contour
+    #         else:
+    #             pass
+
+    #         if pyclipper.Area(scale_line_from_clipper(polygon))>3:
+
+    #             skin_bbox = bbox_for_single_polygon(polygon)
+    #             pattern = Line_stack(scale_list_to_clipper(linear_infill2(config.line_width,teta,skin_bbox)))
+    #             pattern = pattern.intersect_with(Polygon_stack(polygon))
+    #             self.pattern = self.pattern.combine(pattern)
+    #         else:
+    #             pass
+
+    #     # scale test
+    #     # self.pattern = Line_stack(pyclipper.scale_to_clipper(linear_infill2(config.line_width,teta,self.BBox)))
+    #     # if self.skins_as_polygon_stack.total_area() > 0:
+    #     #     self.pattern = Line_stack(scale_list_to_clipper(linear_infill2(config.line_width,teta,skin_bbox)))
+
+    #     #     innerlines =  Line_stack(self.pattern.intersect_with(self.skins_as_polygon_stack))
+    #     #     innerlines = innerlines.intersect_with(perimeter)
+    #     # else:
+    #     #     innerlines = Line_stack()
+
+    #     self.pattern  = self.pattern.intersect_with(perimeter)
+    #     self.polylines = self.pattern.get_print_line()
+    #     # self.startPoint, self.endPoint = self.pattern.return_start_end_point()
 
 
 

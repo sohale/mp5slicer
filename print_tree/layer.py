@@ -4,6 +4,8 @@ from slicer.print_tree.Line_group import *
 from slicer.print_tree.Line_stack import *
 from slicer.print_tree.island import Island
 import numpy as np
+from slicer.commons.utils import scale_list_to_clipper, scale_line_to_clipper
+from slicer.print_tree.infill_paterns import linear_infill2
 
 class Layer():
 
@@ -17,38 +19,14 @@ class Layer():
             config.line_width = 0.35
         self.process_islands()
 
-
-        if config.useSupport:
-            self.support_open_path, self.support_boundary_ps = support_polylines
-        else:
-            self.support_open_path, self.support_boundary_ps = Line_stack(), Polygon_stack()
-
         # self.support_line_stack = support_polylines[0]
         # self.support_polylines = self.support_polygon_difference_with_outline(support_polylines)
         config.reset()
 
         # support
-        self.this_layer_support_area = None
-        self.aggregated_support_area = None
-
-    def get_this_layer_support_area(self): # prepare support
-        this_layer_index = self.index
-        if this_layer_index != 0:
-            one_below_layer_index = self.index - 1
-        else: # layer_index == 0
-            return None
-
-        this_layer_outline = Polygon_stack(self.layers[this_layer_index])
-        offset_value = config.layerThickness*np.tan(np.radians(config.supportOverhangangle))
-        assert offset_value >= 0
-
-        offseted_one_last_ps = Polygon_stack(self.layers[one_below_layer_index]).offset(offset_value)
-        # offseted_one_last_ps = offseted_one_last_ps.remove_small_polygons(5)
-        # old
-        this_layer_support_required_ps = this_layer_outline.difference_with(offseted_one_last_ps)
-        this_layer_support_required_ps = this_layer_support_required_ps.offset(config.support_area_enlarge_value) # think about the number
-        self.this_layer_support_area = this_layer_support_required_ps
-    
+        self.this_layer_support_required_ps = None
+        self.aggregated_support_ps = None
+        self.support_offset_value = config.layerThickness*np.tan(np.radians(config.supportOverhangangle))
 
     def get_raft_base(self):
         raft_base = Polygon_stack()
@@ -62,6 +40,9 @@ class Layer():
 
         else:
             polylines = Line_group("layer", False)
+
+        if config.useSupport:
+            self.support_polylines = self.support_polygon_difference_with_outline()
 
         if self.index == 0 and (config.platform_bound == "brim" or config.platform_bound == "skirts"):
             skirtPolylines = Line_group("skirt", True, config.line_width)
@@ -96,12 +77,10 @@ class Layer():
 
         support_line_group = Line_group('support', True, config.line_width)
 
-        self.support_polylines = self.support_polygon_difference_with_outline()
-        # self.support_polylines = self.support_line_stack.get_print_line()
-
-        for polyline in self.support_polylines:
-            support_line_group.add_chain(polyline)
-        polylines.add_group(support_line_group)
+        if config.useSupport:
+            for polyline in self.support_polylines:
+                support_line_group.add_chain(polyline)
+            polylines.add_group(support_line_group)
 
         return polylines
 
@@ -124,7 +103,86 @@ class Layer():
         config.reset()
 
     def prepare_support(self):
-        self.detect_support_area = self.layers[self.index]
+
+        this_layer_index = self.index
+        if self.index == 0:
+            one_below_layer_index = 0
+        else:
+            one_below_layer_index = self.index - 1
+
+        this_layer = Polygon_stack(self.layers[this_layer_index])
+        one_last_layer = Polygon_stack(self.layers[one_below_layer_index])
+        offseted_one_last_ps = one_last_layer.offset(self.support_offset_value)
+
+        this_layer_support_required_ps = this_layer.difference_with(offseted_one_last_ps)
+        this_layer_support_required_ps = this_layer_support_required_ps.offset(config.support_area_enlarge_value) # think about the number
+        self.this_layer_support_required_ps = this_layer_support_required_ps
+
+    def process_support(self):
+        this_layer_index = self.index
+        if self.index == 0:
+            one_below_layer_index = 0
+        else:
+            one_below_layer_index = self.index - 1
+
+        if self.index == len(self.layers) - 1:
+            support_required_ps = Polygon_stack(self.layers[this_layer_index])
+            self.support_required_ps = Polygon_stack()
+        else:
+            support_required_ps = self.support_required_ps.difference_with(Polygon_stack(self.layers[this_layer_index]))
+            support_required_ps = support_required_ps.union_with(self.this_layer_support_required_ps)
+
+        if config.does_remove_small_area:
+            # clean small area
+            support_required_ps = support_required_ps.remove_small_polygons(config.small_area)
+
+        return support_required_ps # this is for one last layer
+
+    # def support_polygon_difference_with_outline(self):
+
+    #     outline = self.get_outline()
+    #     offseted_outline = outline.offset(config.support_horizontal_offset_from_parts)
+
+    #     polylines = []
+
+    #     # polygons
+    #     solution_polygons_ps = self.support_required_ps.difference_with(offseted_outline)
+    #     polylines += solution_polygons_ps.get_print_line()
+
+    #     # open_path
+    #     solution_open_path_ls = self.support_open_path.difference_with(offseted_outline)
+    #     polylines += solution_open_path_ls.get_print_line()
+
+    #     return polylines
+
+    def support_polygon_difference_with_outline(self):
+
+        outline = self.get_outline()
+        offseted_outline = outline.offset(config.support_horizontal_offset_from_parts)
+
+        polylines = []
+
+        # polygons
+
+        innerlines_whole_bbox = Line_stack(scale_list_to_clipper(linear_infill2(config.supportSamplingDistance,config.support_line_angle,self.BBox)))
+        innerlines = innerlines_whole_bbox.intersect_with(self.support_required_ps)
+
+        assert config.bed_support_strengthen_layer_number >= 1
+        if self.index in range(config.bed_support_strengthen_layer_number):
+            offseted_line_polygon_stack = Polygon_stack()
+            for i in reversed(range(config.bed_support_strengthen_offset_number)):
+                offseted_line_polygon_stack.add_polygon_stack(innerlines.offset_line(config.line_width*(i+1)))
+
+            solution_polygon_ps = offseted_line_polygon_stack.difference_with(offseted_outline)
+            self.support_boundary_ps = solution_polygon_ps
+            polylines += solution_polygon_ps.get_print_line()
+
+        solution_open_path_ls = innerlines.difference_with(offseted_outline)
+        polylines += solution_open_path_ls.get_print_line()
+
+
+        return polylines
+
     # def get_skins(self):
     #     skins = Polygon_stack()
     #     for island in self.islands:
@@ -196,19 +254,3 @@ class Layer():
                 ps.add_polygons(island.get_outterbounds().polygons)
         return ps.union_self()
 
-    def support_polygon_difference_with_outline(self):
-
-        outline = self.get_outline()
-        offseted_outline = outline.offset(config.support_horizontal_offset_from_parts)
-
-        polylines = []
-
-        # polygons
-        solution_polygons_ps = self.support_boundary_ps.difference_with(offseted_outline)
-        polylines += solution_polygons_ps.get_print_line()
-
-        # open_path
-        solution_open_path_ls = self.support_open_path.difference_with(offseted_outline)
-        polylines += solution_open_path_ls.get_print_line()
-
-        return polylines
