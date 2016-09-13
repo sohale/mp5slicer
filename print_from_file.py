@@ -1,8 +1,6 @@
-
 import inspect
 import os
 import sys
-
 sys.path.append(os.path.split(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))))[0])
 from slicer.config.config_factory import config_factory
 from slicer.Print_pipeline import print_mesh
@@ -22,10 +20,7 @@ def print_from_file():
 
 def get_stl_from_file(stl_file_name):
     from stl import mesh
-
-
     return mesh.Mesh.from_file(stl_file_name)
-
 
 if __name__ == '__main__':
     print_from_file()

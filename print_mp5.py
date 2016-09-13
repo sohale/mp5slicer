@@ -1,13 +1,14 @@
 import inspect
 import os
 import sys
-
+import json
 
 sys.path.append(os.path.split(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))))[0])
 from slicer.shapes.mp5tostl import puppy_magic
 from slicer.Print_pipeline import print_mesh
 from slicer.config.config_factory import config_factory
-import json
+
+
 
 def print_from_mp5():
 
@@ -30,10 +31,5 @@ def print_from_mp5():
     print_mesh(stl, "mp5")
     # g = slice(stl, iobj)
 
-
-
-
 if __name__ == '__main__':
     print_from_mp5()
-
-

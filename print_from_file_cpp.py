@@ -23,7 +23,7 @@ def print_from_mp5():
     stls = []
     mp5 = json.load(open(mp5_file_name))
     for son_position in range(len(mp5["root"]["children"])):
-        mc = get_mc_params(mp5,son_position)
+        mc = get_mc_params(mp5, son_position)
         mc_params = to_json_mc_params(mc)
         mp5_string = json.dumps(mp5["root"]["children"][son_position])
 
@@ -39,7 +39,6 @@ def print_from_mp5():
     combined_stl = mesh.Mesh(np.concatenate(stls))
 
     combined_stl.save("mp5.stl")
-    print("done")
     print_mesh(combined_stl, "mp5")
 
 
@@ -54,6 +53,7 @@ def m2stl_mesh(verts, faces):
 
     m = mesh.Mesh(data)
     return m
+
 
 def to_json_mc_params(bbox):
     bb = {}
@@ -70,12 +70,5 @@ def to_json_mc_params(bbox):
     mc_params = json.dumps(mc_params)
     return mc_params
 
-
-
 if __name__ == '__main__':
     print_from_mp5()
-
-
-
-
-

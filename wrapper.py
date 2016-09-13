@@ -1,5 +1,4 @@
 #!/bin/env python3
-
 import json
 import logging
 import mysql.connector
@@ -9,7 +8,6 @@ import requests
 import signal
 import subprocess
 import sys
-import time
 
 sys.path.append(os.getcwd() + os.sep + os.pardir)
 from wedesignAPI.wedesignAPI import settings
@@ -67,7 +65,8 @@ def get_django_projects_route():
     return get_django_route() + '/api/projects/'
 
 
-def get_authentication(username='Admin', password=os.environ['ADMIN_PASSWORD']):
+def get_authentication(username='Admin',
+                       password=os.environ['ADMIN_PASSWORD']):
     """
     Gets an authentication token in order to be able to post slices (if admin)
     or retrieve private projects.
@@ -76,7 +75,8 @@ def get_authentication(username='Admin', password=os.environ['ADMIN_PASSWORD']):
     @return: Authorization headers.
     """
     auth_token = requests.post(get_django_route() + '/o/token/',
-                               headers={'Content-Type': 'application/x-www-form-urlencoded'},
+                               headers={'Content-Type':
+                                    'application/x-www-form-urlencoded'},
                                data={
                                    'grant_type': 'password',
                                    'username': username,
@@ -85,7 +85,8 @@ def get_authentication(username='Admin', password=os.environ['ADMIN_PASSWORD']):
                                }
                                ).json()
 
-    return {'Authorization': auth_token['token_type'] + ' ' + auth_token['access_token']}
+    return {'Authorization': auth_token['token_type'] + ' ' \
+                + auth_token['access_token']}
 
 
 def get_mp5_data(project):
@@ -95,10 +96,14 @@ def get_mp5_data(project):
     @return: MP5 tree as string.
     """
     auth_headers = get_authentication()
-    requests.get(get_django_projects_route() + str(project) + '/', headers=auth_headers)
+    requests.get(get_django_projects_route() + str(project) + '/', 
+                    headers=auth_headers)
 
-    connexion = mysql.connector.connect(host='mysql', database=os.environ['MYSQL_DATABASE'],
-                                        user='root', password=os.environ['MYSQL_ROOT_PASSWORD'])
+    connexion = mysql.connector.connect(host='mysql',
+        database=os.environ['MYSQL_DATABASE'],
+        user='root',
+        password=os.environ['MYSQL_ROOT_PASSWORD'])
+
     cursor = connexion.cursor()
 
     query = ("SELECT tree FROM API_project WHERE id = %s")
@@ -129,12 +134,19 @@ def slice_mp5(mp5_data, output_filename, error_filename):
     output_file = open(os.path.join(SLICES_DIR, output_filename), 'w')
 
     logger.info("Running slicing script.")
-    p = subprocess.Popen(['python2', 'mock_print_from_pipe.py', 'config/config.json'],
-                         stdin=subprocess.PIPE, stdout=output_file, stderr=subprocess.PIPE)
+    p = subprocess.Popen(['python2',
+                          'mock_print_from_pipe.py',
+                          'config/config.json'],
+                         stdin=subprocess.PIPE,
+                         stdout=output_file,
+                         stderr=subprocess.PIPE)
+
     _, err = p.communicate(bytes(mp5_data, 'utf-8'))
 
     if p.wait() != 0:
-        with open(os.path.join(SLICES_DIR, error_filename.format(error_filename)), 'wb') as f:
+        with open(os.path.join(SLICES_DIR, 
+                               error_filename.format(error_filename)),
+                  'wb') as f:
             logger.error("Slicing failed, traceback in {}.".format(error_filename))
             f.write(err)
 
@@ -184,7 +196,8 @@ def process_job(job, redis_client):
     filename = 'result_{}_{}.gcode'.format(job['project'], job['user'])
 
     try:
-        slice_mp5(mp5_data, filename, 'error_{}_{}.log'.format(job['project'], job['user']))
+        slice_mp5(mp5_data, filename, 'error_{}_{}.log'.format(job['project'],
+                                                               job['user']))
     except SliceError:
         logger.error("Error during the slicing.")
     else:
@@ -202,7 +215,9 @@ def main():
 
     django_slices_route = get_django_slices_route()
     print(requests.get(django_slices_route + '1/').json())
-    redis_client = redis.StrictRedis(host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB)
+    redis_client = redis.StrictRedis(host=REDIS_HOST,
+                                     port=REDIS_PORT,
+                                     db=REDIS_DB)
 
     running = True
 
@@ -216,13 +231,13 @@ def main():
     while running:
         logger.info("Retrieving a job from Redis...")
 
-        job = json.loads(redis_client.brpoplpush(REDIS_SLICE_JOBS_KEY, REDIS_SLICE_RUNNING_JOBS_KEY, 0)
-                         .decode(encoding='utf-8')
-                         )
+        job = json.loads(redis_client.brpoplpush(REDIS_SLICE_JOBS_KEY,
+                                                 REDIS_SLICE_RUNNING_JOBS_KEY,
+                                                 0)
+                         .decode(encoding='utf-8'))
 
         logger.info("Job retrieved: {}".format(job))
         process_job(job, redis_client)
-
 
 if __name__ == "__main__":
     main()

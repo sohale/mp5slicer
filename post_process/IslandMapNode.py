@@ -1,18 +1,13 @@
-
-
-
-class IslandMapNode:
-    def __init__(self,position,neighbours = {}, poly=None, indexInPoly=None):
+class IslandMapNode(object):
+    def __init__(self, position, neighbours={}, poly=None, index_in_poly=None):
         """ initializes a graph object """
         self.position = position
         self.neighbours = neighbours
         self.poly = poly
-        self.indexInPoly = indexInPoly
+        self.index_in_poly = index_in_poly
 
-    def getNeighbours(self):
+    def get_neighbours(self):
         return self.neighbours
 
-    def addNeighbour(self, neighbour,pos):
+    def add_neighbour(self, neighbour, pos):
         self.neighbours[tuple(pos)] = neighbour
-
-

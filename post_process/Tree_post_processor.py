@@ -1,11 +1,10 @@
-
-class Tree_post_processor():
+class TreePostProcessor(object):
 
     def __init__(self, print_tree):
         self.print_tree = print_tree
         self.tasks = []
-        
-    def add_task(self, task, level = 0):
+
+    def add_task(self, task, level=0):
         self.tasks.append(task)
 
     def run(self):
@@ -14,8 +13,8 @@ class Tree_post_processor():
             if len(self.print_tree[layer_index].sub_lines) != 0:
                 self.__gotroughgroup(self.print_tree[layer_index])
 
-    def __gotroughgroup(self,group):
-        if (group.isLeaf):
+    def __gotroughgroup(self, group):
+        if group.isLeaf:
             self.__switch_leaf(group)
         else:
             self.__switch_node(group)
@@ -39,4 +38,3 @@ class Tree_post_processor():
 
         for sub_node in node.sub_lines:
             self.__gotroughgroup(sub_node)
-

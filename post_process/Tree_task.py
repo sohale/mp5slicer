@@ -1,25 +1,19 @@
-
-
-
-class Tree_task():
+class TreeTask(object):
 
     def __init__(self):
         pass
 
-
-    def infill(self,line_group):
+    def infill(self, line_group):
         pass
 
-    def layer(self,line_group):
+    def layer(self, line_group):
         pass
 
     def raft_layer(self, line_group):
         pass
 
-
     def contact_layer(self, line_group):
         pass
-
 
     def skin(self, line_group):
         pass

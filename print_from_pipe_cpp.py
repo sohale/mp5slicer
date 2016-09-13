@@ -24,7 +24,7 @@ def print_from_mp5():
     mp5 = json.loads(mp5_as_json)
 
     for son_position in range(len(mp5["root"]["children"])):
-        mc = get_mc_params(mp5,son_position)
+        mc = get_mc_params(mp5, son_position)
         mc_params = to_json_mc_params(mc)
         mp5_string = json.dumps(mp5["root"]["children"][son_position])
 
@@ -70,8 +70,3 @@ def to_json_mc_params(bbox):
 
 if __name__ == '__main__':
     print_from_mp5()
-
-
-
-
-
