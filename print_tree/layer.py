@@ -24,9 +24,8 @@ class Layer():
         config.reset()
 
         # support
-        self.this_layer_support_required_ps = None
-        self.aggregated_support_ps = None
         self.support_offset_value = config.layerThickness*np.tan(np.radians(config.supportOverhangangle))
+        self.support_boundary_ps = Polygon_stack()
 
     def get_raft_base(self):
         raft_base = Polygon_stack()

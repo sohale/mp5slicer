@@ -19,13 +19,8 @@ import numpy as np
 #         return S
 
 def intersection_with_line(z, vertice_0, vertice_1):
-    v_0_x = vertice_0[0]
-    v_0_y = vertice_0[1]
-    v_0_z = vertice_0[2]
-    
-    v_1_x = vertice_1[0]
-    v_1_y = vertice_1[1]
-    v_1_z = vertice_1[2]
+    v_0_x, v_0_y, v_0_z = vertice_0
+    v_1_x, v_1_y, v_1_z = vertice_1
 
     if v_0_z < z: 
         if z < v_1_z:
@@ -65,9 +60,7 @@ def intersection_with_triangle(z, triangle):
     #     return []
 
 
-    vertice_0 = triangle[0]
-    vertice_1 = triangle[1]
-    vertice_2 = triangle[2]
+    vertice_0, vertice_1, vertice_2 = triangle
 
     # this is dealed with in the intersection by line
     # if vertice_0[2] == z:
@@ -153,17 +146,15 @@ def slicer_from_mesh_as_dict(mesh, slice_height_from=0, slice_height_to=100, sli
     slice_height_to += 0.198768976
 
     if sliceplanes_height != []: # if empty
-        sliceplanes_height = sliceplanes_height
         sliceplanes_height = np.array(sliceplanes_height)
     else:
         sliceplanes_height = np.arange(slice_height_from, slice_height_to, slice_step)
 
     slice_layers = [{} for i in range(len(sliceplanes_height))]
-    plane_index_list = np.array(range(len(slice_layers)))
+    plane_index_list = np.arange(len(slice_layers))
 
     z = mesh.triangles[:,:,2]
     tri_min_list, tri_max_list = np.amin(z, axis=1), np.amax(z, axis=1)
-    index_list = range(len(mesh.triangles))
     for triangle_index in range(len(mesh.triangles)):
         triangle = mesh.triangles[triangle_index]
         tri_min, tri_max = tri_min_list[triangle_index], tri_max_list[triangle_index]

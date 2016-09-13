@@ -1,5 +1,5 @@
 import sys
-from math import sqrt,pow
+from math import sqrt, pow
 
 from slicer.print_tree.clipper_operations import *
 import pyclipper

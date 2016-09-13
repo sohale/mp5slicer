@@ -1,30 +1,28 @@
 from slicer.post_process.Tree_task import Tree_task
 import slicer.config.config as config
-import slicer.config.printer_config as printer_config
-import sys
-from slicer.post_process.gcode_recorder import Gcode_recorder
+from slicer.post_process.gcode_recorder import GcodeRecorder
 from slicer.commons.utils import distance as calulate_distance
 import numpy as np
 
-class Gcode_writer(Tree_task):
+class GcodeGenerator(Tree_task):
 
-    def __init__(self, gcode_filename, layerThickness_list = []):
+    def __init__(self, gcode_filename, layerThickness_list=[]):
         # self.gcodeEnvironment = GCodeEnvironment(gcode_filename)
         self.layer_index = 0
         self.layerThickness_list = layerThickness_list
         self.skip_retraction = False
 
-        self.gcode_recorder = Gcode_recorder(gcode_filename)
+        self.gcode_recorder = GcodeRecorder(gcode_filename)
         self.fan_speed = config.default_fan_speed
         self.speed = config.speedRate
         self.extrusion_multiplier = config.extrusion_multiplier
 
-        self.X, self.Y = 0, 0 # this is only for calculDis
-
+        self.X = 0
+        self.Y = 0 # this is only for calculDis
         self.Z = 0
 
     def __del__(self):        
-        self.gcode_recorder.write_Gcode()
+        self.gcode_recorder.write_gcode()
 
     def calculDis(self,A):
         return calulate_distance([self.X, self.Y], A)

@@ -1,19 +1,21 @@
 import slicer.config.config as config
 import numpy as np
 import slicer.config.printer_config as printer_config
-import sys
 from slicer.commons.utils import distance as calulate_distance
+import sys
 
-class G():
+class G(object):
+    '''Vectorised calculation for handling G0, G1 extrusion calculation'''
     def __init__(self):
         self.commands = []
 
-    def append_g(self,x,y):
-        self.commands.append([x,y])
+    def append_g(self, x, y):
+        self.commands.append([x, y])
 
     def calculE(self, extrusion_multiplier_list):
-        commands = np.array(self.commands)[:,:2]
-        layerThickness = np.array([config.layerThickness for i in range(len(commands)-1)])
+        commands = np.array(self.commands)[:, :2]
+        layer_thickness = np.array([config.layerThickness for i in
+                                   range(len(commands)-1)])
 
         # truncation
         commands = np.floor(commands*1000)/1000
@@ -21,9 +23,9 @@ class G():
         commands_next_point = commands[1:]
         commands = commands[:-1]
 
-
-        distance = np.linalg.norm(commands - commands_next_point, axis = 1)
-        section_surface = layerThickness * config.nozzle_size # layerThickness is possible to change for each layer
+        distance = np.linalg.norm(commands-commands_next_point, axis=1)
+        # layer_thickness is possible to change for each layer
+        section_surface = layer_thickness * config.nozzle_size
         volume = section_surface * distance * extrusion_multiplier_list
         filament_length = volume / config.crossArea
         self.E = filament_length.tolist()
@@ -31,16 +33,19 @@ class G():
 
     def calculE_test(self, extrusion_multiplier_list):
         '''this function is only for testing purposes'''
-        def calculE_slow(A, B, layerThickness):
-            distance = calulate_distance(A, B)
-            section_surface = layerThickness * config.nozzle_size # layerThickness is possible to change for each layer
+        def calculE_slow(point_0, point_1, layer_thickness):
+            distance = calulate_distance(point_0, point_1)
+            # layer_thickness is possible to change for each layer
+            section_surface = layer_thickness * config.nozzle_size 
             volume = section_surface * distance
             filament_length = volume / config.crossArea
             return filament_length
 
         res = []
-        for i,j,k in zip(self.commands, self.commands[1:], extrusion_multiplier_list):
-            res.append(calculE_slow(i, j, config.layerThickness)*k)
+        for i,j,k in zip(self.commands, 
+                        self.commands[1:], 
+                        extrusion_multiplier_list):
+            res.append(calculE_slow(i, j, config.layer_thickness)*k)
         res = np.array(res)
         res = res.tolist()
         res.insert(0, 0)
@@ -53,11 +58,16 @@ class G():
 Problems of gcode recorder, need to store lots of imformation in a list form, 
 this uses too much of memory?
 
-And a specific index for commands 5,6,7,8, if this ever gets more, the code will be messy. 
+And a specific index for commands 5,6,7,8, if this ever gets more, the code 
+will be messy. 
 
 '''
-class Gcode_recorder():
-    def __init__(self, gcode_filename = "test.gcode"):
+class GcodeRecorder:
+    ''' 
+    To save gcode into a list of commands and parameter for later 
+    translation into actual gcode
+    '''
+    def __init__(self, gcode_filename="test.gcode"):
         self.G = G()
         self.E = 0
         self.gcode_filename = gcode_filename
@@ -90,7 +100,7 @@ class Gcode_recorder():
         self.current_layer_height = 0
 
         self.fan_speed = []
-        self.fan_speed_function = self.prepare_change_fanspeed_function(printer_config.model)
+        self.fan_speed_function = self.prepare_change_fanspeed_function()
         self.fan_speed_index = 0
         self.current_fanspeed = 0
 
@@ -106,7 +116,7 @@ class Gcode_recorder():
         self.extrusion_multiplier = []
 
         self.retract_string = "G92 E0\nG1 E-4.0000 F{}\n".format(config.retractionSpeed)
-        self.unretract_string =  "G1 E0.0000 F{}\nG92 E0\n".format(config.retractionSpeed)
+        self.unretract_string = "G1 E0.0000 F{}\nG92 E0\n".format(config.retractionSpeed)
 
         self.g0 = self.prepare_g0_function()
         self.change_z = self.prepare_change_z_function()
@@ -132,18 +142,23 @@ class Gcode_recorder():
         extrusion_multiplier_list = extrusion_multiplier_list[1:] # hack : first one is always, prepare for calculE
         return np.array(extrusion_multiplier_list)
     ########### prepare function for specific printer ###########
-    def prepare_change_fanspeed_function(self, printer):
+    @staticmethod
+    def prepare_change_fanspeed_function():
         if printer_config.model == "r2x":
-            return lambda fan_speed : "M126 S{}\n".format(fan_speed)
+            return lambda fan_speed: "M126 S{}\n".format(fan_speed)
         else:
-            return lambda fan_speed :  "M106 S{:d}\n".format(int(fan_speed*255))
+            return lambda fan_speed: "M106 S{:d}\n".format(int(fan_speed*255))
 
-    def prepare_g0_function(self):
-        func = lambda x, y : "G0 X{:.3f} Y{:.3f} F{}\n".format(x, y, config.inAirSpeed)
+    @staticmethod
+    def prepare_g0_function():
+        func = lambda x, y: "G0 X{:.3f} Y{:.3f} F{}\n".format(x,
+                                                              y,
+                                                              config.inAirSpeed)
         return func
 
-    def prepare_change_z_function(self):
-        func = lambda z : "G0 Z{:.3f} F{}\n".format(z, config.z_movement_speed)
+    @staticmethod
+    def prepare_change_z_function():
+        func = lambda z: "G0 Z{:.3f} F{}\n".format(z, config.z_movement_speed)
         return func
     ########### function to append information into gcode recorder ###########
     def append_retract(self):
@@ -154,15 +169,15 @@ class Gcode_recorder():
 
     def append_g0(self, line):
         self.commands.append(0)
-        self.G.append_g(line[0],line[1])
+        self.G.append_g(line[0], line[1])
 
-    def append_g1(self,line):
+    def append_g1(self, line):
         self.commands.append(1)
-        self.G.append_g(line[0],line[1])
+        self.G.append_g(line[0], line[1])
 
     def append_g1_change_speed(self, line):
         self.commands.append(10)
-        self.G.append_g(line[0],line[1])
+        self.G.append_g(line[0], line[1])
 
     def append_change_z(self, z):
         self.commands.append(4)
@@ -194,52 +209,59 @@ class Gcode_recorder():
         self.z_index += 1
         return instruction
 
-    def get_startcode(self, printer):
+    @staticmethod
+    def get_startcode():
 
-        if printer == "r2x":
+        if printer_config.model == "r2x":
             start_code_name = "gcode_writer/r2xstart"
-            startString = "M104 S{} T1 (set extruder temperature)\n".format(config.extruder_temperature)
-        elif printer == "um2":
+            start_string = "M104 S{} T1 (set extruder temperature)\n".format(
+                config.extruder_temperature)
+
+        elif printer_config.model == "um2":
             start_code_name = "gcode_writer/um2_startcode"
-            startString = "M140 S{}\nM109 S{}\n".format(config.bed_temperature, config.extruder_temperature)
-        elif printer == "umo":
+            start_string = "M140 S{}\nM109 S{}\n".format(
+                config.bed_temperature, 
+                config.extruder_temperature)
+
+        elif printer_config.model == "umo":
             start_code_name = "gcode_writer/startcode"
-            startString = "M109 S{}\n".format(config.extruder_temperature)
+            start_string = "M109 S{}\n".format(config.extruder_temperature)
         else:
             raise NotImplementedError("only support r2x, um2, umo")
 
-        startCode = open(start_code_name + ".gcode","r")
-        for line in startCode:
-            startString += line
-        startCode.close()
-        return startString
+        start_code = open(start_code_name + ".gcode", "r")
+        for line in start_code:
+            start_string += line
+        start_code.close()
+        return start_string
 
-    def get_endcode(self, printer):
-        if printer == "r2x":
+    @staticmethod
+    def get_endcode():
+        if printer_config.model == "r2x":
             end_code_name = "gcode_writer/r2xend"
-        elif printer == "um2":
+        elif printer_config.model == "um2":
             end_code_name = "gcode_writer/um2_endcode"
-        elif printer == "umo":
+        elif printer_config.model == "umo":
             end_code_name = "gcode_writer/endcode"
         else:
             raise NotImplementedError("Supports for Printer models r2x, um2, umo")
 
-        endString = ""
-        endCode = open(end_code_name + ".gcode","r")
-        for line in endCode:
-            endString += line
-        endCode.close()
-        return endString    
+        end_string = ""
+        end_code = open(end_code_name + ".gcode", "r")
+        for line in end_code:
+            end_string += line
+        end_code.close()
+        return end_string    
 
-    def get_config(self):
-        instruction = ""
-        for attr in dir(config):
-            if not attr.startswith('__'):
-                instruction += ";" +str(attr)+ " : "+str(getattr(config, attr)) +" \n"
-        return instruction
+    # @staticmethod
+    # def get_config():
+    #     instruction = ""
+    #     for attr in dir(config):
+    #         if not attr.startswith('__'):
+    #             instruction += ";" +str(attr)+ " : "+str(getattr(config, attr)) +" \n"
+    #     return instruction
 
     def get_change_fanspeed_code(self):
-
         fan_speed = self.fan_speed[self.fan_speed_index]
         instruction = self.fan_speed_function(fan_speed)
         self.fan_speed_index += 1
@@ -259,30 +281,32 @@ class Gcode_recorder():
     def get_g0(self, x, y):
         return self.g0(x, y)
 
-    def get_g1(self, x, y, E):
+    @staticmethod
+    def get_g1(x, y, E):
         return "G1 X{:.3f} Y{:.3f} E{:.5f}\n".format(x, y, E)
 
-    def get_g1_with_speed_change(self, x, y, E, speed):
+    @staticmethod
+    def get_g1_with_speed_change(x, y, E, speed):
         # fun fact : this is faster then "G1 X{} Y{} E{} F{}\n".format(x, y, E, speed)
         return "G1 X{:.3f} Y{:.3f} E{:.5f} F{}\n".format(x, y, E, speed)
 
     # @staticmethod
-    # def calculE(A, B, layerThickness):
+    # def calculE(A, B, layer_thickness):
     #     distance = np.sqrt( (pow((A[0]-B[0]),2)) + pow((A[1]-B[1]),2))
-    #     section_surface = layerThickness * config.nozzle_size # layerThickness is possible to change for each layer
+    #     section_surface = layer_thickness * config.nozzle_size # layer_thickness is possible to change for each layer
     #     volume = section_surface * distance * config.extrusion_multiplier
     #     filament_length = volume / config.crossArea
     #     return filament_length
 
-    def write_Gcode(self):
+    def write_gcode(self):
 
-        self.G.calculE(self.make_extrusion_multiplier_array()) 
+        self.G.calculE(self.make_extrusion_multiplier_array())
         # code for testing E
         # res = self.G.calculE_test(self.make_extrusion_multiplier_array())
         # for i,j in zip(self.G.E, res):
         #     print(i,j)
 
-        instruction = self.get_startcode(printer_config.model)
+        instruction = self.get_startcode()
         instruction += "G1 F200 E{}\n".format(config.initial_extrusion)
         self.gcode_output.write(instruction)
         g_index = 0
@@ -293,14 +317,15 @@ class Gcode_recorder():
                 g_data = self.G.commands[g_index]
                 g_index += 1
 
-                # if self.G.get_extrusion_by_index(g_index) != 0:
-                    # assert self.G.get_extrusion_by_index(g_index) == self.calculE([self.X, self.Y], g_data, config.layerThickness)
                 if commands_identifier == 0: # write g0 with retraction
                     instruction = self.get_g0(g_data[0], g_data[1])
                 elif commands_identifier == 1: # write g1
                     instruction = self.get_g1(g_data[0], g_data[1], self.E)
                 else: # write g1 with speed change
-                    instruction = self.get_g1_with_speed_change(g_data[0], g_data[1], self.E, self.current_speed)
+                    instruction = self.get_g1_with_speed_change(g_data[0],
+                                                                g_data[1],
+                                                                self.E,
+                                                                self.current_speed)
             elif commands_identifier == 2: # write retraction
                 instruction = self.retract_string
 
@@ -311,7 +336,8 @@ class Gcode_recorder():
             elif commands_identifier == 4: # write change z
                 instruction = self.get_change_z_gcode()
 
-            elif commands_identifier == 5: # notify change speed actual change speed is written in g1
+            # notify change speed actual change speed is written in g1
+            elif commands_identifier == 5:
                 instruction = ""
                 self.current_speed = self.speed[self.speed_index]
                 self.speed_index += 1
@@ -333,6 +359,6 @@ class Gcode_recorder():
 
             self.gcode_output.write(instruction)
 
-        instruction = self.get_endcode(printer_config.model)
+        instruction = self.get_endcode()
         self.gcode_output.write(instruction)
         self.gcode_output.close()
