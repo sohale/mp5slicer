@@ -26,7 +26,7 @@ def crisp_subtract(node):
     son1 = get_fonuky(sons[0])
     son2 = get_fonuky(sons[1])
     matrix = make_matrix4(node["matrix"])
-    return vector3.Transformed(vector3.crisp_subtract(son1, son2), matrix)
+    return vector3.Transformed(vector3.CrispSubtract(son1, son2), matrix)
 
 
 def simple_cylinder(node):
@@ -35,7 +35,7 @@ def simple_cylinder(node):
     w = make_vector4(0, 0, 1)
     u = make_vector4(1, 0, 0)
     return vector3.Transformed(
-        vector3.simple_cylinder(A, w, u, 0.5, 0.5, 1), matrix)
+        vector3.SimpleCylinder(A, w, u, 0.5, 0.5, 1), matrix)
 
 
 def root(node):
