@@ -11,7 +11,7 @@ def rotation_matrix(axis, theta):
     convert degrees to radians if needed.
     '''
     axis = np.asarray(axis)
-        # No need to rotate if there is no actual rotation
+    # No need to rotate if there is no actual rotation
     if not axis.any():
         return np.zeros((3, 3))
 
@@ -30,8 +30,8 @@ def rotation_matrix(axis, theta):
         da, db, dc, dd = powers[12:16]
 
         return np.array([[aa + bb - cc - dd, 2 * (bc + ad), 2 * (bd - ac)],
-                            [2 * (bc - ad), aa + cc - bb - dd, 2 * (cd + ab)],
-                            [2 * (bd + ac), 2 * (cd - ab), aa + dd - bb - cc]])
+                         [2 * (bc - ad), aa + cc - bb - dd, 2 * (cd + ab)],
+                         [2 * (bd + ac), 2 * (cd - ab), aa + dd - bb - cc]])
 
 def rotate(mesh, axis, theta, point=None):
     '''
@@ -64,8 +64,6 @@ def rotate(mesh, axis, theta, point=None):
 
     rotated_matrix = np.zeros(mesh.shape)
     for i in range(3):
-        rotated_matrix[:,i] = _rotate(mesh[:, i])
-
+        rotated_matrix[:, i] = _rotate(mesh[:, i])
 
     return rotated_matrix
-

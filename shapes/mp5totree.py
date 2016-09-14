@@ -1,25 +1,17 @@
-
 from slicer.shapes.Boundingbox import *
 
 def get_mc_params(mp5source, son_position):
 
-
     root_node = get_root_node(mp5source)
     bbox = get_fonuky(root_node, son_position)
-
-
-
 
     return bbox
 
 def get_root_node(tree):
     return tree["root"]
 
-
-
-def get_fonuky(node, params = None):
+def get_fonuky(node, params=None):
     type = node["type"]
-
 
     switch = {
         "Difference": subtract,
@@ -28,15 +20,15 @@ def get_fonuky(node, params = None):
         "icone": cone,
         "iellipsoid": ellipsoid,
         "icube": cube,
-        "root" : root,
-        "Union" : union,
+        "root": root,
+        "Union": union,
         "Intersection": intersection,
         "itorus": torus,
 
     }
     if params is not None:
         bbox = switch[type](node, params)
-    else :
+    else:
         bbox = switch[type](node)
     return bbox
 
@@ -49,9 +41,13 @@ def subtract(node):
     sons = node["children"]
     for i in range(len(sons)):
         sbbox = get_fonuky(sons[i])
-        result_bbox = updateBoundingBoxForSubBoundingBox(result_bbox, None, sbbox)  # just update, dont apply the matrix
 
-    bbox = updateBoundingBoxForSubBoundingBox(None, matrix, result_bbox)
+        # just update, dont apply the matrix
+        result_bbox = update_bounding_box_for_sub_bounding_box(result_bbox,
+                                                               None,
+                                                               sbbox)
+
+    bbox = update_bounding_box_for_sub_bounding_box(None, matrix, result_bbox)
     return bbox
 
 def intersection(node):
@@ -62,9 +58,13 @@ def intersection(node):
     sons = node["children"]
     for i in range(len(sons)):
         sbbox = get_fonuky(sons[i])
-        result_bbox = updateBoundingBoxForSubBoundingBox(result_bbox, None, sbbox)  # just update, dont apply the matrix
 
-    bbox = updateBoundingBoxForSubBoundingBox(None, matrix, result_bbox)
+        # just update, dont apply the matrix
+        result_bbox = update_bounding_box_for_sub_bounding_box(result_bbox,
+                                                               None,
+                                                               sbbox)
+
+    bbox = update_bounding_box_for_sub_bounding_box(None, matrix, result_bbox)
     return bbox
 
 def union(node):
@@ -75,38 +75,41 @@ def union(node):
     sons = node["children"]
     for i in range(len(sons)):
         sbbox = get_fonuky(sons[i])
-        result_bbox = updateBoundingBoxForSubBoundingBox(result_bbox, None, sbbox)  # just update, dont apply the matrix
+        # just update, dont apply the matrix
+        result_bbox = update_bounding_box_for_sub_bounding_box(result_bbox,
+                                                               None,
+                                                               sbbox)
 
-    bbox = updateBoundingBoxForSubBoundingBox(None, matrix, result_bbox)
+    bbox = update_bounding_box_for_sub_bounding_box(None, matrix, result_bbox)
     return bbox
 
 def cube(node):
     matrix = make_matrix4(node["matrix"])
-    bbox = getBoundingBoxForSingleShapeMatrix(matrix)
+    bbox = get_bounding_box_for_single_shape_matrix(matrix)
 
     return bbox
 
 def ellipsoid(node):
     matrix = make_matrix4(node["matrix"])
-    bbox = getBoundingBoxForSingleShapeMatrix(matrix)
+    bbox = get_bounding_box_for_single_shape_matrix(matrix)
 
     return bbox
 
 def cone(node):
     matrix = make_matrix4(node["matrix"])
-    bbox = getBoundingBoxForSingleShapeMatrix(matrix)
+    bbox = get_bounding_box_for_single_shape_matrix(matrix)
 
     return bbox
 
 def cylinder(node):
     matrix = make_matrix4(node["matrix"])
-    bbox = getBoundingBoxForSingleShapeMatrix(matrix)
+    bbox = get_bounding_box_for_single_shape_matrix(matrix)
 
     return bbox
 
 def torus(node):
     matrix = make_matrix4(node["matrix"])
-    bbox = getBoundingBoxForSingleShapeMatrix_torus(matrix)
+    bbox = get_bounding_box_for_single_shape_matrix_torus(matrix)
 
     return bbox
 
@@ -119,19 +122,23 @@ def root(node, son_position):
     # sons = node["children"]
     # for i in range(len(sons)):
     #     sbbox = get_fonuky(sons[i])
-    #     result_bbox = updateBoundingBoxForSubBoundingBox(result_bbox, None, sbbox)  # just update, dont apply the matrix
+    #     result_bbox = update_bounding_box_for_sub_bounding_box(result_bbox, None, sbbox)  # just update, dont apply the matrix
 
     sons = node["children"]
 
     sbbox = get_fonuky(sons[son_position])
-    result_bbox = updateBoundingBoxForSubBoundingBox(result_bbox, None, sbbox)  # just update, dont apply the matrix
 
-    bbox = updateBoundingBoxForSubBoundingBox(None, matrix, result_bbox)
+     # just update, dont apply the matrix
+    result_bbox = update_bounding_box_for_sub_bounding_box(result_bbox,
+                                                           None,
+                                                           sbbox)
+
+    bbox = update_bounding_box_for_sub_bounding_box(None, matrix, result_bbox)
     return bbox
 
 def make_matrix4(array):
     arr = np.array(array).astype(float)
-    return np.matrix(np.reshape(arr, (4,4)))
+    return np.matrix(np.reshape(arr, (4, 4)))
 
 
 
@@ -148,5 +155,3 @@ def make_matrix4(array):
 #
 #     def add_son(self, node):
 #         self.sons.append(node)
-
-

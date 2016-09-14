@@ -12,11 +12,10 @@ class config_factory:
 
         import slicer.config.base_config as config
         for arg in arg_dictionnary:
-            setattr(config,arg,arg_dictionnary[arg])
-        setattr(config, "crossArea" ,((config.filamentDiameter/2.0)**2) * math.pi) #6.37939
-
-
-
+            setattr(config, arg, arg_dictionnary[arg])
+        setattr(config,
+                "crossArea",
+                ((config.filamentDiameter/2.0)**2) * math.pi)  # 6.37939
 
 
 class Printer_config():

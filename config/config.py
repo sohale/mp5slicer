@@ -1,5 +1,4 @@
 import sys
-
 import slicer.config.base_config as base_config
 
 
@@ -10,18 +9,19 @@ def reset():
         setattr(this_config, atr, getattr(base_config, atr))
 
 # these parameters are here only for autocompletion,
-#  they will be overwritten with default configuration and personnal configuration
+# they will be overwritten with default configuration
+# and personnal configuration
 layerThickness = None
 line_width = None
-temperature =  None
+temperature = None
 inAirSpeed = None
 retractionSpeed = None
 retractionLength = None
-speedRate =  None
+speedRate = None
 filamentDiameter = None
 shellSize = None
 firstLayerOffset = None
-infillSpeed  = None
+infillSpeed = None
 supportSpeed = None
 skinSpeed = None
 raftSpeed = None
@@ -30,7 +30,7 @@ holeSpeed = None
 shellSpeed = None
 min_retraction_distance = None
 default_fan_speed = None
-hasControllableFanSpeed  = None
+hasControllableFanSpeed = None
 useAdaptiveSlicing = None
 useSupport = None
 exteriorFanSpeed = None
@@ -43,7 +43,7 @@ upSkinsCount = None
 downSkinsCount = None
 
 supportSamplingDistance = None
-supportOverhangangle = None 
+supportOverhangangle = None
 link_threshold = None
 bed_support_strengthen_number = None
 

@@ -2,19 +2,20 @@ import slicer.config.config as config
 import numpy as np
 from slicer.commons.utils import distance as calulate_distance
 
+
 def shorten_last_line(line_group, shorten_length):
     if config.inner_boundary_coast_at_end_length <= 0:
         return None
 
     import copy
-    def shorten_vector(end, shorten_length_in_function): # start is 0,0
+    def shorten_vector(end, shorten_length_in_function):  # start is 0,0
         shorten_length_in_function = np.sqrt(shorten_length_in_function)
 
         angle = np.arctan2(end[1], end[0])
         length_of_end = np.sqrt(end[0]**2 + end[1]**2)
 
         if length_of_end < shorten_length_in_function:
-            return length_of_end# last line is less than 0.8
+            return length_of_end  # last line is less than 0.8
 
         if end[0] == 0:
             shorten_length_ratio_x = 0
@@ -26,7 +27,7 @@ def shorten_last_line(line_group, shorten_length):
             shorten_length_ratio_y = 0
         else:
             shorten_length_ratio_y = \
-                abs((length_of_end - shorten_length_in_function)*np.sin(angle)/end[1])
+                abs((length_of_end-shorten_length_in_function)*np.sin(angle)/end[1])
 
         assert 0 <= shorten_length_ratio_x <= 1
         assert 0 <= shorten_length_ratio_y <= 1
@@ -49,7 +50,7 @@ def shorten_last_line(line_group, shorten_length):
                 final_vector = shorten_vector(vector_from_last_line,
                                               shorten_length_copy)
 
-                # last line shorter than shorten_length_copy, 
+                # last line shorter than shorten_length_copy,
                 # then delete last line
                 if isinstance(final_vector, float):
                     shorten_length_copy -= final_vector
@@ -79,9 +80,9 @@ def reorder_lines_close_to_point(line_group, point):
         return None
 
     for line_index in range(len(line_group.sub_lines)):
-        # line_group format has the first point equals to last point, 
+        # line_group format has the first point equals to last point,
         # so delete it for easier mulipulation
-        line = line_group.sub_lines[line_index][:-1] 
+        line = line_group.sub_lines[line_index][:-1]
 
         shortest_length = 9999999999
 
@@ -99,6 +100,7 @@ def reorder_lines_close_to_point(line_group, point):
 
         new_line.append(new_line[0]) # forcing the format for line_group
         line_group.sub_lines[line_index] = new_line
+
 
 def retract_at_point_inside_boundary(line_group,
                                      inner_boundary_first_point_list):
@@ -122,7 +124,7 @@ def retract_at_point_inside_boundary(line_group,
             distance = calulate_distance(point, line_group.sub_lines[0][0])
             if config.line_width*(config.shellSize)-epsilon \
                     <= distance <= config.line_width*config.shellSize+epsilon:
-                retraction_point = point # this is the optimal retraction point so exit the loop
+                retraction_point = point  # this is the optimal retraction point so exit the loop
                 break
             elif config.line_width*(config.shellSize-1) \
                     <= distance <= config.line_width*(config.shellSize)+epsilon:

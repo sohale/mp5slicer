@@ -19,7 +19,6 @@ class TreePostProcessor(object):
         else:
             self.__switch_node(group)
 
-
     def __switch_leaf(self, leaf):
         for task in self.tasks:
             method = getattr(task, 'leaf')
@@ -28,7 +27,6 @@ class TreePostProcessor(object):
         for task in self.tasks:
             method = getattr(task, leaf.type)
             method(leaf)
-
 
     # @profile
     def __switch_node(self, node):

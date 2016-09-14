@@ -12,7 +12,6 @@ def arrange_path(line_group):
     assert isinstance(line_group, Line_group)
     lines = line_group.sub_lines
 
-
     start_points_list = [None]*len(lines)
     end_points_list = [None]*len(lines)
     for line_index in range(len(lines)):
@@ -25,25 +24,22 @@ def arrange_path(line_group):
 
     ordered_lines = []
     current_index = 0
-    end_point = False #True if the line start by an end point
-
+    end_point = False  # True if the line start by an end point
 
     while len(ordered_lines) < len(lines):
 
-
-        if end_point:#search with begining point
+        if end_point:  # search with begining point
             # reversed_list = lines[current_index]
             lines[current_index].reverse()
             ordered_lines.append(lines[current_index])
 
-
-        else: #search with end point
+        else:  # search with end point
             ordered_lines.append(lines[current_index])
 
         if len(ordered_lines) < len(lines):
             already_used_points[current_index] = True
             already_used_points[current_index + end_offset] = True
-            next_point_tuple = get_next_point(current_index, 
+            next_point_tuple = get_next_point(current_index,
                                               end_point,
                                               start_points_list,
                                               end_points_list,
@@ -54,7 +50,9 @@ def arrange_path(line_group):
 
     line_group.sub_lines = ordered_lines
 
-def get_next_point(init_point_index, end_point, start_points_list,
+
+def get_next_point(
+        init_point_index, end_point, start_points_list,
         end_points_list, already_used_points, end_offset):
 
     min_dist_tuple = MinDistTuple(float("inf"), None, None)
@@ -68,7 +66,7 @@ def get_next_point(init_point_index, end_point, start_points_list,
 
     for point_index in range(len(start_points_list)):
         if not already_used_points[point_index]:
-            distance = calulate_distance(start_point, 
+            distance = calulate_distance(start_point,
                                          start_points_list[point_index])
             if distance < min_dist_tuple.distance:
                 min_dist_tuple.distance = distance
@@ -200,15 +198,13 @@ def get_next_point(init_point_index, end_point, start_points_list,
     #         end_point_dists.set(calulate_distance(end_point,end_points_list[point_index]),index2+point_index)
 
 
-
-
-# !!!!!!!DO NOT REMOVE CODE (or do if you have red the following): 
+# !!!!!!!DO NOT REMOVE CODE (or do if you have red the following):
 # This code uses sorted list of ordered distances,
-# it can be used to improve the gridy closest point search, 
+# it can be used to improve the gridy closest point search,
 # if you don't care, feel free to remove.
 # also considere using nearPy to get neirest neighbour
 def arrange_path_with_sorted_lists(lines):
-    #todo: ordered list retrieval
+    # todo: ordered list retrieval
     dist_lists = [bintrees.FastRBTree() for i in range(len(lines)*2)]
     start_points_list = [(float("inf"), None)]*len(lines)
     end_points_list = [(float("inf"), None)]*len(lines)
@@ -216,7 +212,7 @@ def arrange_path_with_sorted_lists(lines):
         start_points_list[line_index] = lines[line_index][0]
         end_points_list[line_index] = lines[line_index][len(lines[line_index])-1]
 
-    end_offset = len(lines) -1
+    end_offset = len(lines) - 1
 
     for start_point_index in range(len(start_points_list)):
         start_point = start_points_list[start_point_index]
@@ -226,14 +222,13 @@ def arrange_path_with_sorted_lists(lines):
         for point_index in range(len(start_points_list)):
             if start_point_index != point_index:
                 start_point_dists.insert(
-                    calulate_distance(start_point,start_points_list[point_index]),
+                    calulate_distance(start_point, start_points_list[point_index]),
                     point_index)
-
 
         for point_index in range(len(end_points_list)):
             if start_point_index != point_index:
                 start_point_dists.insert(
-                    calulate_distance(start_point,end_points_list[point_index]),
+                    calulate_distance(start_point, end_points_list[point_index]),
                     end_offset + point_index)
 
     for start_point_index in range(len(start_points_list)):
@@ -242,13 +237,12 @@ def arrange_path_with_sorted_lists(lines):
         end_point_dists = dist_lists[start_point_index + end_offset]
         for point_index in range(len(start_points_list)):
             end_point_dists.insert(
-                calulate_distance(end_point,start_points_list[point_index]),
+                calulate_distance(end_point, start_points_list[point_index]),
                 point_index)
-
 
         for point_index in range(len(end_points_list)):
             end_point_dists.insert(
-                calulate_distance(end_point,end_points_list[point_index]),
+                calulate_distance(end_point, end_points_list[point_index]),
                 end_offset + point_index)
 
     # ordered_lines = []
@@ -258,5 +252,3 @@ def arrange_path_with_sorted_lists(lines):
     #     iter = rbtree.iter(dist_lists[0] + end_offset)
     #     i.goto(0)
     #     next_point = i.item
-
-

@@ -3,6 +3,7 @@ from slicer.post_process.simple_routing import SimpleRouter
 from slicer.post_process.boundary_finishing_touch import BoundaryFinish
 from slicer.post_process.gcode_writer_new import GcodeGenerator
 
+
 def refine_print_tree(print_tree, stl_file_name):
     simple_print_tree = []
     for layer in print_tree:
@@ -12,7 +13,6 @@ def refine_print_tree(print_tree, stl_file_name):
     router = SimpleRouter()
     boundary_finisher = BoundaryFinish()
     # cal_extrusion = Cal_extrusion()
-
 
     name = stl_file_name.partition('.')[0]
     write_gcode = GcodeGenerator(gcode_filename=name + ".gcode")

@@ -38,4 +38,3 @@ def m2stl_mesh(verts, faces):
 
     m = mesh.Mesh(data)
     return m
-

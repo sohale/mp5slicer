@@ -18,10 +18,10 @@ class GcodeGenerator(TreeTask):
         self.extrusion_multiplier = config.extrusion_multiplier
 
         self.X = 0
-        self.Y = 0 # this is only for calculDis
+        self.Y = 0  # this is only for calculDis
         self.Z = 0
 
-    def __del__(self):        
+    def __del__(self):
         self.gcode_recorder.write_gcode()
 
     def distance_to_self(self, A):
@@ -33,8 +33,8 @@ class GcodeGenerator(TreeTask):
     def type_gcode_end(self, type_str):
         self.gcode_recorder.append_type_end(type_str)
 
-    def append_rewrite_speed_fan_speed_extrusion_multiplier(self,
-            speed, fan_speed, extrusion_multiplier):
+    def append_rewrite_speed_fan_speed_extrusion_multiplier(
+            self, speed, fan_speed, extrusion_multiplier):
         if self.speed != speed:
             self.gcode_recorder.append_rewrite_speed(speed)
             self.speed = speed
@@ -51,10 +51,11 @@ class GcodeGenerator(TreeTask):
         else:
             pass
 
-    def basic_writing_gcode(self, 
-            line_group, speed, fan_speed, extrusion_multiplier):
-        self.append_rewrite_speed_fan_speed_extrusion_multiplier(speed,
-            fan_speed, extrusion_multiplier)
+    def basic_writing_gcode(
+            self, line_group, speed, fan_speed, extrusion_multiplier):
+
+        self.append_rewrite_speed_fan_speed_extrusion_multiplier(
+            speed, fan_speed, extrusion_multiplier)
         for line in line_group.sub_lines:
 
             if len(line) > 0:
@@ -65,7 +66,7 @@ class GcodeGenerator(TreeTask):
                     self.gcode_recorder.append_g0(line[0])
                     self.gcode_recorder.append_unretract()
                 else:
-                    self.gcode_recorder.append_g0(line[0]) 
+                    self.gcode_recorder.append_g0(line[0])
 
                 self.X, self.Y = line[0]
 
@@ -80,16 +81,16 @@ class GcodeGenerator(TreeTask):
         if self.skip_retraction:
             self.skip_retraction = False
 
-    def writing_gcode_with_length_filter(self,
-            line_group, speed, fan_speed, 
+    def writing_gcode_with_length_filter(
+            self, line_group, speed, fan_speed,
             extrusion_multiplier, length_threshold):
-    
-        self.append_rewrite_speed_fan_speed_extrusion_multiplier(speed, 
+
+        self.append_rewrite_speed_fan_speed_extrusion_multiplier(speed,
             fan_speed, extrusion_multiplier)
         for line in line_group.sub_lines:
             if len(line) > 0:
                 dist = self.distance_to_self(line[0])
-                
+
                 if dist < length_threshold:
                     self.gcode_recorder.append_g1_change_speed(line[0])
                     self.X, self.Y = line[0]
@@ -107,7 +108,6 @@ class GcodeGenerator(TreeTask):
                         self.gcode_recorder.append_g0(line[0])
                         self.X, self.Y = line[0]
 
-
                 if self.skip_retraction:
                     self.skip_retraction = False
 
@@ -121,7 +121,7 @@ class GcodeGenerator(TreeTask):
 
                     self.X, self.Y = line[point_index]
 
-    def infill(self, line_group): # done
+    def infill(self, line_group):
         self.type_gcode_start('infill')
         length_threshold = config.line_width * 2.5
 
@@ -132,12 +132,12 @@ class GcodeGenerator(TreeTask):
 
         self.type_gcode_end('infill')
 
-    def layer(self,line_group): # done
+    def layer(self, line_group):
         if self.layer_index > 1:
             pass
         elif self.layer_index == 0:
             config.line_width = config.first_layer_line_width
-            config.infillSpeed = config.first_layer_infillSpeed  
+            config.infillSpeed = config.first_layer_infillSpeed
             config.skinSpeed = config.first_layer_skinSpeed
             config.boundarySpeed = config.first_layer_boundarySpeed
             config.holeSpeed = config.first_layer_holeSpeed
@@ -168,19 +168,17 @@ class GcodeGenerator(TreeTask):
 
         import copy
         # only support 1 decimal place now
-        assert z_change == 0 or len(str(z_change).split('.')[1]) in [1, 2] 
+        assert z_change == 0 or len(str(z_change).split('.')[1]) in [1, 2]
         old_height = copy.copy(self.Z)
         self.Z += z_change
         self.Z = np.around(self.Z, decimals=2)
-        # delete next line, for debug only 
+        # delete next line, for debug only
         if self.layer_index not in [0, 1]:
             assert np.around(self.Z - old_height, decimals=2) == \
                 config.layerThickness
             pass
 
         self.gcode_recorder.append_change_z(self.Z)
-   
-
 
         # self.gcode_recorder.append_unretract() # gcode_recorder
         speed = config.speedRate
@@ -190,13 +188,13 @@ class GcodeGenerator(TreeTask):
         self.type_gcode_end('layer')
         self.layer_index += 1
 
-    def raft_layer(self, line_group): # done
+    def raft_layer(self, line_group):
         config.extrusion_multiplier = 1.1
         # self.gcodeEnvironment.Z += config.raftLayerThickness
         self.gcode_recorder.append_change_z(config.raftLayerThickness)
         config.reset()
 
-    def contact_layer(self, line_group): # done
+    def contact_layer(self, line_group):
         config.infillSpeed = 1100
         config.skinSpeed = 1000
         config.boundarySpeed = 1000
@@ -209,7 +207,7 @@ class GcodeGenerator(TreeTask):
 
         config.reset()
 
-    def skin(self, line_group): # done
+    def skin(self, line_group):
         self.type_gcode_start('skin')
         length_threshold = config.line_width * 2.5
         # self.skip_retraction = True
@@ -220,42 +218,47 @@ class GcodeGenerator(TreeTask):
                                               length_threshold)
         self.type_gcode_end('skin')
 
-    def hole(self, line_group): # done
+    def hole(self, line_group):
         self.type_gcode_start('hole')
         self.basic_writing_gcode(line_group,
                                  config.holeSpeed,
                                  config.exteriorFanSpeed,
                                  config.extrusion_multiplier)
         self.type_gcode_end('hole')
-    def inner_boundary(self, line_group): # done
+
+    def inner_boundary(self, line_group):
         self.type_gcode_start('inner boundary')
         self.basic_writing_gcode(line_group,
                                  config.innerboundarySpeed,
                                  config.default_fan_speed,
                                  config.extrusion_multiplier)
         self.type_gcode_end('inner boundary')
-    def inner_hole(self, line_group): # done
+
+    def inner_hole(self, line_group):
         self.type_gcode_start('inner_hole')
         self.basic_writing_gcode(line_group,
                                  config.boundarySpeed,
                                  config.exteriorFanSpeed,
                                  config.extrusion_multiplier)
         self.type_gcode_end('inner_hole')
-    def boundary(self, line_group): # done
+
+    def boundary(self, line_group):
         self.type_gcode_start('boundary')
         self.basic_writing_gcode(line_group,
                                  config.boundarySpeed,
                                  config.default_fan_speed,
                                  config.extrusion_multiplier)
         self.type_gcode_end('boundary')
-    def skirt(self, line_group): #done
+
+    def skirt(self, line_group):
         self.type_gcode_start('skirt')
         self.basic_writing_gcode(line_group,
                                  config.raftSpeed,
                                  config.skirtFanSpeed,
                                  config.extrusion_multiplier)
         self.type_gcode_end('skirt')
-    def support(self, line_group): # done
+
+    def support(self, line_group):
         self.type_gcode_start('support')
         length_threshold = config.line_width * 1.5
         # self.skip_retraction = True
@@ -265,7 +268,8 @@ class GcodeGenerator(TreeTask):
                                               config.extrusion_multiplier,
                                               length_threshold)
         self.type_gcode_end('support')
-    def raft(self, line_group): # done
+
+    def raft(self, line_group):
         self.type_gcode_start('raft')
         self.basic_writing_gcode(line_group,
                                  config.raftSpeed,
@@ -273,7 +277,8 @@ class GcodeGenerator(TreeTask):
                                  config.extrusion_multiplier,
                                  config.raftLayerThickness)
         self.type_gcode_end('raft')
-    def top_raft(self, line_group): # done
+
+    def top_raft(self, line_group):
         self.type_gcode_start('top_raft')
         config.extrusion_multiplier = 0.8
         self.basic_writing_gcode(line_group,
@@ -289,7 +294,7 @@ class GcodeGenerator(TreeTask):
 
 
 '''
-# these are the functions that is useful but not yet implemented 
+# these are the functions that is useful but not yet implemented
 # because of the change of gcode writer
 
 #     # a simple instrcuction that will retract filament

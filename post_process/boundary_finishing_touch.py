@@ -3,6 +3,7 @@ from slicer.post_process.print_quality_optimizer import shorten_last_line,\
     reorder_lines_close_to_point, retract_at_point_inside_boundary
 import slicer.config.config as config
 
+
 class BoundaryFinish(TreeTask):
     def __init__(self):
         super().__init__()
@@ -45,8 +46,8 @@ class BoundaryFinish(TreeTask):
             # for i in lines:
             #     self.inner_boundary_last_points.append(i)
 
-        reorder_lines_close_to_point(line_group, 
+        reorder_lines_close_to_point(line_group,
             config.boundary_starts_close_to_point)
 
-        shorten_last_line(line_group, 
+        shorten_last_line(line_group,
             config.inner_boundary_coast_at_end_length)

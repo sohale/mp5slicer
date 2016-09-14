@@ -5,6 +5,7 @@ from slicer.commons.utils import distance as calulate_distance
 from slicer.post_process.IslandMapEdge import IslandMapEdge
 from slicer.post_process.IslandMapNode import IslandMapNode
 
+
 class IslandMap(object):
 
     def __init__(self, step, bound, holes, list_shells, last_pos=None):
@@ -26,10 +27,10 @@ class IslandMap(object):
                 self.__generate_points_for_one_poly(shell, shells_graph)
             self.__list_graph_dict_shell.append(shells_graph)
 
-        # here self.points contains every point in the bound 
+        # here self.points contains every point in the bound
         # but out of the holes
 
-        # for every poly we need to find the intersected point and 
+        # for every poly we need to find the intersected point and
         # assocy it to an index in the poly
 
         # create edges between everypoints if they dont cross anny hole
@@ -37,12 +38,11 @@ class IslandMap(object):
 
     def __generate_all_points(self):
         # currentCost = 0
-        #for i in range(len(self.bound)-1):
+        # for i in range(len(self.bound)-1):
         pass
 
     def get_graph(self):
         return self.__graph_dict_outline
-
 
     def __generate_points_for_one_poly(self, poly, graph):
         current_cost = 0
@@ -64,8 +64,8 @@ class IslandMap(object):
                     #i+=1
 
                 graph[tuple(poly[start_index])].add_neighbour(
-                    IslandMapEdge(poly[start_index], 
-                                  poly[stop_index], 
+                    IslandMapEdge(poly[start_index],
+                                  poly[stop_index],
                                   current_cost, current_path),
                     poly[stop_index])
 
@@ -146,7 +146,7 @@ class IslandMap(object):
                 poly[start_index])
 
 
-        #TODO : manage case where step too high
+        # TODO : manage case where step too high
 
     def __generate_direct_edges(self, point, graph):
         for graph_point in graph.keys():

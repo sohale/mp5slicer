@@ -4,6 +4,7 @@ import slicer.config.printer_config as printer_config
 from slicer.commons.utils import distance as calulate_distance
 import sys
 
+
 class G(object):
     '''Vectorised calculation for handling G0, G1 extrusion calculation'''
     def __init__(self):
@@ -36,15 +37,15 @@ class G(object):
         def calculE_slow(point_0, point_1, layer_thickness):
             distance = calulate_distance(point_0, point_1)
             # layer_thickness is possible to change for each layer
-            section_surface = layer_thickness * config.nozzle_size 
+            section_surface = layer_thickness * config.nozzle_size
             volume = section_surface * distance
             filament_length = volume / config.crossArea
             return filament_length
 
         res = []
-        for i,j,k in zip(self.commands, 
-                        self.commands[1:], 
-                        extrusion_multiplier_list):
+        for i, j, k in zip(self.commands,
+                           self.commands[1:],
+                           extrusion_multiplier_list):
             res.append(calculE_slow(i, j, config.layer_thickness)*k)
         res = np.array(res)
         res = res.tolist()
@@ -55,16 +56,16 @@ class G(object):
         return self.E[index]
 
 '''
-Problems of gcode recorder, need to store lots of imformation in a list form, 
+Problems of gcode recorder, need to store lots of imformation in a list form,
 this uses too much of memory?
 
-And a specific index for commands 5,6,7,8, if this ever gets more, the code 
-will be messy. 
+And a specific index for commands 5,6,7,8, if this ever gets more, the code
+will be messy.
 
 '''
 class GcodeRecorder:
     ''' 
-    To save gcode into a list of commands and parameter for later 
+    To save gcode into a list of commands and parameter for later
     translation into actual gcode
     '''
     def __init__(self, gcode_filename="test.gcode"):
@@ -85,7 +86,7 @@ class GcodeRecorder:
         1 - write G1
         2 - write retract
         3 - write unretract
-        4 - write change z 
+        4 - write change z
         5 - rewrite speed signal
         6 - rewrite fan speed signal
         7 - comments type starts
@@ -93,7 +94,7 @@ class GcodeRecorder:
         9 - change extrusion multiplier
         10 - write G1 with speed change
         '''
-        self.commands = [] 
+        self.commands = []
 
         self.Z = []
         self.z_index = 0
@@ -120,7 +121,7 @@ class GcodeRecorder:
 
         self.g0 = self.prepare_g0_function()
         self.change_z = self.prepare_change_z_function()
-        # testing 
+        # testing
         self.X, self.Y = 0, 0
 
     def reset_E(self):
@@ -139,8 +140,10 @@ class GcodeRecorder:
                 extrusion_multiplier = self.extrusion_multiplier[extrusion_multiplier_index]
                 extrusion_multiplier_index += 1
 
-        extrusion_multiplier_list = extrusion_multiplier_list[1:] # hack : first one is always, prepare for calculE
+        # hack : first one is always G0, prepare for calculE
+        extrusion_multiplier_list = extrusion_multiplier_list[1:]
         return np.array(extrusion_multiplier_list)
+
     ########### prepare function for specific printer ###########
     @staticmethod
     def prepare_change_fanspeed_function():
@@ -160,6 +163,7 @@ class GcodeRecorder:
     def prepare_change_z_function():
         func = lambda z: "G0 Z{:.3f} F{}\n".format(z, config.z_movement_speed)
         return func
+
     ########### function to append information into gcode recorder ###########
     def append_retract(self):
         self.commands.append(2)
@@ -209,8 +213,8 @@ class GcodeRecorder:
         self.z_index += 1
         return instruction
 
-    @staticmethod
-    def get_startcode():
+    @property
+    def startcode(self):
 
         if printer_config.model == "r2x":
             start_code_name = "gcode_writer/r2xstart"
@@ -235,8 +239,8 @@ class GcodeRecorder:
         start_code.close()
         return start_string
 
-    @staticmethod
-    def get_endcode():
+    @property
+    def endcode(self):
         if printer_config.model == "r2x":
             end_code_name = "gcode_writer/r2xend"
         elif printer_config.model == "um2":
@@ -251,7 +255,7 @@ class GcodeRecorder:
         for line in end_code:
             end_string += line
         end_code.close()
-        return end_string    
+        return end_string
 
     # @staticmethod
     # def get_config():
@@ -306,7 +310,7 @@ class GcodeRecorder:
         # for i,j in zip(self.G.E, res):
         #     print(i,j)
 
-        instruction = self.get_startcode()
+        instruction = self.startcode
         instruction += "G1 F200 E{}\n".format(config.initial_extrusion)
         self.gcode_output.write(instruction)
         g_index = 0
@@ -359,6 +363,6 @@ class GcodeRecorder:
 
             self.gcode_output.write(instruction)
 
-        instruction = self.get_endcode()
+        instruction = self.endcode
         self.gcode_output.write(instruction)
         self.gcode_output.close()

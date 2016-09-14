@@ -22,10 +22,10 @@ def intersection_with_line(z, vertice_0, vertice_1):
     v_0_x, v_0_y, v_0_z = vertice_0
     v_1_x, v_1_y, v_1_z = vertice_1
 
-    if v_0_z < z: 
+    if v_0_z < z:
         if z < v_1_z:
             r = (z - v_0_z)/(v_1_z - v_0_z)
-            s = [v_0_x + (v_1_x - v_0_x)*r, 
+            s = [v_0_x + (v_1_x - v_0_x)*r,
                  v_0_y + (v_1_y - v_0_y)*r]
             return s
         elif z > v_1_z:
@@ -36,12 +36,14 @@ def intersection_with_line(z, vertice_0, vertice_1):
             raise StandardError("this should never happen")
     elif v_0_z == z:
         return [v_0_x, v_0_y]
-    elif z > v_1_z: # we know v_0_z > z  
+    elif z > v_1_z:  # we know v_0_z > z
         r = (z - v_1_z)/(v_0_z - v_1_z)
-        s = [v_1_x + (v_0_x - v_1_x)*r, 
+        s = [v_1_x + (v_0_x - v_1_x)*r,
              v_1_y + (v_0_y - v_1_y)*r]
         return s
-    elif z == v_1_z: # we know v_0_z > z and z <= v_1_z, the only possible way to has answer here is when z == v_1_z
+    # we know v_0_z > z and z <= v_1_z,
+    # the only possible way to has answer here is when z == v_1_z
+    elif z == v_1_z:
         if v_0_z < v_1_z: # order for trim dict
             return [v_0_x, v_1_x]
         else:
@@ -50,7 +52,7 @@ def intersection_with_line(z, vertice_0, vertice_1):
         return None
 
 def intersection_with_triangle(z, triangle):
-    # triangle is a 3*3 
+    # triangle is a 3*3
     assert isinstance(triangle, np.ndarray)
     # if(np.array_equal(triangle[0],triangle[1])):
     #     return []
@@ -66,7 +68,7 @@ def intersection_with_triangle(z, triangle):
     # if vertice_0[2] == z:
     #     if vertice_1[2] == z:
             # not necessary since the triangle are repaired
-            # if  vertice_2[2] != z: 
+            # if  vertice_2[2] != z:
             #     return [vertice_0,vertice_1]
             # else:
             #     return None
@@ -89,12 +91,12 @@ def intersection_with_triangle(z, triangle):
 
     intersection_point_0 = intersection_with_line(z, vertice_0, vertice_1)
 
-    if intersection_point_0 is not None :
+    if intersection_point_0 is not None:
         line.append(intersection_point_0)
 
 
     intersection_point_1 = intersection_with_line(z, vertice_1, vertice_2)
-    if intersection_point_0 == None: # line is empty so this must be one intersection point
+    if intersection_point_0 is None:  # line is empty so this must be one intersection point
             line.append(intersection_point_1)
     else:
         if intersection_point_1 is not None:
@@ -132,12 +134,24 @@ def truncate(f, n):
     return float('.'.join([i, (d+'0'*n)[:n]]))
 
 
-def slicer_from_mesh_as_dict_cy(mesh, slice_height_from=0, slice_height_to=100, slice_step=1):
-    return slicer_from_mesh_as_dict_cyth(mesh, slice_height_from, slice_height_to, slice_step, sliceplanes_height=[])
+def slicer_from_mesh_as_dict_cy(mesh,
+                                slice_height_from=0,
+                                slice_height_to=100,
+                                slice_step=1):
+
+    return slicer_from_mesh_as_dict_cyth(mesh,
+                                         slice_height_from,
+                                         slice_height_to,
+                                         slice_step,
+                                         sliceplanes_height=[])
 
 
 
-def slicer_from_mesh_as_dict(mesh, slice_height_from=0, slice_height_to=100, slice_step=1, sliceplanes_height=[]):
+def slicer_from_mesh_as_dict(mesh,
+                             slice_height_from=0,
+                             slice_height_to=100,
+                             slice_step=1,
+                             sliceplanes_height=[]):
 
     import datetime
     start_time = datetime.datetime.now()
@@ -148,7 +162,9 @@ def slicer_from_mesh_as_dict(mesh, slice_height_from=0, slice_height_to=100, sli
     if sliceplanes_height != []: # if empty
         sliceplanes_height = np.array(sliceplanes_height)
     else:
-        sliceplanes_height = np.arange(slice_height_from, slice_height_to, slice_step)
+        sliceplanes_height = np.arange(slice_height_from,
+                                       slice_height_to,
+                                       slice_step)
 
     slice_layers = [{} for i in range(len(sliceplanes_height))]
     plane_index_list = np.arange(len(slice_layers))
@@ -157,9 +173,10 @@ def slicer_from_mesh_as_dict(mesh, slice_height_from=0, slice_height_to=100, sli
     tri_min_list, tri_max_list = np.amin(z, axis=1), np.amax(z, axis=1)
     for triangle_index in range(len(mesh.triangles)):
         triangle = mesh.triangles[triangle_index]
-        tri_min, tri_max = tri_min_list[triangle_index], tri_max_list[triangle_index]
-
-        plane_index = plane_index_list[(tri_min<=sliceplanes_height)&(sliceplanes_height<=tri_max)]
+        tri_min = tri_min_list[triangle_index]
+        tri_max = tri_max_list[triangle_index]
+        plane_index = plane_index_list[(tri_min <= sliceplanes_height) & \
+                                       (sliceplanes_height <= tri_max)]
         intersect_planes_heights = sliceplanes_height[plane_index]
 
         for index, z in zip(plane_index, intersect_planes_heights):
@@ -213,41 +230,56 @@ def visualization_2d(slice_layers):
         row_now = int(np.floor(count/number_row))
         column_now = int(count % number_row)
         for line_segment in each_layer:
-            axarr[row_now, column_now].plot([line_segment[0][0], line_segment[1][0]], [line_segment[0][1], line_segment[1][1]])
+            axarr[row_now, column_now].plot(
+                [line_segment[0][0], line_segment[1][0]],
+                [line_segment[0][1], line_segment[1][1]])
+
         count += 1
 
     plt.show()
 
-def adaptive_slicing(mesh, default_layer_thickness, curvature_tol=0.6, cusp_height_tol=0.15, layer_thickness_choices=[0.2, 0.15, 0.1], does_visualize = False):
+def adaptive_slicing(mesh,
+                     default_layer_thickness,
+                     curvature_tol=0.6,
+                     cusp_height_tol=0.15,
+                     layer_thickness_choices=[0.2, 0.15, 0.1],
+                     does_visualize=False):
     assert len(layer_thickness_choices) == 3
 
     '''
-    This adative height calculation is based on cusp height and curvature, 
+    This adative height calculation is based on cusp height and curvature,
     it allows user for inputting three choice of layerthickness.
 
-    The idea is simple, if certain triangle has curvature larger than curvature_tol or cusp_height_tol larger than cusp_height_tol,
-    then if slice plane step trought this triangle, the slice plane should take a difference layer_thickness.
+    The idea is simple, if certain triangle has curvature larger
+    than curvature_tol or cusp_height_tol larger than cusp_height_tol,
+    then if slice plane step trought this triangle,
+    the slice plane should take a difference layer_thickness.
 
-    Note since cusp_height calculation involves layerThickness, but there is impossible to know the layerThickness beforehand, thus 
+    Note since cusp_height calculation involves layerThickness,
+    but there is impossible to know the layerThickness beforehand, thus
     an assume layerThickness is used for cusp_height approximation.
 
-    Explaination of cusp height can be found in paper Slicing_procedures_for_layered_manufacturing. 
-    Cusp height and curvature calculation formula is found in paper part orientation and build cost determination in layer maufacturing.
+    Explaination of cusp height can be found in paper
+    "Slicing_procedures_for_layered_manufacturing".
+
+    Cusp height and curvature calculation formula is found in paper
+    "part orientation and build cost determination in layer maufacturing".
     '''
     def extract_triangles_feature():
 
-        average_layer_thickness = 0.2 # this is just for approximate cusp_height calculation
+         # this is just for approximate cusp_height calculation
+        average_layer_thickness = 0.2 
         triangle_counter = 0
         triangle_feature_recorder = {}
 
         for triangle in mesh.triangles:
             tri_min, tri_max = min_max_z(triangle)
-            if tri_min != tri_max: # not consider weird triangle
+            if tri_min != tri_max:  # not consider weird triangle
                 triangle_feature = 0
 
                 normal = mesh.normals[triangle_counter]
                 normal = normal/np.linalg.norm(normal)
-                curvature = abs(np.dot(normal, [0,0,1]))
+                curvature = abs(np.dot(normal, [0, 0, 1]))
                 cusp_height = curvature * average_layer_thickness
                 triangle_counter += 1
 
@@ -268,17 +300,22 @@ def adaptive_slicing(mesh, default_layer_thickness, curvature_tol=0.6, cusp_heig
 
     # import itertools
     triangle_feature_recorder = extract_triangles_feature()
-    triangle_feature_recorder = [[i[0],i[1],triangle_feature_recorder[i]] for i in list(triangle_feature_recorder)]
+    triangle_feature_recorder = [[i[0], i[1], triangle_feature_recorder[i]] 
+                                  for i in list(triangle_feature_recorder)]
 
-    number_point = [i[0] for i in triangle_feature_recorder] + [i[1] for i in triangle_feature_recorder]
+    number_point = [i[0] for i in triangle_feature_recorder] + \
+                   [i[1] for i in triangle_feature_recorder]
     number_point = sorted(set(number_point))
 
     '''
     range_feature_list is a list with lists. 
-    For each list, it indicates the start range, end range and the feature of triangle, feature of triangle takes value 0, 1, 2.
+    For each list, it indicates the start range, 
+    end range and the feature of triangle, feature of triangle takes value 0, 1, 2.
+
     Feature of triangle is 0 if this trangle don't have high curvature and high cusp height.
     Feature of triangle is 1 if this trangle have either high curvature or high cusp height.
     Feature of triangle is 2 if this trangle have both high curvature and high cusp height.
+
     For example,
     range_feature_list = [[1,2,0],[3,5,2],[6,7,1]]
     Be aware that the third entry of each list is triangle feature, 
@@ -308,10 +345,10 @@ def adaptive_slicing(mesh, default_layer_thickness, curvature_tol=0.6, cusp_heig
         while current_height <= end:
             if start <= current_height:
                 '''
-                Since feature takes value 0, 1, 2 and it is decided to be 
+                Since feature takes value 0, 1, 2 and it is decided to be
                 coincident with the length of layer_thickness_choices and position.
                 '''
-                current_height += layer_thickness_choices[feature] 
+                current_height += layer_thickness_choices[feature]
                 slice_plane_height.append(current_height)
                 thickness_list.append(layer_thickness_choices[feature])
             else: 
@@ -320,7 +357,8 @@ def adaptive_slicing(mesh, default_layer_thickness, curvature_tol=0.6, cusp_heig
                 thickness_list.append(layer_thickness_choices[feature])
 
     # pass the range of range_feature_list but not reach the mesh zmax
-    while current_height < mesh.bounding_box().zmax - default_layer_thickness - 0.000001: # 0.000001 is for just in case the current_height is exactly the same to the top of the mesh
+    # 0.000001 is for just in case the current_height is exactly the same to the top of the mesh
+    while current_height < mesh.bounding_box().zmax - default_layer_thickness - 0.000001:
         current_height += default_layer_thickness
         slice_plane_height.append(current_height)
         thickness_list.append(layer_thickness_choices[feature])
@@ -328,8 +366,8 @@ def adaptive_slicing(mesh, default_layer_thickness, curvature_tol=0.6, cusp_heig
     ################### visualisation ###################
     if does_visualize:
         import matplotlib.pyplot as plt
-        from matplotlib import collections  as mc
-        lines = [((0,height),(5,height)) for height in slice_plane_height]
+        from matplotlib import collections as mc
+        lines = [((0, height), (5, height)) for height in slice_plane_height]
         c = []
         for thickness in thickness_list:
             if thickness == layer_thickness_choices[0]:
