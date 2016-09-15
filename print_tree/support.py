@@ -250,7 +250,7 @@ class Support_Vertical_lines(object):
                     if not pl.last_line_is_empty():
                         last_pointlast_point_unscaled = scale_point_from_clipper(pl.point_at_last_line())
 
-                        if calulate_distance(last_pointlast_point_unscaled, this_point_ucscaled) <= config.link_threshold: # new link line
+                        if calulate_distance(last_pointlast_point_unscaled, this_point_ucscaled) <= config.LINK_THRESHOLD: # new link line
                             pl.add_point_in_last_line(this_point_scaled)
                         else:
                             pl.new_line()
@@ -271,19 +271,19 @@ class Support_Vertical_lines(object):
         pyclipper_formatting = PolygonStack([])
 
         # offset points
-        # pyclipper_formatting.add_polygon_stack(ls.offset_point(config.line_width))
+        # pyclipper_formatting.add_polygon_stack(ls.offset_point(config.LINE_WIDTH))
          # remove the contacting layer, i.e. one empty layer between support and object
         pyclipper_formatting.add_polygon_stack(ls.offset_last_pointlast_point())
 
         if first_layer:
-            pyclipper_formatting.add_polygon_stack(ls.offset_line(config.line_width))
-            # pyclipper_formatting.add_polygon_stack(ls.offset_all(config.line_width))
-            # pyclipper_formatting.add_polygon_stack(ls.offset_all(config.line_width*2))
-            # pyclipper_formatting.add_polygon_stack(ls.offset_all(config.line_width*3))
-        #     pyclipper_formatting.add_polygon_stack(ls.offset_all(config.line_width*4))
+            pyclipper_formatting.add_polygon_stack(ls.offset_line(config.LINE_WIDTH))
+            # pyclipper_formatting.add_polygon_stack(ls.offset_all(config.LINE_WIDTH))
+            # pyclipper_formatting.add_polygon_stack(ls.offset_all(config.LINE_WIDTH*2))
+            # pyclipper_formatting.add_polygon_stack(ls.offset_all(config.LINE_WIDTH*3))
+        #     pyclipper_formatting.add_polygon_stack(ls.offset_all(config.LINE_WIDTH*4))
         # else:
-        #     pyclipper_formatting.add_polygon_stack(ls.offset_point(config.line_width))
-            # pyclipper_formatting.add_polygon_stack(ls.offset_point(config.line_width*2))
+        #     pyclipper_formatting.add_polygon_stack(ls.offset_point(config.LINE_WIDTH))
+            # pyclipper_formatting.add_polygon_stack(ls.offset_point(config.LINE_WIDTH*2))
         
         ls.clean()
         return [ls, pyclipper_formatting]
@@ -336,7 +336,7 @@ class Support:
         # threshold is cos(theta) value
         # if building_direction is vector [[0], [0], [1]]
         # if threshold is cos(-135 degree) = sqrt(2)/2 = -0.70710678118, means if angle is between 135 and 225 degree then these facet requres support
-        cos_overhang_angle = -1 * np.cos(config.supportOverhangangle)
+        cos_overhang_angle = -1 * np.cos(config.SUPPORT_OVERHANG_ANGLE)
         normal_cos_theta = self.mesh.dot_building_direction()
         exceed_threshold_mask = (normal_cos_theta<cos_overhang_angle) # boolean list indicating which triangle requires support 
 
@@ -469,7 +469,7 @@ class Support:
         if it hits then take it as a support point
         '''
 
-        offset = config.support_horizontal_offset_from_parts
+        offset = config.SUPPORT_HORIZONTAL_OFFSET_FROM_PARTS
 
         for group in self.groups:
             self.support_vertical_line_object.append_group()
@@ -483,19 +483,19 @@ class Support:
             max_z = np.max(self.mesh.max_z[group])
 
             # thin part sampling distance, rethink whether this is necessary
-            config.supportSamplingDistanceSmall = 0.5
+            config.SUPPORT_SAMPLING_DISTANCESmall = 0.5
             if max_x - min_x < offset:
-                x_sample = list(np.arange(min_x, max_x, config.supportSamplingDistanceSmall))
+                x_sample = list(np.arange(min_x, max_x, config.SUPPORT_SAMPLING_DISTANCESmall))
                 x_sample.append(max_x)
             else:
-                x_sample = list(np.arange(min_x + offset, max_x - offset, config.supportSamplingDistance))
+                x_sample = list(np.arange(min_x + offset, max_x - offset, config.SUPPORT_SAMPLING_DISTANCE))
                 if len(x_sample) > 0 and max_x - x_sample[-1] > offset:
                     x_sample.append(max_x)
             if max_y - min_y < offset:
-                y_sample = list(np.arange(min_y, max_y, config.supportSamplingDistanceSmall))
+                y_sample = list(np.arange(min_y, max_y, config.SUPPORT_SAMPLING_DISTANCESmall))
                 y_sample.append(max_y)
             else:
-                y_sample = list(np.arange(min_y + offset, max_y - offset, config.supportSamplingDistance))
+                y_sample = list(np.arange(min_y + offset, max_y - offset, config.SUPPORT_SAMPLING_DISTANCE))
                 if len(y_sample) > 0 and max_y - y_sample[-1] > offset:
                     y_sample.append(max_y)
 

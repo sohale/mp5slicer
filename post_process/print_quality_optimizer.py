@@ -4,7 +4,7 @@ from slicer.commons.utils import distance as calulate_distance
 
 
 def shorten_last_line(line_group, shorten_length):
-    if config.inner_boundary_coast_at_end_length <= 0:
+    if config.INNER_BOUNDARY_COAST_AT_END_LENGTH <= 0:
         return None
 
     import copy
@@ -104,13 +104,13 @@ def reorder_lines_close_to_point(line_group, point):
 
 def retract_at_point_inside_boundary(line_group,
                                      inner_boundary_first_point_list):
-    if config.outline_outside_in:
+    if config.OUTLINE_OUTSIDE_IN:
         return None
-    if not config.boundary_retraction_inside:
+    if not config.BOUNDARY_RETRACTION_INSIDE:
         return None
     if inner_boundary_first_point_list is None:
         return None
-    if config.shellSize == 0:
+    if config.SHELL_SIZE == 0:
         return None
     if inner_boundary_first_point_list == []:
         return None
@@ -122,12 +122,12 @@ def retract_at_point_inside_boundary(line_group,
         # outer_boundary_first_point = line_group.sub_lines[outer_boundary_index][0]
         for point in inner_boundary_first_point_list:
             distance = calulate_distance(point, line_group.sub_lines[0][0])
-            if config.line_width*(config.shellSize)-epsilon \
-                    <= distance <= config.line_width*config.shellSize+epsilon:
+            if config.LINE_WIDTH*(config.SHELL_SIZE)-epsilon \
+                    <= distance <= config.LINE_WIDTH*config.SHELL_SIZE+epsilon:
                 retraction_point = point  # this is the optimal retraction point so exit the loop
                 break
-            elif config.line_width*(config.shellSize-1) \
-                    <= distance <= config.line_width*(config.shellSize)+epsilon:
+            elif config.LINE_WIDTH*(config.SHELL_SIZE-1) \
+                    <= distance <= config.LINE_WIDTH*(config.SHELL_SIZE)+epsilon:
                 retraction_point = point
             else:
                 pass

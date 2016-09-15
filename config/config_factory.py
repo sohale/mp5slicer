@@ -15,7 +15,7 @@ class ConfigFactory(object):
             setattr(config, arg, arg_dictionnary[arg])
         setattr(config,
                 "crossArea",
-                ((config.filamentDiameter/2.0)**2) * math.pi)  # 6.37939
+                ((config.FILAMENT_DIAMETER/2.0)**2) * math.pi)  # 6.37939
 
 
 class PrinterConfig():

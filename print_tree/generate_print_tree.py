@@ -14,7 +14,7 @@ def generate_tree(polygon_layers, bounding_box):
     for layer in layer_list:
         layer.prepare_skins()
 
-        if config.useSupport:
+        if config.USE_SUPPORT:
             layer.prepare_support()
 
     for layer in layer_list:
@@ -22,7 +22,7 @@ def generate_tree(polygon_layers, bounding_box):
         layer.process_infill()
 
     # change the following logic to somewhere else
-    if config.useSupport:
+    if config.USE_SUPPORT:
         for layer_index in reversed(range(len(layer_list))):
             one_last_layer_index = layer_index - 1
             if layer_index == 0:
@@ -30,7 +30,7 @@ def generate_tree(polygon_layers, bounding_box):
             layer_list[one_last_layer_index].support_required_ps = \
                 layer_list[layer_index].process_support()
 
-        if config.one_empty_layer_between_support_and_model:
+        if config.ONE_EMPTY_LAYER_BETWEEN_SUPPORT_AND_MODEL:
             for layer_index in range(len(layer_list)):
                 one_above_layer_index = layer_index + 1
                 if layer_index == len(layer_list) - 1:
@@ -51,7 +51,7 @@ def generate_tree(polygon_layers, bounding_box):
                 layer_list[layer_index].support_required_ps = \
                     this_layer_support_required_ps
 
-    if config.raft is True:
+    if config.RAFT is True:
         raft_base = layer_list[0].get_raft_base()
         raft_layer = RaftLayer(True, False, bounding_box, raft_base)
         layer_list.insert(0, raft_layer)

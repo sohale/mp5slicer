@@ -2,81 +2,80 @@ import numpy as np
 
 # layerThickness = 0.2
 LAYER_THICKNESS = 0.2
-nozzle_size = 0.4  # for calculation extrusion
-line_width = 0.4  # for caluculating the offset for polygons
-extruder_temperature = 210
-bed_temperature = 70
-retractionLength = 4.5
-filamentDiameter = 2.85
-shellSize = 3
-firstLayerOffset = 0
-min_retraction_distance = 5
-useAdaptiveSlicing = False
-upSkinsCount = 4
-downSkinsCount = 3
+NOZZLE_SIZE = 0.4  # for calculation extrusion
+LINE_WIDTH = 0.4  # for caluculating the offset for polygons
+EXTRUDER_TEMPERATURE = 210
+BED_TEMPERATURE = 70
+RETRACTION_LENGTH = 4.5
+FILAMENT_DIAMETER = 2.85
+SHELL_SIZE = 3
+FIRST_LAYER_OFFSET = 0
+MIN_RETRACTION_DISTANCE = 5
+USE_ADAPTIVE_SLICING = False
+UP_SKINS_COUNT = 4
+DOWN_SKINS_COUNT = 3
 
 # travel speed
-z_movement_speed = 9000
-inAirSpeed = 9000
-retractionSpeed = 2400
-retractionSpeed = 2400
-speedRate =  1800
-infillSpeed  = 1800
-skinSpeed = 1800
-raftSpeed = 1800
-boundarySpeed = 1800
-innerboundarySpeed = 1800
-holeSpeed = 1800
-supportSpeed = 1800
+Z_MOVEMENT_SPEED = 9000
+IN_AIR_SPEED = 9000
+RETRACTION_SPEED = 2400
+SPEED_RATE = 1800
+INFILL_SPEED = 1800
+SKIN_SPEED = 1800
+RAFT_SPEED = 1800
+BOUNDARY_SPEED = 1800
+INNER_BOUNDARY_SPEED = 1800
+HOLE_SPEED = 1800
+SUPPORT_SPEED = 1800
 
 # fan speed
-hasControllableFanSpeed  = True
-default_fan_speed = 1
-exteriorFanSpeed = 1
-bridgeFanSpeed = 1
-interiorFanSpeed = 1
-supportFanSpeed = 1
-skirtFanSpeed = 1
-raftFanSpeed = 1
+HAS_CONTROLLABLE_FAN_SPEED = True
+DEFAULT_FAN_SPEED = 1
+EXTERIOR_FAN_SPEED = 1
+BRIDGE_FAN_SPEED = 1
+INTERIOR_FAN_SPEED = 1
+SUPPORT_FAN_SPEED = 1
+SKIRT_FAN_SPEED = 1
+RAFT_FAN_SPEED = 1
 
 # support
-useSupport = True
-supportSamplingDistance = 2
-link_threshold = 5*np.sqrt(2*(supportSamplingDistance**2))
-bed_support_strengthen_offset_number = 2
-bed_support_strengthen_layer_number = 2 # needs to be at least one
-supportOverhangangle = 85
-support_horizontal_offset_from_parts = 0.5
-support_area_enlarge_value = 0.4
-one_empty_layer_between_support_and_model = True
-support_line_angle = 0
-does_remove_small_area = True
-small_area = 5
+USE_SUPPORT = True
+SUPPORT_SAMPLING_DISTANCE = 2
+LINK_THRESHOLD = 5*np.sqrt(2*(SUPPORT_SAMPLING_DISTANCE**2))
+BED_SUPPORT_STRENGTHEN_OFFSET_NUMBER = 2
+BED_SUPPORT_STRENGTHEN_LAYER_NUMBER = 2 # needs to be at least one
+SUPPORT_OVERHANG_ANGLE = 85
+SUPPORT_HORIZONTAL_OFFSET_FROM_PARTS = 0.5
+SUPPORT_AREA_ENLARGE_VALUE = 0.4
+ONE_EMPTY_LAYER_BETWEEN_SUPPORT_AND_MODEL = True
+SUPPORT_LINE_ANGLE = 0
+DOES_REMOVE_SMALL_AREA = True
+SMALL_AREA = 5
 
-platform_bound = "brim"
-platform_bound_count = 3
-raft = False # raft very slow
-raftLayerThickness = 0.15
-extrusion_multiplier = 1.1
-initial_extrusion = 0.2
-toFile = False
+PLATFORM_BOUND = "brim"
+PLATFORM_BOUND_COUNT = 3
+RAFT = False # RAFT very slow
+RAFT_LAYER_THICKNESS = 0.15
+EXTRUSION_MULTIPLIER = 1.1
+INITIAL_EXTRUSION = 0.2
+TO_FILE = False
 
 # outline / boundary
-outline_outside_in = False
-boundary_starts_close_to_point = [150, 300]
-inner_boundary_coast_at_end_length = 0.5
-outer_boundary_coast_at_end_length = 0
-boundary_retraction_inside = True
+OUTLINE_OUTSIDE_IN = False
+BOUNDARY_STARTS_CLOSE_TO_POINT = [150, 300]
+INNER_BOUNDARY_COAST_AT_END_LENGTH = 0.5
+OUTER_BOUNDARY_COAST_AT_END_LENGTH = 0
+BOUNDARY_RETRACTION_INSIDE = True
 
 # new
-retraction_at_change_layer = True
+RETRACTION_AT_CHANGE_LAYER = True
 
 # first layer
-first_layer_line_width = 0.42
-first_layer_infillSpeed = 750
-first_layer_skinSpeed = 750
-first_layer_holeSpeed = 750
-first_layer_supportSpeed = 750
-first_layer_raftSpeed = 750
-first_layer_boundarySpeed = 750
-first_layer_thickness = 0.2 # only allow maximun two decimal places
+FIRST_LAYER_LINE_WIDTH = 0.42
+FIRST_LAYER_INFILL_SPEED = 750
+FIRST_LAYER_SKIN_SPEED = 750
+FIRST_LAYER_HOLE_SPEED = 750
+FIRST_LAYER_SUPPORT_SPEED = 750
+FIRST_LAYER_RAFT_SPEED = 750
+FIRST_LAYER_BOUNDARY_SPEED = 750
+FIRST_LAYER_THICKNESS = 0.2 # only allow maximun two decimal places

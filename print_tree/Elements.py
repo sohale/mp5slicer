@@ -17,21 +17,21 @@ class Outline(object):
 
             if len(polygons) != 0:
                 self.boundary = self.Boundary(
-                    self, SingleLine(polygons[0], config.line_width))
+                    self, SingleLine(polygons[0], config.LINE_WIDTH))
             else:
                 self.boundary = self.Boundary(
-                    self, SingleLine([], config.line_width))
+                    self, SingleLine([], config.LINE_WIDTH))
 
             self.holes = []
             for poly_index in range(1, len(polygons)):
                 self.holes.append(self.Hole(self,
                                             SingleLine(polygons[poly_index],
-                                            config.line_width)))
+                                            config.LINE_WIDTH)))
 
-            self.hole_polylines = LineGroup("hole", True, config.line_width)
+            self.hole_polylines = LineGroup("hole", True, config.LINE_WIDTH)
             self.inner_boundary_polylines = LineGroup("inner_boundary",
                                                      True,
-                                                     config.line_width)
+                                                     config.LINE_WIDTH)
             self.hole_shells = PolygonStack()
             self.boundary_shells = PolygonStack()
             self.inner_shells = PolygonStack()
@@ -41,20 +41,20 @@ class Outline(object):
         # self.innerbounds = self.get_innerbounds()
 
     def get_raft_base(self):
-        return PolygonStack(self.boundary.line.offset(config.line_width * 5))
+        return PolygonStack(self.boundary.line.offset(config.LINE_WIDTH * 5))
 
-    def get_platform_bound(self):
-        if config.platform_bound == "brim":
-            platform_bound = PolygonStack(self.boundary.line.offset(config.line_width))
+    def get_PLATFORM_BOUND(self):
+        if config.PLATFORM_BOUND == "brim":
+            PLATFORM_BOUND = PolygonStack(self.boundary.line.offset(config.LINE_WIDTH))
 
         else:
-            platform_bound = PolygonStack(self.boundary.line.offset(config.line_width*5))
-        return platform_bound
+            PLATFORM_BOUND = PolygonStack(self.boundary.line.offset(config.LINE_WIDTH*5))
+        return PLATFORM_BOUND
 
     def g_print(self):
         polylines = LineGroup("outline", False)
 
-        if config.outline_outside_in:
+        if config.OUTLINE_OUTSIDE_IN:
 
             # printing the outer line first, optimize the z-scar
             polylines.add_group(self.boundary.g_print())
@@ -91,9 +91,9 @@ class Outline(object):
         self.inner_shells = PolygonStack(previous_boundary_shell)
         self.inner_shells.add_polygon_stack(poly_hole_stack)
 
-        for i in range(1, config.shellSize, 1):
-            pstack = PolygonStack(self.boundary.line.offset(-i*config.line_width))
-            pstackhole = PolygonStack(offset(poly_hole_stack, i*config.line_width))
+        for i in range(1, config.SHELL_SIZE, 1):
+            pstack = PolygonStack(self.boundary.line.offset(-i*config.LINE_WIDTH))
+            pstackhole = PolygonStack(offset(poly_hole_stack, i*config.LINE_WIDTH))
 
             pc = pyclipper.Pyclipper()
             if not pstack.is_empty():
@@ -119,7 +119,7 @@ class Outline(object):
         if self.empty:
             return PolygonStack()
         else:
-            return PolygonStack(offset(self.inner_shells, -config.line_width/2))
+            return PolygonStack(offset(self.inner_shells, -config.LINE_WIDTH/2))
 
     def get_inner_shells(self):
         if self.empty:
@@ -163,7 +163,7 @@ class Outline(object):
         def __init__(self, outline, line):
             self.outline = outline
             self.line = line
-            self.polylines = LineGroup("hole", True, config.line_width)
+            self.polylines = LineGroup("hole", True, config.LINE_WIDTH)
 
         def g_print(self):
             self.polylines.add_chain(Outline.process_polyline(self.line.get_contour()))
@@ -179,7 +179,7 @@ class Outline(object):
         def __init__(self, outline, line):
             self.outline = outline
             self.line = line
-            self.polylines = LineGroup("boundary", True, config.line_width)
+            self.polylines = LineGroup("boundary", True, config.LINE_WIDTH)
 
         def g_print(self):
             self.polylines.add_chain(Outline.process_polyline(self.line.get_contour()))

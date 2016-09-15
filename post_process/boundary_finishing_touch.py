@@ -12,10 +12,10 @@ class BoundaryFinish(TreeTask):
 
     def boundary(self, line_group):
         reorder_lines_close_to_point(line_group,
-            config.boundary_starts_close_to_point)
+            config.BOUNDARY_STARTS_CLOSE_TO_POINT)
 
         shorten_last_line(line_group,
-            config.outer_boundary_coast_at_end_length)
+            config.OUTER_BOUNDARY_COAST_AT_END_LENGTH)
 
         retract_at_point_inside_boundary(line_group,
             self.inner_boundary_last_points)
@@ -47,7 +47,7 @@ class BoundaryFinish(TreeTask):
             #     self.inner_boundary_last_points.append(i)
 
         reorder_lines_close_to_point(line_group,
-            config.boundary_starts_close_to_point)
+            config.BOUNDARY_STARTS_CLOSE_TO_POINT)
 
         shorten_last_line(line_group,
-            config.inner_boundary_coast_at_end_length)
+            config.INNER_BOUNDARY_COAST_AT_END_LENGTH)

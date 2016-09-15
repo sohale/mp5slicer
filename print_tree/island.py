@@ -41,8 +41,8 @@ class Island(object):
         self.process_outlines(self.polygons)
         self.process_shells()
 
-    def get_platform_bound(self):
-        return self.outline.get_platform_bound()
+    def get_PLATFORM_BOUND(self):
+        return self.outline.get_PLATFORM_BOUND()
 
     def get_raft_base(self):
         return self.outline.get_raft_base()
@@ -126,10 +126,10 @@ class Island(object):
 
         top_layers_indexes_to_agregate = \
             range(self.layer_index,
-                  min(self.layer_index + config.upSkinsCount, len(self.layers)))
+                  min(self.layer_index + config.UP_SKINS_COUNT, len(self.layers)))
 
         bottom_layers_indexes_to_agregate = \
-            range(max(self.layer_index - config.downSkinsCount, 0),
+            range(max(self.layer_index - config.DOWN_SKINS_COUNT, 0),
                   self.layer_index+1)
 
         upskins = PolygonStack()

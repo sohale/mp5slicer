@@ -19,7 +19,7 @@ class GCodeEnvironment(object):
 
         self.X = 0
         self.Y = 0
-        self.Z = config.firstLayerOffset
+        self.Z = config.FIRST_LAYER_OFFSET
 
     def truncate(self,f, n):
         '''Truncates/pads a float f to n decimal places without rounding'''
@@ -41,13 +41,13 @@ class GCodeEnvironment(object):
             B[i] = self.truncate(A[i],3)
         A = B
         distance = self.calculDis(A)
-        if distance > config.min_retraction_distance and retract:
+        if distance > config.MIN_RETRACTION_DISTANCE and retract:
             instruction = self.retract()
 
-            instruction +=  "G0" + " X"+str(A[0]) + " Y"+str(A[1]) + " Z"+str(self.truncate(self.Z,3)) +" F"+str(self.settings.inAirSpeed)+"\n"
+            instruction +=  "G0" + " X"+str(A[0]) + " Y"+str(A[1]) + " Z"+str(self.truncate(self.Z,3)) +" F"+str(self.settings.IN_AIR_SPEED)+"\n"
             instruction += self.unretract()
         else :
-            instruction =  "G0" + " X"+str(A[0]) + " Y"+str(A[1]) + " Z"+str(self.truncate(self.Z,3)) + " F"+str(self.settings.inAirSpeed)+"\n"
+            instruction =  "G0" + " X"+str(A[0]) + " Y"+str(A[1]) + " Z"+str(self.truncate(self.Z,3)) + " F"+str(self.settings.IN_AIR_SPEED)+"\n"
 
 
 
@@ -80,7 +80,7 @@ class GCodeEnvironment(object):
         if isinstance(A,str):
             raise RuntimeError
         if speed == 0:
-            self.F = self.settings.speedRate
+            self.F = self.settings.SPEED_RATE
         else:
             self.F = speed
 
@@ -102,7 +102,7 @@ class GCodeEnvironment(object):
     # a simple instrcuction that will retract filament
     # call the caller: changeLayer (or nextLayer)
     def retractFilament(self, retraction):
-        return "G1 F"+str(self.settings.retractionSpeed) + " E" + str( max(0, (self.truncate(self.E, 4) - retraction) ) ) + "\n"
+        return "G1 F"+str(self.settings.RETRACTION_SPEED) + " E" + str( max(0, (self.truncate(self.E, 4) - retraction) ) ) + "\n"
 
 
     def volumeInLinear(self, A, B):

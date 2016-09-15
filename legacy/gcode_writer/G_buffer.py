@@ -32,7 +32,7 @@ class G_buffer(object):
             gcode_output = sys.stdout
 
         instruction = gcodeEnvironment.startcode(printer_config.model)
-        instruction += "G1 F200 E" + str(config.initial_extrusion)
+        instruction += "G1 F200 E" + str(config.INITIAL_EXTRUSION)
         gcode_output.write(instruction)
 
         # @profile
@@ -44,7 +44,7 @@ class G_buffer(object):
                     gcode_output.write(gcodeEnvironment.goToNextPoint(line[0],True))
                     # for point_index in range(1,len(line)-1):
                     for point_index in range(1,len(line)):
-                        instruction = gcodeEnvironment.drawToNextPoint(line[point_index], config.LAYER_THICKNESS, config.boundarySpeed, config.exteriorFanSpeed)
+                        instruction = gcodeEnvironment.drawToNextPoint(line[point_index], config.LAYER_THICKNESS, config.BOUNDARY_SPEED, config.EXTERIOR_FAN_SPEED)
                         gcode_output.write(instruction)
                     # gcode_output.write(gcodeEnvironment.goToNextPoint(line[-1],True))
                         point_in_each_line_counter += 1
@@ -57,7 +57,7 @@ class G_buffer(object):
                 if len(line) > 0:
                     gcode_output.write(gcodeEnvironment.goToNextPoint(line[0], True))
                     for point_index in range(1, len(line)):
-                        instruction = gcodeEnvironment.drawToNextPoint(line[point_index], config.LAYER_THICKNESS, config.holeSpeed, config.exteriorFanSpeed)
+                        instruction = gcodeEnvironment.drawToNextPoint(line[point_index], config.LAYER_THICKNESS, config.HOLE_SPEED, config.EXTERIOR_FAN_SPEED)
                         gcode_output.write(instruction)
             self.skip_retraction = False
 
@@ -67,23 +67,23 @@ class G_buffer(object):
                 if len(line) > 0:
                     if self.skip_retraction:
                         dist = gcodeEnvironment.calculDis(line[0])
-                        if dist < config.line_width * 2.5:
+                        if dist < config.LINE_WIDTH * 2.5:
                             instruction = gcodeEnvironment.drawToNextPoint(line[0], config.LAYER_THICKNESS,
-                                                             config.infillSpeed, config.interiorFanSpeed)
+                                                             config.INFILL_SPEED, config.INTERIOR_FAN_SPEED)
                             gcode_output.write(instruction)
                         else:
                             gcode_output.write(gcodeEnvironment.goToNextPoint(line[0],False))
                             self.skip_retraction = False
                     else:
                         dist = gcodeEnvironment.calculDis(line[0])
-                        if dist < config.line_width * 2.5:
+                        if dist < config.LINE_WIDTH * 2.5:
                             instruction = gcodeEnvironment.drawToNextPoint(line[0], config.LAYER_THICKNESS,
-                                                             config.infillSpeed, config.interiorFanSpeed)
+                                                             config.INFILL_SPEED, config.INTERIOR_FAN_SPEED)
                             gcode_output.write(instruction)
                         else:
                             gcode_output.write(gcodeEnvironment.goToNextPoint(line[0], True))
                     for point_index in range(1,len(line)):
-                        instruction = gcodeEnvironment.drawToNextPoint(line[point_index], config.LAYER_THICKNESS, config.infillSpeed, config.interiorFanSpeed)
+                        instruction = gcodeEnvironment.drawToNextPoint(line[point_index], config.LAYER_THICKNESS, config.INFILL_SPEED, config.INTERIOR_FAN_SPEED)
                         gcode_output.write(instruction)
 
         # @profile
@@ -92,23 +92,23 @@ class G_buffer(object):
                 if len(line) > 0:
                     if self.skip_retraction:
                         dist = gcodeEnvironment.calculDis(line[0])
-                        if dist < config.line_width * 2.5:
+                        if dist < config.LINE_WIDTH * 2.5:
                             instruction = gcodeEnvironment.drawToNextPoint(line[0], config.LAYER_THICKNESS,
-                                                             config.infillSpeed, config.interiorFanSpeed)
+                                                             config.INFILL_SPEED, config.INTERIOR_FAN_SPEED)
                             gcode_output.write(instruction)
                         else:
                             gcode_output.write(gcodeEnvironment.goToNextPoint(line[0],False))
                             self.skip_retraction = False
                     else:
                         dist = gcodeEnvironment.calculDis(line[0])
-                        if dist < config.line_width * 2.5:
+                        if dist < config.LINE_WIDTH * 2.5:
                             instruction = gcodeEnvironment.drawToNextPoint(line[0], config.LAYER_THICKNESS,
-                                                             config.infillSpeed, config.interiorFanSpeed)
+                                                             config.INFILL_SPEED, config.INTERIOR_FAN_SPEED)
                             gcode_output.write(instruction)
                         else:
                             gcode_output.write(gcodeEnvironment.goToNextPoint(line[0], True))
                     for point_index in range(1,len(line)):
-                        instruction = gcodeEnvironment.drawToNextPoint(line[point_index], config.LAYER_THICKNESS , config.skinSpeed, config.interiorFanSpeed)
+                        instruction = gcodeEnvironment.drawToNextPoint(line[point_index], config.LAYER_THICKNESS , config.SKIN_SPEED, config.INTERIOR_FAN_SPEED)
                         gcode_output.write(instruction)
 
         def print_support(support):
@@ -120,7 +120,7 @@ class G_buffer(object):
                     else:
                         gcode_output.write(gcodeEnvironment.goToNextPoint(line[0], True))
                     for point_index in range(1,len(line)):
-                        instruction = gcodeEnvironment.drawToNextPoint(line[point_index], config.LAYER_THICKNESS, config.supportSpeed, config.supportFanSpeed)
+                        instruction = gcodeEnvironment.drawToNextPoint(line[point_index], config.LAYER_THICKNESS, config.SUPPORT_SPEED, config.SUPPORT_FAN_SPEED)
                         gcode_output.write(instruction)
             self.skip_retraction = False
 
@@ -130,7 +130,7 @@ class G_buffer(object):
                     gcode_output.write(gcodeEnvironment.goToNextPoint(line[0],True))
                     for point_index in range(1,len(line)-1):
                     # for point_index in range(1,len(line)):
-                        instruction = gcodeEnvironment.drawToNextPoint(line[point_index], config.LAYER_THICKNESS, config.boundarySpeed, config.exteriorFanSpeed)
+                        instruction = gcodeEnvironment.drawToNextPoint(line[point_index], config.LAYER_THICKNESS, config.BOUNDARY_SPEED, config.EXTERIOR_FAN_SPEED)
                         gcode_output.write(instruction)
                     gcode_output.write(gcodeEnvironment.goToNextPoint(line[-1],True))
 
@@ -141,7 +141,7 @@ class G_buffer(object):
                 if len(line) > 0:
                     gcode_output.write(gcodeEnvironment.goToNextPoint(line[0], True))
                     for point_index in range(1, len(line)):
-                        instruction = gcodeEnvironment.drawToNextPoint(line[point_index], config.LAYER_THICKNESS, config.raftSpeed, 0.2)
+                        instruction = gcodeEnvironment.drawToNextPoint(line[point_index], config.LAYER_THICKNESS, config.RAFT_SPEED, 0.2)
                         gcode_output.write(instruction)
                         self.previousPos = line[point_index]
             self.skip_retraction = False
@@ -151,20 +151,20 @@ class G_buffer(object):
                 if len(line) > 0:
                     gcode_output.write(gcodeEnvironment.goToNextPoint(line[0], True))
                     for point_index in range(1, len(line)):
-                        instruction = gcodeEnvironment.drawToNextPoint(line[point_index], config.raftLayerThickness, config.raftSpeed, 0)
+                        instruction = gcodeEnvironment.drawToNextPoint(line[point_index], config.RAFT_LAYER_THICKNESS, config.RAFT_SPEED, 0)
                         gcode_output.write(instruction)
                         self.previousPos = line[point_index]
             self.skip_retraction = False
 
         def print_top_raft(raft):
-            config.extrusion_multiplier = 0.8
+            config.EXTRUSION_MULTIPLIER = 0.8
             for line in raft.sub_lines:
                 if len(line) > 0:
                     gcode_output.write(gcodeEnvironment.goToNextPoint(line[0], True))
                     for point_index in range(1, len(line)):
                         instruction = gcodeEnvironment.drawToNextPoint(line[point_index],
-                                                                       config.raftLayerThickness,
-                                                                       config.raftSpeed, 0)
+                                                                       config.RAFT_LAYER_THICKNESS,
+                                                                       config.RAFT_SPEED, 0)
                         gcode_output.write(instruction)
                         self.previousPos = line[point_index]
             self.wait_point = raft.sub_lines[0][0]
@@ -202,21 +202,21 @@ class G_buffer(object):
             switch[node.type](node)
 
         def print_raft_layer(node):
-            config.extrusion_multiplier = 1.1
-            gcodeEnvironment.Z += config.raftLayerThickness
+            config.EXTRUSION_MULTIPLIER = 1.1
+            gcodeEnvironment.Z += config.RAFT_LAYER_THICKNESS
             for node in node.sub_lines:
                 gotroughgroup(node)
 
             config.reset()
 
         def print_contact_layer(node):
-            config.infillSpeed = 1100
-            config.skinSpeed = 1000
-            config.boundarySpeed = 1000
-            config.holeSpeed = 1000
-            config.exteriorFanSpeed = 1
-            config.interiorFanSpeed = 1
-            config.extrusion_multiplier = 1.2
+            config.INFILL_SPEED = 1100
+            config.SKIN_SPEED = 1000
+            config.BOUNDARY_SPEED = 1000
+            config.HOLE_SPEED = 1000
+            config.EXTERIOR_FAN_SPEED = 1
+            config.INTERIOR_FAN_SPEED = 1
+            config.EXTRUSION_MULTIPLIER = 1.2
 
             gcodeEnvironment.Z += config.LAYER_THICKNESS + 0.2
 
@@ -232,11 +232,11 @@ class G_buffer(object):
         # @profile
         def print_layer(node):
             if self.layer_index < 2:
-                config.infillSpeed  = 1500
-                config.skinSpeed = 1500
-                config.boundarySpeed = 1500
-                config.holeSpeed = 1500
-                config.supportSpeed = 1500
+                config.INFILL_SPEED  = 1500
+                config.SKIN_SPEED = 1500
+                config.BOUNDARY_SPEED = 1500
+                config.HOLE_SPEED = 1500
+                config.SUPPORT_SPEED = 1500
 
             # allow change of layerThickness for each layer
             if self.layerThickness_list: # open happen if it is adaptive slicing
@@ -273,7 +273,7 @@ class G_buffer(object):
 
 
 
-        # gcode_output.write(gcodeEnvironment.retractFilament(config.retractionLength))
+        # gcode_output.write(gcodeEnvironment.retractFilament(config.RETRACTION_LENGTH))
         gcode_output.write(gcodeEnvironment.endcode(printer_config.model))
         gcode_output.close()
 

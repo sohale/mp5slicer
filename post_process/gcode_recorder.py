@@ -26,7 +26,7 @@ class G(object):
 
         distance = np.linalg.norm(commands-commands_next_point, axis=1)
         # layer_thickness is possible to change for each layer
-        section_surface = layer_thickness * config.nozzle_size
+        section_surface = layer_thickness * config.NOZZLE_SIZE
         volume = section_surface * distance * extrusion_multiplier_list
         filament_length = volume / config.crossArea
         self.E = filament_length.tolist()
@@ -37,7 +37,7 @@ class G(object):
         def calculE_slow(point_0, point_1, layer_thickness):
             distance = calulate_distance(point_0, point_1)
             # layer_thickness is possible to change for each layer
-            section_surface = layer_thickness * config.nozzle_size
+            section_surface = layer_thickness * config.NOZZLE_SIZE
             volume = section_surface * distance
             filament_length = volume / config.crossArea
             return filament_length
@@ -73,7 +73,7 @@ class GcodeRecorder(object):
         self.E = 0
         self.gcode_filename = gcode_filename
 
-        if config.toFile:
+        if config.TO_FILE:
             self.gcode_output = open(self.gcode_filename, "w")
         else:
             self.gcode_output = sys.stdout
@@ -116,8 +116,8 @@ class GcodeRecorder(object):
 
         self.extrusion_multiplier = []
 
-        self.retract_string = "G92 E0\nG1 E-4.0000 F{}\n".format(config.retractionSpeed)
-        self.unretract_string = "G1 E0.0000 F{}\nG92 E0\n".format(config.retractionSpeed)
+        self.retract_string = "G92 E0\nG1 E-4.0000 F{}\n".format(config.RETRACTION_SPEED)
+        self.unretract_string = "G1 E0.0000 F{}\nG92 E0\n".format(config.RETRACTION_SPEED)
 
         self.g0 = self.prepare_g0_function()
         self.change_z = self.prepare_change_z_function()
@@ -130,7 +130,7 @@ class GcodeRecorder(object):
     def make_extrusion_multiplier_array(self):
         extrusion_multiplier_index = 0
         extrusion_multiplier_list = []
-        extrusion_multiplier = config.extrusion_multiplier
+        extrusion_multiplier = config.EXTRUSION_MULTIPLIER
         for i in self.commands:
             if i == 0:
                 extrusion_multiplier_list.append(0)
@@ -156,12 +156,12 @@ class GcodeRecorder(object):
     def prepare_g0_function():
         func = lambda x, y: "G0 X{:.3f} Y{:.3f} F{}\n".format(x,
                                                               y,
-                                                              config.inAirSpeed)
+                                                              config.IN_AIR_SPEED)
         return func
 
     @staticmethod
     def prepare_change_z_function():
-        func = lambda z: "G0 Z{:.3f} F{}\n".format(z, config.z_movement_speed)
+        func = lambda z: "G0 Z{:.3f} F{}\n".format(z, config.Z_MOVEMENT_SPEED)
         return func
 
     ########### function to append information into gcode recorder ###########
@@ -219,17 +219,17 @@ class GcodeRecorder(object):
         if printer_config.model == "r2x":
             start_code_name = "gcode_writer/r2xstart"
             start_string = "M104 S{} T1 (set extruder temperature)\n".format(
-                config.extruder_temperature)
+                config.EXTRUDER_TEMPERATURE)
 
         elif printer_config.model == "um2":
             start_code_name = "gcode_writer/um2_startcode"
             start_string = "M140 S{}\nM109 S{}\n".format(
-                config.bed_temperature, 
-                config.extruder_temperature)
+                config.BED_TEMPERATURE, 
+                config.EXTRUDER_TEMPERATURE)
 
         elif printer_config.model == "umo":
             start_code_name = "gcode_writer/startcode"
-            start_string = "M109 S{}\n".format(config.extruder_temperature)
+            start_string = "M109 S{}\n".format(config.EXTRUDER_TEMPERATURE)
         else:
             raise NotImplementedError("only support r2x, um2, umo")
 
@@ -297,8 +297,8 @@ class GcodeRecorder(object):
     # @staticmethod
     # def calculE(A, B, layer_thickness):
     #     distance = np.sqrt( (pow((A[0]-B[0]),2)) + pow((A[1]-B[1]),2))
-    #     section_surface = layer_thickness * config.nozzle_size # layer_thickness is possible to change for each layer
-    #     volume = section_surface * distance * config.extrusion_multiplier
+    #     section_surface = layer_thickness * config.NOZZLE_SIZE # layer_thickness is possible to change for each layer
+    #     volume = section_surface * distance * config.EXTRUSION_MULTIPLIER
     #     filament_length = volume / config.crossArea
     #     return filament_length
 
@@ -311,7 +311,7 @@ class GcodeRecorder(object):
         #     print(i,j)
 
         instruction = self.startcode
-        instruction += "G1 F200 E{}\n".format(config.initial_extrusion)
+        instruction += "G1 F200 E{}\n".format(config.INITIAL_EXTRUSION)
         self.gcode_output.write(instruction)
         g_index = 0
         for commands_identifier in self.commands:

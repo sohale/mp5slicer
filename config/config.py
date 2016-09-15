@@ -11,47 +11,82 @@ def reset():
 # these parameters are here only for autocompletion,
 # they will be overwritten with default configuration
 # and personnal configuration
-layerThickness = None
-line_width = None
-temperature = None
-inAirSpeed = None
-retractionSpeed = None
-retractionLength = None
-speedRate = None
-filamentDiameter = None
-shellSize = None
-firstLayerOffset = None
-infillSpeed = None
-supportSpeed = None
-skinSpeed = None
-raftSpeed = None
-boundarySpeed = None
-holeSpeed = None
-shellSpeed = None
-min_retraction_distance = None
-default_fan_speed = None
-hasControllableFanSpeed = None
-useAdaptiveSlicing = None
-useSupport = None
-exteriorFanSpeed = None
-bridgeFanSpeed = None
-interiorFanSpeed = None
-supportFanSpeed = None
-skirtFanSpeed = None
-raftFanSpeed = None
-upSkinsCount = None
-downSkinsCount = None
 
-supportSamplingDistance = None
-supportOverhangangle = None
-link_threshold = None
-bed_support_strengthen_number = None
+LAYER_THICKNESS = None
+NOZZLE_SIZE = None
+LINE_WIDTH = None
+EXTRUDER_TEMPERATURE = None
+BED_TEMPERATURE = None
+RETRACTION_LENGTH = None
+FILAMENT_DIAMETER = None
+SHELL_SIZE = None
+FIRST_LAYER_OFFSET = None
+MIN_RETRACTION_DISTANCE = None
+USE_ADAPTIVE_SLICING = None
+UP_SKINS_COUNT = None
+DOWN_SKINS_COUNT = None
 
-platform_bound = None
-platform_bound_count = None
-raft = None
-raftLayerThickness = None
-extrusion_multiplier = None
-initial_extrusion = None
-crossArea = None
-toFile = False
+# travel speed
+Z_MOVEMENT_SPEED = None
+IN_AIR_SPEED = None
+RETRACTION_SPEED = None
+SPEED_RATE = None
+INFILL_SPEED = None
+SKIN_SPEED = None
+RAFT_SPEED = None
+BOUNDARY_SPEED = None
+INNER_BOUNDARY_SPEED = None
+HOLE_SPEED = None
+SUPPORT_SPEED = None
+
+# fan speed
+HAS_CONTROLLABLE_FAN_SPEED = None
+DEFAULT_FAN_SPEED = None
+EXTERIOR_FAN_SPEED = None
+BRIDGE_FAN_SPEED = None
+INTERIOR_FAN_SPEED = None
+SUPPORT_FAN_SPEED = None
+SKIRT_FAN_SPEED = None
+RAFT_FAN_SPEED = None
+
+# support
+USE_SUPPORT = None
+SUPPORT_SAMPLING_DISTANCE = None
+LINK_THRESHOLD = None
+BED_SUPPORT_STRENGTHEN_OFFSET_NUMBER = None
+BED_SUPPORT_STRENGTHEN_LAYER_NUMBER = None
+SUPPORT_OVERHANG_ANGLE = None
+SUPPORT_HORIZONTAL_OFFSET_FROM_PARTS = None
+SUPPORT_AREA_ENLARGE_VALUE = None
+ONE_EMPTY_LAYER_BETWEEN_SUPPORT_AND_MODEL = None
+SUPPORT_LINE_ANGLE = None
+DOES_REMOVE_SMALL_AREA = None
+SMALL_AREA = None
+
+PLATFORM_BOUND = None
+PLATFORM_BOUND_COUNT = None
+RAFT = None
+RAFT_LAYER_THICKNESS = None
+EXTRUSION_MULTIPLIER = None
+INITIAL_EXTRUSION = None
+TO_FILE = None
+
+# outline / boundary
+OUTLINE_OUTSIDE_IN = None
+BOUNDARY_STARTS_CLOSE_TO_POINT = None
+INNER_BOUNDARY_COAST_AT_END_LENGTH = None
+OUTER_BOUNDARY_COAST_AT_END_LENGTH = None
+BOUNDARY_RETRACTION_INSIDE = None
+
+# new
+RETRACTION_AT_CHANGE_LAYER = None
+
+# first layer
+FIRST_LAYER_LINE_WIDTH = None
+FIRST_LAYER_INFILL_SPEED = None
+FIRST_LAYER_SKIN_SPEED = None
+FIRST_LAYER_HOLE_SPEED = None
+FIRST_LAYER_SUPPORT_SPEED = None
+FIRST_LAYER_RAFT_SPEED = None
+FIRST_LAYER_BOUNDARY_SPEED = None
+FIRST_LAYER_THICKNESS = None

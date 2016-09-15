@@ -15,24 +15,24 @@ class RaftLayer(object):
     def G_print(self):
         polylines = LineGroup("raft_layer", False)
         if self.is_top_raft:
-            raft_polylines = LineGroup("top_raft", True, config.line_width)
+            raft_polylines = LineGroup("top_raft", True, config.LINE_WIDTH)
         # elif self.is_bottom_raft:
-        #     raft_polylines = LineGroup("bottom_raft", True, config.line_width)
+        #     raft_polylines = LineGroup("bottom_raft", True, config.LINE_WIDTH)
         else:
-            raft_polylines = LineGroup("raft", True, config.line_width)
+            raft_polylines = LineGroup("raft", True, config.LINE_WIDTH)
 
         polylines.add_group(raft_polylines)
 
         x_or_y = False
 
         if self.is_bottom_raft:
-            linear_infill_result = linear_infill2(config.line_width,
+            linear_infill_result = linear_infill2(config.LINE_WIDTH,
                                                   135,
                                                   self.BBox)
 
             infill_pattern = LineStack(scale_line_to_clipper(linear_infill_result))
         else:
-            linear_infill_result = linear_infill2(config.line_width*2,
+            linear_infill_result = linear_infill2(config.LINE_WIDTH*2,
                                                   135,
                                                   self.BBox)
 

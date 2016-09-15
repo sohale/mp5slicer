@@ -193,7 +193,7 @@ class PolygonStack(object):
             total_area += pyclipper.Area(scale_line_from_clipper(polygon))
         return total_area
 
-    def remove_small_polygons(self, small_area_threshold):
+    def remove_small_polygons(self, SMALL_AREA_threshold):
         polygons = []
         for polygon in self.polygons:
             if pyclipper.Area(polygon) > 5:

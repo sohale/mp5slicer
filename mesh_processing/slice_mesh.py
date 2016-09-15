@@ -36,7 +36,7 @@ def slice_mesh(stl_mesh):
     # this_mesh.translate([90,130,0])
     bounding_box = this_mesh.bounding_box()
 
-    if config.useAdaptiveSlicing:
+    if config.USE_ADAPTIVE_SLICING:
         adaptive_height_list, adaptive_thickness = adaptive_slicing(
             this_mesh, config.LAYER_THICKNESS, curvature_tol=0.6,
             cusp_height_tol=0.15, layer_thickness_choices=[0.2, 0.15, 0.1],
@@ -62,7 +62,7 @@ def slice_mesh(stl_mesh):
         layers_as_polygons[layer_index] = scale_list_to_clipper(
             layers_as_polygons[layer_index])
 
-    if config.useAdaptiveSlicing:
+    if config.USE_ADAPTIVE_SLICING:
         return layers_as_polygons, this_mesh, bounding_box, adaptive_thickness
     else:
         return layers_as_polygons, this_mesh, bounding_box
