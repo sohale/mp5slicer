@@ -6,11 +6,7 @@ from slicer.commons.utils import distance as calulate_distance
 
 ############################ GCodeEnvironment Taken from old slicer without any changes ###########################
 
-class GCodeEnvironment:
-
-
-
-
+class GCodeEnvironment(object):
 
     def __init__(self):
 

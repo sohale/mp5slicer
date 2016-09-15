@@ -2,7 +2,7 @@ import inspect
 import os
 import sys
 sys.path.append(os.path.split(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))))[0])
-from slicer.config.config_factory import config_factory
+from slicer.config.config_factory import ConfigFactory
 from slicer.Print_pipeline import print_mesh
 
 def print_from_file():
@@ -10,7 +10,7 @@ def print_from_file():
     args = args[1:]
     stl_file_name = args[0]
     conf_file_name = args[1]
-    config_factory(conf_file_name)
+    ConfigFactory(conf_file_name)
     import slicer.config.config as config
     config.reset()
 

@@ -15,7 +15,7 @@ class G(object):
 
     def calculE(self, extrusion_multiplier_list):
         commands = np.array(self.commands)[:, :2]
-        layer_thickness = np.array([config.layerThickness for i in
+        layer_thickness = np.array([config.LAYER_THICKNESS for i in
                                    range(len(commands)-1)])
 
         # truncation
@@ -63,7 +63,7 @@ And a specific index for commands 5,6,7,8, if this ever gets more, the code
 will be messy.
 
 '''
-class GcodeRecorder:
+class GcodeRecorder(object):
     ''' 
     To save gcode into a list of commands and parameter for later
     translation into actual gcode

@@ -1,31 +1,14 @@
 import pyclipper
-import inspect, os
+import inspect
+import os
 import sys
+from collections import namedtuple
 sys.path.append(os.path.split(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))))[0])
-from slicer.commons.utils import scale_value_to_clipper, scale_value_from_clipper
+from slicer.commons.utils import scale_value_to_clipper, \
+                                 scale_value_from_clipper
 
 
-
-def diff_layers( _subj,_clip,closed):
-
-
-    pc = pyclipper.Pyclipper()
-    pc.AddPaths(_clip, pyclipper.PT_CLIP, True)
-    try:
-        pc.AddPaths(_subj, pyclipper.PT_SUBJECT, closed)
-    except:
-        raise RuntimeError
-
-    if closed:
-        solution = pc.Execute(pyclipper.CT_DIFFERENCE, pyclipper.PFT_EVENODD, pyclipper.PFT_EVENODD)
-    else:
-        solution = pc.Execute2(pyclipper.CT_DIFFERENCE, pyclipper.PFT_EVENODD, pyclipper.PFT_EVENODD)
-        solution = pyclipper.PolyTreeToPaths(solution)
-
-    return solution
-
-def union_layers( _subj,_clip,closed):
-
+def diff_layers(_subj, _clip, closed):
 
     pc = pyclipper.Pyclipper()
     pc.AddPaths(_clip, pyclipper.PT_CLIP, True)
@@ -35,16 +18,41 @@ def union_layers( _subj,_clip,closed):
         raise RuntimeError
 
     if closed:
-        solution = pc.Execute(pyclipper.CT_UNION, pyclipper.PFT_EVENODD, pyclipper.PFT_EVENODD)
+        solution = pc.Execute(pyclipper.CT_DIFFERENCE,
+                              pyclipper.PFT_EVENODD,
+                              pyclipper.PFT_EVENODD)
     else:
-        solution = pc.Execute2(pyclipper.CT_UNION, pyclipper.PFT_EVENODD, pyclipper.PFT_EVENODD)
+        solution = pc.Execute2(pyclipper.CT_DIFFERENCE,
+                               pyclipper.PFT_EVENODD,
+                               pyclipper.PFT_EVENODD)
+
         solution = pyclipper.PolyTreeToPaths(solution)
 
     return solution
 
 
-def union_itself( _subj,closed):
+def union_layers(_subj, _clip, closed):
 
+    pc = pyclipper.Pyclipper()
+    pc.AddPaths(_clip, pyclipper.PT_CLIP, True)
+    try:
+        pc.AddPaths(_subj, pyclipper.PT_SUBJECT, closed)
+    except:
+        raise RuntimeError
+
+    if closed:
+        solution = pc.Execute(pyclipper.CT_UNION,
+                              pyclipper.PFT_EVENODD,
+                              pyclipper.PFT_EVENODD)
+    else:
+        solution = pc.Execute2(pyclipper.CT_UNION,
+                               pyclipper.PFT_EVENODD,
+                               pyclipper.PFT_EVENODD)
+        solution = pyclipper.PolyTreeToPaths(solution)
+    return solution
+
+
+def union_itself(_subj, closed):
 
     pc = pyclipper.Pyclipper()
     try:
@@ -53,9 +61,13 @@ def union_itself( _subj,closed):
         raise RuntimeError
 
     if closed:
-        solution = pc.Execute(pyclipper.CT_UNION, pyclipper.PFT_EVENODD, pyclipper.PFT_EVENODD)
+        solution = pc.Execute(pyclipper.CT_UNION,
+                              pyclipper.PFT_EVENODD,
+                              pyclipper.PFT_EVENODD)
     else:
-        # solution = pc.Execute2(pyclipper.CT_UNION, pyclipper.PFT_EVENODD, pyclipper.PFT_EVENODD)
+        # solution = pc.Execute2(pyclipper.CT_UNION,
+        #                        pyclipper.PFT_EVENODD,
+        #                        pyclipper.PFT_EVENODD)
         # solution = pyclipper.PolyTreeToPaths(solution)
         raise NotImplementedError
 
@@ -71,10 +83,12 @@ def union_itself( _subj,closed):
 #     except:
 #         raise RuntimeError
 #
-#     return pc.Execute2(pyclipper.CT_UNION, pyclipper.PFT_EVENODD, pyclipper.PFT_EVENODD)
+#     return pc.Execute2(pyclipper.CT_UNION,
+#                        pyclipper.PFT_EVENODD,
+#                        pyclipper.PFT_EVENODD)
 
 
-def diff_layers_as_polytree( _subj,_clip,closed):
+def diff_layers_as_polytree(_subj, _clip, closed):
     pc = pyclipper.Pyclipper()
     pc.AddPaths(_clip, pyclipper.PT_CLIP, True)
     try:
@@ -82,13 +96,15 @@ def diff_layers_as_polytree( _subj,_clip,closed):
     except:
         raise RuntimeError
 
-    solution = pc.Execute2(pyclipper.CT_DIFFERENCE, pyclipper.PFT_EVENODD, pyclipper.PFT_EVENODD)
+    solution = pc.Execute2(pyclipper.CT_DIFFERENCE,
+                           pyclipper.PFT_EVENODD,
+                           pyclipper.PFT_EVENODD)
 
     return solution
 
 
-def inter_layers( _subj,_clip,closed):
-    if len(_clip) == 0 :
+def inter_layers(_subj, _clip, closed):
+    if len(_clip) == 0:
         return []
     pc = pyclipper.Pyclipper()
     try:
@@ -102,65 +118,69 @@ def inter_layers( _subj,_clip,closed):
         raise RuntimeError
 
     if closed:
-        solution = pc.Execute(pyclipper.CT_INTERSECTION, pyclipper.PFT_EVENODD, pyclipper.PFT_EVENODD)
+        solution = pc.Execute(pyclipper.CT_INTERSECTION,
+                              pyclipper.PFT_EVENODD,
+                              pyclipper.PFT_EVENODD)
     else:
-        solution = pc.Execute2(pyclipper.CT_INTERSECTION, pyclipper.PFT_EVENODD, pyclipper.PFT_EVENODD)
+        solution = pc.Execute2(pyclipper.CT_INTERSECTION,
+                               pyclipper.PFT_EVENODD,
+                               pyclipper.PFT_EVENODD)
         solution = pyclipper.PolyTreeToPaths(solution)
 
     return solution
 
-def inter_layers_as_polytree( _subj,_clip,closed):
+def inter_layers_as_polytree(_subj, _clip, closed):
 
     pc = pyclipper.Pyclipper()
 
     pc.AddPaths(_clip, pyclipper.PT_CLIP, True)
-
     pc.AddPaths(_subj, pyclipper.PT_SUBJECT, closed)
 
-    solution = pc.Execute2(pyclipper.CT_INTERSECTION, pyclipper.PFT_EVENODD, pyclipper.PFT_EVENODD)
+    solution = pc.Execute2(pyclipper.CT_INTERSECTION,
+                           pyclipper.PFT_EVENODD,
+                           pyclipper.PFT_EVENODD)
 
     return solution
 
+
 def isPaths(paths):
     assert(isinstance(paths[0][0][0], int))
+    pass
 
 
-def offset_default(polygon_stack,val):
+def offset_default(polygon_stack, val):
     path = polygon_stack.polygons
     po = pyclipper.PyclipperOffset()
-    po.AddPaths(path,pyclipper.JT_SQUARE,pyclipper.ET_CLOSEDPOLYGON)
-
+    po.AddPaths(path, pyclipper.JT_SQUARE, pyclipper.ET_CLOSEDPOLYGON)
 
     offseted = po.Execute(scale_value_to_clipper(val))
-
     return offseted
 
+
 # @profile
-def offset(polygon_stack,val):
+def offset(polygon_stack, val):
     path = polygon_stack.polygons
     # path = pyclipper.ReversePaths(polygon_stack.polygons)
     # for polygon_index in range(len(path)):
     #     if not pyclipper.Orientation(path[polygon_index]):
     #         path[polygon_index] = pyclipper.ReversePath(path[polygon_index])
     po = pyclipper.PyclipperOffset()
-    po.AddPaths(path,pyclipper.JT_MITER,pyclipper.ET_CLOSEDPOLYGON)
+    po.AddPaths(path, pyclipper.JT_MITER, pyclipper.ET_CLOSEDPOLYGON)
 
     offseted = po.Execute(scale_value_to_clipper(val))
-
     return offseted
 
-def SinglePolygonOffset(single_line,val):
+
+def single_polygon_offset(single_line, val):
     path = single_line
     # path = pyclipper.ReversePaths(polygon_stack.polygons)
     # for polygon_index in range(len(path)):
     #     if not pyclipper.Orientation(path[polygon_index]):
     #         path[polygon_index] = pyclipper.ReversePath(path[polygon_index])
     po = pyclipper.PyclipperOffset()
-    po.AddPath(path,pyclipper.JT_SQUARE,pyclipper.ET_CLOSEDPOLYGON)
-
+    po.AddPath(path, pyclipper.JT_SQUARE, pyclipper.ET_CLOSEDPOLYGON)
 
     offseted = po.Execute(scale_value_to_clipper(float(val)))
-
     return offseted
 
 
@@ -218,7 +238,8 @@ def SinglePolygonOffset(single_line,val):
 #
 #     return solution
 
-def LinesOffset(lines, offset_value,does_visualize=False):
+
+def lines_offset(lines, offset_value, does_visualize=False):
 
     pc = pyclipper.PyclipperOffset()
     pc.AddPaths(lines, pyclipper.JT_SQUARE, pyclipper.ET_OPENSQUARE)
@@ -227,31 +248,32 @@ def LinesOffset(lines, offset_value,does_visualize=False):
     # solution = pyclipper.scale_from_clipper(solution)
 
     if does_visualize:
-        import matplotlib.pyplot as plt 
+        import matplotlib.pyplot as plt
         for line in lines:
             plt.plot([i[0] for i in line], [i[1] for i in line])
 
         for line in solution:
             plt.plot([i[0] for i in line], [i[1] for i in line])
-            plt.plot([line[-1][0],line[0][0]],[line[-1][1],line[0][1]])
+            plt.plot([line[-1][0], line[0][0]], [line[-1][1], line[0][1]])
         plt.show()
 
     return solution
 
-from collections import namedtuple
-Bounding_box = namedtuple('Bounding_box', 'xmax xmin ymax ymin') 
+
+BoundingBox = namedtuple('BoundingBox', 'xmax xmin ymax ymin')
+
 
 def bbox_for_single_polygon(polygon):
 
     pc = pyclipper.Pyclipper()
     try:
-
-        pc.AddPath(polygon,pyclipper.PT_SUBJECT, True)
+        pc.AddPath(polygon, pyclipper.PT_SUBJECT, True)
         clipper_bounding_rectangle = pc.GetBounds()
-        return Bounding_box(scale_value_from_clipper(clipper_bounding_rectangle.right),
-                         scale_value_from_clipper(clipper_bounding_rectangle.left),
-                         scale_value_from_clipper(clipper_bounding_rectangle.top),
-                         scale_value_from_clipper(clipper_bounding_rectangle.bottom))
+        return BoundingBox(
+            scale_value_from_clipper(clipper_bounding_rectangle.right),
+            scale_value_from_clipper(clipper_bounding_rectangle.left),
+            scale_value_from_clipper(clipper_bounding_rectangle.top),
+            scale_value_from_clipper(clipper_bounding_rectangle.bottom))
     except pyclipper.ClipperException:
         return None
 
@@ -261,4 +283,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

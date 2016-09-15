@@ -10,7 +10,9 @@ from slicer.print_tree.Line_stack import *
 from slicer.print_tree.Line_group import *
 import slicer.config.config as config
 
-from slicer.commons.utils import scale_list_to_clipper, scale_value_from_clipper, scale_list_from_clipper
+from slicer.commons.utils import scale_list_to_clipper, \
+                                 scale_value_from_clipper, \
+                                 scale_list_from_clipper
 
 
 #
@@ -18,9 +20,9 @@ from slicer.commons.utils import scale_list_to_clipper, scale_value_from_clipper
 #     def __init__(self,island,polygons):
 #         self.island = island
 #         self.polygons = polygons
-#         external_perimeter = Polygon_stack(polygons[0])
+#         external_perimeter = PolygonStack(polygons[0])
 #
-#         scaled_external_perimeter = Polygon_stack(offset(external_perimeter, -config.line_width/2))
+#         scaled_external_perimeter = PolygonStack(offset(external_perimeter, -config.line_width/2))
 #         if len(scaled_external_perimeter.polygons)> 1:
 #             for polygon_index in range(1, len(scaled_external_perimeter.polygons)):
 #                 layer = self.island.layer
@@ -31,8 +33,8 @@ from slicer.commons.utils import scale_list_to_clipper, scale_value_from_clipper
 #         self.boundary = self.Boundary(self, Line(scaled_external_perimeter,config.line_width) )
 #         self.holes  = []
 #         for poly_index in range(1, len(polygons)):
-#             polygon = Polygon_stack(polygons[poly_index])
-#             scaled_hole = Polygon_stack(offset(polygon, config.line_width/2))
+#             polygon = PolygonStack(polygons[poly_index])
+#             scaled_hole = PolygonStack(offset(polygon, config.line_width/2))
 #             self.holes.append(self.Hole(self, Line(scaled_hole, config.line_width)))
 #
 #     class Hole():
@@ -40,8 +42,8 @@ from slicer.commons.utils import scale_list_to_clipper, scale_value_from_clipper
 #             self.outline = outline
 #             self.line = line
 #             self.shells = []
-#             self.polylines = Line_group("hole", config.line_width)
-#             self.innerPolylines = Line_group("inner_hole", config.line_width)
+#             self.polylines = LineGroup("hole", config.line_width)
+#             self.innerPolylines = LineGroup("inner_hole", config.line_width)
 #
 #         def make_one_shell(self,index):
 #             shell = Outline.process_shell(self.line, index * config.line_width)
@@ -95,8 +97,8 @@ from slicer.commons.utils import scale_list_to_clipper, scale_value_from_clipper
 #
 #             self.line = line
 #             self.shells = []
-#             self.polylines = Line_group("boundary", config.line_width)
-#             self.innerPolylines = Line_group("inner_boundary", config.line_width)
+#             self.polylines = LineGroup("boundary", config.line_width)
+#             self.innerPolylines = LineGroup("inner_boundary", config.line_width)
 #
 #         def make_one_shell(self,index,previousShell):
 #             shell = Outline.process_shell(self.line, -index * config.line_width)
@@ -160,8 +162,8 @@ from slicer.commons.utils import scale_list_to_clipper, scale_value_from_clipper
 #                 return self.line.get_outter_bound()
 #
 #
-#     def get_innershells(self):
-#         innershells = Polygon_stack()
+#     def get_inner_shells(self):
+#         innershells = PolygonStack()
 #
 #         innershells.add_polygon_stack(self.boundary.get_innershell())
 #         for hole in self.holes:
@@ -170,7 +172,7 @@ from slicer.commons.utils import scale_list_to_clipper, scale_value_from_clipper
 #         return innershells
 #
 #     def get_innerbounds(self):
-#         inner_bounds = Polygon_stack()
+#         inner_bounds = PolygonStack()
 #
 #         inner_bounds.add_polygon_stack(self.boundary.get_inner_bound())
 #         for hole in self.holes:
@@ -179,7 +181,7 @@ from slicer.commons.utils import scale_list_to_clipper, scale_value_from_clipper
 #         return inner_bounds
 #
 #     def get_outterbounds(self):
-#         outter_bounds = Polygon_stack()
+#         outter_bounds = PolygonStack()
 #
 #         outter_bounds .add_polygon_stack(self.boundary.get_outterbound())
 #         for hole in self.holes:
@@ -200,7 +202,7 @@ from slicer.commons.utils import scale_list_to_clipper, scale_value_from_clipper
 #     @staticmethod
 #     def process_shell(line,offset_val):
 #         contour = line.get_contour()
-#         offset_poly = Polygon_stack(offset(contour,offset_val))
+#         offset_poly = PolygonStack(offset(contour,offset_val))
 #
 #         return  Line(offset_poly, line.width)
 #
@@ -218,12 +220,12 @@ from slicer.commons.utils import scale_list_to_clipper, scale_value_from_clipper
 #             polyline.append(point)
 #         # goes back to the start point since the polygon does not repeat the start (end) vertice twice
 #         polyline.append(start_point)
-#         # print_line = Line_group(line.width)
+#         # print_line = LineGroup(line.width)
 #         # print_line.add_chain(polyline)
 #         return polyline
 #
 #     def g_print(self):
-#         polylines = Line_group("outline")
+#         polylines = LineGroup("outline")
 #         for hole in self.holes:
 #             polylines.add_group(hole.g_print_inner_shell())
 #             polylines.add_group(hole.g_print())
@@ -233,29 +235,28 @@ from slicer.commons.utils import scale_list_to_clipper, scale_value_from_clipper
 #         return polylines
 
 
-class Infill:
+class Infill(object):
     def __init__(self, polygons,skin, layers,layer_index,BBox):
         self.layers =layers
         self.polygons =polygons
         self.BBox = BBox
-        self.XorY = layer_index%2
+        self.x_or_y = layer_index%2
         self.pattern = None
         if isinstance(skin, Skin):
             skin_islands = skin.skins_as_polygon_stack
         else:
-            skin_islands = Polygon_stack()
+            skin_islands = PolygonStack()
         self.startPoint = None
         self.endPoint = None
-        self.polylines = self.make_polyline(polygons,skin_islands, layer_index)
+        self.polylines = self.make_polyline(polygons, skin_islands, layer_index)
 
+    def make_polyline(self, polygons, skin_islands, layer_index):
 
-    def make_polyline(self,polygons,skin_islands, layer_index):
-
-        teta = 45 if self.XorY else 135
+        teta = 45 if self.x_or_y else 135
         # scale test
-        # self.pattern = Line_stack(pyclipper.scale_to_clipper(linear_infill2(5,teta,self.BBox)))
-        self.pattern = Line_stack(scale_list_to_clipper(linear_infill2(5,teta,self.BBox)))
-
+        # self.pattern = LineStack(pyclipper.scale_to_clipper(linear_infill2(5,teta,self.BBox)))
+        self.pattern = LineStack(
+            scale_list_to_clipper(linear_infill2(5, teta, self.BBox)))
 
         if not skin_islands.is_empty():
             innerlines = self.pattern.intersect_with(polygons)
@@ -267,7 +268,7 @@ class Infill:
         #     raise StandardError
         # innerlines_as_tree = inter_layers(self.pattern,self.polygons[0],False)
         # for interline in innerlines_as_tree.Childs:
-        #     innerlines.append(interline.Contour)
+        #     innerlines.append(interline.contour)
         # # innerlines = pyclipper.scale_from_clipper(innerlines)
         #
         #
@@ -277,18 +278,18 @@ class Infill:
         #         innerlines =[]
         #
         #         for interline in innerlines_as_tree.Childs:
-        #             innerlines.append(interline.Contour)
+        #             innerlines.append(interline.contour)
         #         # innerlines = pyclipper.scale_from_clipper(innerlines)
         #
         #
         # for skin_index in range(len(skin_islands)):
         #     if  len(innerlines) != 0:
         #         # innerlines_as_tree = diff_layers(innerlines,pyclipper.scale_from_clipper(skin_polygons[skin_index]),False)
-        #         innerlines_as_tree = diff_layers(innerlines,skin_islands[skin_index].Contour,False)
+        #         innerlines_as_tree = diff_layers(innerlines,skin_islands[skin_index].contour,False)
         #         innerlines =[]
         #
         #         for interline in innerlines_as_tree.Childs:
-        #             innerlines.append(interline.Contour)
+        #             innerlines.append(interline.contour)
         #         # innerlines = pyclipper.scale_from_clipper(innerlines)
         return innerlines.get_print_line()
         # try:
@@ -296,41 +297,41 @@ class Infill:
         # except:
         #     raise RuntimeError
 
-
-    def process_polyline(self,polygon):
-
+    def process_polyline(self, polygon):
         if len(polygon) == 0:
             return []
         polyline = []
-        start_point = polygon[0] # frist vertex of the polygon
+        start_point = polygon[0]  # frist vertex of the polygon
         polyline.append(start_point)
-        for point in polygon[1:]: # the rest of the vertices
+        for point in polygon[1:]:  # the rest of the vertices
             polyline.append(point)
         return polyline
 
-
-
-
     def g_print(self):
-        polylines = Line_group("infill", True, config.line_width)
+        polylines = LineGroup("infill", True, config.line_width)
         for polyline in self.polylines:
             polylines.add_chain(self.process_polyline(polyline))
         return polylines
 
-class Skin:
-    def __init__(self,downskins, upskins,layers,layer_index, island_bbox, orientation = None):
+class Skin(object):
+    def __init__(
+            self, downskins, upskins, layers, layer_index, island_bbox,
+            orientation=None):
+
         self.layers = layers
         self.layer_index = layer_index
-        downskins = Polygon_stack(offset(downskins,1))
-        upskins = Polygon_stack(offset(upskins, 1))
-        self.skins_as_polygon_stack = Polygon_stack()
-        self.skins_as_polygon_stack = self.skins_as_polygon_stack.union_with(downskins)
-        self.skins_as_polygon_stack = self.skins_as_polygon_stack.union_with(upskins)
+        downskins = PolygonStack(offset(downskins, 1))
+        upskins = PolygonStack(offset(upskins, 1))
+        self.skins_as_polygon_stack = PolygonStack()
+        self.skins_as_polygon_stack = \
+            self.skins_as_polygon_stack.union_with(downskins)
+        self.skins_as_polygon_stack = \
+            self.skins_as_polygon_stack.union_with(upskins)
         self.downskins = downskins
         self.upskins = upskins
         self.island_bbox = island_bbox
 
-        self.XorY = (layer_index+1)%2
+        self.x_or_y = (layer_index+1) % 2
         self.pattern = None
         self.startPoint = None
         self.endPoint = None
@@ -343,11 +344,20 @@ class Skin:
         po = pyclipper.PyclipperOffset()
         po.MiterLimit = 2
         base = 1#pow(10, 15)
-        empty_poly = Polygon_stack([[[base, base], [base + 1, base], [base + 1, base + 1], [base, base + 1]]])
+        empty_poly = PolygonStack([[[base, base],
+                                     [base + 1, base],
+                                     [base + 1, base + 1],
+                                     [base, base + 1]]])
         if self.skins_as_polygon_stack.polygons != []:
-            polys = pyclipper.PolyTreeToPaths(diff_layers_as_polytree(self.skins_as_polygon_stack.polygons, empty_poly.polygons, True))
+
+            polys = pyclipper.PolyTreeToPaths(
+                diff_layers_as_polytree(self.skins_as_polygon_stack.polygons,
+                                        empty_poly.polygons,
+                                        True))
+
             po.AddPaths(polys, pyclipper.JT_MITER, pyclipper.ET_CLOSEDPOLYGON)
-            islandStack = Island_stack(po.Execute2(scale_value_to_clipper(-config.line_width/2)))
+            islandStack = IslandStack(
+                po.Execute2(scale_value_to_clipper(-config.line_width/2)))
             return islandStack.get_islands()
         else:
             return []
@@ -357,63 +367,69 @@ class Skin:
     #     skin_bbox = self.skins_as_polygon_stack.bounding_box()
     #     # self.skins_as_polygon_stack.visualize(self.island_bbox)
 
-    #     teta = 45 if self.XorY else 135
+    #     teta = 45 if self.x_or_y else 135
     #     if self.orientation is not None:
     #         teta = self.orientation
 
-    #     # self.pattern = Line_stack()
+    #     # self.pattern = LineStack()
     #     # for polygon in self.skins_as_polygon_stack.polygons:
     #     #     # two things are done in the following if
     #     #     # 1. area possitive means it's not hole 
     #     #     # 2. and check it is not a very small area
     #     #     if pyclipper.Orientation(polygon): # area possitive means it's not hole and if it's not a very small area
     #     #         skin_bbox = bbox_for_single_polygon(polygon)
-    #     #         pattern = Line_stack(scale_list_to_clipper(linear_infill2(config.line_width,teta,skin_bbox)))
-    #     #         pattern = pattern.intersect_with(Polygon_stack(polygon))
+    #     #         pattern = LineStack(scale_list_to_clipper(linear_infill2(config.line_width,teta,skin_bbox)))
+    #     #         pattern = pattern.intersect_with(PolygonStack(polygon))
     #     #         self.pattern = self.pattern.combine(pattern)
 
     #     # scale test
-    #     # self.pattern = Line_stack(pyclipper.scale_to_clipper(linear_infill2(config.line_width,teta,self.BBox)))
+    #     # self.pattern = LineStack(pyclipper.scale_to_clipper(linear_infill2(config.line_width,teta,self.BBox)))
     #     if self.skins_as_polygon_stack.total_area() > 0:
-    #         self.pattern = Line_stack(scale_list_to_clipper(linear_infill2(config.line_width,teta,skin_bbox)))
+    #         self.pattern = LineStack(scale_list_to_clipper(linear_infill2(config.line_width,teta,skin_bbox)))
 
-    #         innerlines =  Line_stack(self.pattern.intersect_with(self.skins_as_polygon_stack))
+    #         innerlines =  LineStack(self.pattern.intersect_with(self.skins_as_polygon_stack))
     #         innerlines = innerlines.intersect_with(perimeter)
     #     else:
-    #         innerlines = Line_stack()
+    #         innerlines = LineStack()
 
     #     self.polylines = innerlines.get_print_line()
     #     self.startPoint, self.endPoint = innerlines.return_start_end_point()
 
     def process(self, skins, perimeter):
-        self.skins_as_polygon_stack = self.skins_as_polygon_stack.union_with(skins)
+        self.skins_as_polygon_stack = \
+            self.skins_as_polygon_stack.union_with(skins)
         skin_bbox = self.skins_as_polygon_stack.bounding_box()
         # self.skins_as_polygon_stack.visualize(self.island_bbox)
 
-        teta = 45 if self.XorY else 135
+        teta = 45 if self.x_or_y else 135
         if self.orientation is not None:
             teta = self.orientation
 
-        # self.pattern = Line_stack()
+        # self.pattern = LineStack()
         # for polygon in self.skins_as_polygon_stack.polygons:
         #     # two things are done in the following if
         #     # 1. area possitive means it's not hole 
         #     # 2. and check it is not a very small area
         #     if pyclipper.Orientation(polygon): # area possitive means it's not hole and if it's not a very small area
         #         skin_bbox = bbox_for_single_polygon(polygon)
-        #         pattern = Line_stack(scale_list_to_clipper(linear_infill2(config.line_width,teta,skin_bbox)))
-        #         pattern = pattern.intersect_with(Polygon_stack(polygon))
+        #         pattern = LineStack(scale_list_to_clipper(linear_infill2(config.line_width,teta,skin_bbox)))
+        #         pattern = pattern.intersect_with(PolygonStack(polygon))
         #         self.pattern = self.pattern.combine(pattern)
 
         # scale test
-        # self.pattern = Line_stack(pyclipper.scale_to_clipper(linear_infill2(config.line_width,teta,self.BBox)))
+        # self.pattern = LineStack(pyclipper.scale_to_clipper(linear_infill2(config.line_width,teta,self.BBox)))
         if self.skins_as_polygon_stack.total_area() > 0:
-            self.pattern = Line_stack(scale_list_to_clipper(linear_infill2(config.line_width,teta,skin_bbox)))
+            self.pattern = LineStack(
+                scale_list_to_clipper(linear_infill2(config.line_width,
+                                                     teta,
+                                                     skin_bbox)))
 
-            innerlines =  Line_stack(self.pattern.intersect_with(self.skins_as_polygon_stack))
+            innerlines = LineStack(
+                self.pattern.intersect_with(self.skins_as_polygon_stack))
+
             innerlines = innerlines.intersect_with(perimeter)
         else:
-            innerlines = Line_stack()
+            innerlines = LineStack()
 
         self.polylines = innerlines.get_print_line()
         self.startPoint, self.endPoint = innerlines.return_start_end_point()
@@ -422,68 +438,59 @@ class Skin:
     #     skin_bbox = self.skins_as_polygon_stack.bounding_box()
     #     # self.skins_as_polygon_stack.visualize(self.island_bbox)
 
-    #     teta = 45 if self.XorY else 135
+    #     teta = 45 if self.x_or_y else 135
     #     if self.orientation is not None:
     #         teta = self.orientation
 
-    #     self.pattern = Line_stack()
+    #     self.pattern = LineStack()
     #     for polygon in self.islands:
     #         # two things are done in the following if
     #         # 1. area possitive means it's not hole 
     #         # 2. and check it is not a very small area
     #         # if pyclipper.Orientation(polygon): # area possitive means it's not hole and if it's not a very small area
     #         if isinstance(polygon, pyclipper.PyPolyNode):
-    #             polygon = polygon.Contour
+    #             polygon = polygon.contour
     #         else:
     #             pass
 
     #         if pyclipper.Area(scale_line_from_clipper(polygon))>3:
 
     #             skin_bbox = bbox_for_single_polygon(polygon)
-    #             pattern = Line_stack(scale_list_to_clipper(linear_infill2(config.line_width,teta,skin_bbox)))
-    #             pattern = pattern.intersect_with(Polygon_stack(polygon))
+    #             pattern = LineStack(scale_list_to_clipper(linear_infill2(config.line_width,teta,skin_bbox)))
+    #             pattern = pattern.intersect_with(PolygonStack(polygon))
     #             self.pattern = self.pattern.combine(pattern)
     #         else:
     #             pass
 
     #     # scale test
-    #     # self.pattern = Line_stack(pyclipper.scale_to_clipper(linear_infill2(config.line_width,teta,self.BBox)))
+    #     # self.pattern = LineStack(pyclipper.scale_to_clipper(linear_infill2(config.line_width,teta,self.BBox)))
     #     # if self.skins_as_polygon_stack.total_area() > 0:
-    #     #     self.pattern = Line_stack(scale_list_to_clipper(linear_infill2(config.line_width,teta,skin_bbox)))
+    #     #     self.pattern = LineStack(scale_list_to_clipper(linear_infill2(config.line_width,teta,skin_bbox)))
 
-    #     #     innerlines =  Line_stack(self.pattern.intersect_with(self.skins_as_polygon_stack))
+    #     #     innerlines =  LineStack(self.pattern.intersect_with(self.skins_as_polygon_stack))
     #     #     innerlines = innerlines.intersect_with(perimeter)
     #     # else:
-    #     #     innerlines = Line_stack()
+    #     #     innerlines = LineStack()
 
     #     self.pattern  = self.pattern.intersect_with(perimeter)
     #     self.polylines = self.pattern.get_print_line()
     #     # self.startPoint, self.endPoint = self.pattern.return_start_end_point()
 
-
-
-    def process_polyline(self,polygon):
+    def process_polyline(self, polygon):
         if len(polygon) == 0:
             return []
         polyline = []
-        start_point = polygon[0] # frist vertex of the polygon
+        start_point = polygon[0]  # frist vertex of the polygon
         polyline.append(start_point)
-        for point in polygon[1:]: # the rest of the vertices
+        for point in polygon[1:]:  # the rest of the vertices
             polyline.append(point)
         return polyline
 
-
-
-
     def g_print(self):
-        polylines = Line_group("skin", True, config.line_width)
-        if self.polylines != None:
+        polylines = LineGroup("skin", True, config.line_width)
+        if self.polylines is not None:
             for polyline in self.polylines:
                 polylines.add_chain(self.process_polyline(polyline))
         else:
             pass
         return polylines
-
-class Support_line:
-    def __init__(self):
-        pass

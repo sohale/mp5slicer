@@ -38,7 +38,7 @@ def slice_mesh(stl_mesh):
 
     if config.useAdaptiveSlicing:
         adaptive_height_list, adaptive_thickness = adaptive_slicing(
-            this_mesh, config.layerThickness, curvature_tol=0.6,
+            this_mesh, config.LAYER_THICKNESS, curvature_tol=0.6,
             cusp_height_tol=0.15, layer_thickness_choices=[0.2, 0.15, 0.1],
             does_visualize=False)
 
@@ -46,14 +46,14 @@ def slice_mesh(stl_mesh):
             this_mesh,
             slice_height_from=bounding_box.zmin,
             slice_height_to=bounding_box.zmax,
-            slice_step=config.layerThickness,
+            slice_step=config.LAYER_THICKNESS,
             sliceplanes_height=adaptive_height_list)
     else:
         slice_layers = slicer_from_mesh_as_dict(
             this_mesh,
             slice_height_from=bounding_box.zmin,
             slice_height_to=bounding_box.zmax,
-            slice_step=config.layerThickness)
+            slice_step=config.LAYER_THICKNESS)
 
     layers_as_polygons = polygonize_layers_from_trimed_dict(slice_layers)
 

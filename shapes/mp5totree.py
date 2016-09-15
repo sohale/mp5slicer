@@ -142,7 +142,7 @@ def make_matrix4(array):
 
 
 
-# class node():
+# class node(object):
 #
 #     def __init__(self,sons, type, matrix):
 #         self.type = type

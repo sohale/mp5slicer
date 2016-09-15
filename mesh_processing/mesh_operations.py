@@ -8,7 +8,7 @@ sys.path.append(os.path.split(os.path.dirname(os.path.abspath(inspect.getfile(in
 from slicer.mesh_processing.rotation import rotate as rotation
 
 
-class Mesh():
+class Mesh(object):
 
     def __init__(self,
                  input_triangles=[],
@@ -202,7 +202,7 @@ class Mesh():
         pyplot.show()
 
 
-class BoundingBox():
+class BoundingBox(object):
     def __init__(self, xmin, xmax, ymin, ymax, zmin, zmax):
         self.xmin = xmin
         self.xmax = xmax

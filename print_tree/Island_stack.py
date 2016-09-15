@@ -1,13 +1,10 @@
-
-
-
-class Island_stack():
+class IslandStack(object):
 
     def __init__(self, polynode):
         self.islands = []
         self.split(polynode)
 
-    def split(self,polynode):
+    def split(self, polynode):
         for child in polynode.Childs:
             if not child.IsHole:
                 self.islands.append(child)
@@ -18,4 +15,3 @@ class Island_stack():
 
     def get_islands(self):
         return self.islands
-

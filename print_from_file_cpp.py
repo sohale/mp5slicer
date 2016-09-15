@@ -5,7 +5,7 @@ import sys
 sys.path.append(os.path.split(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))))[0])
 
 from slicer.Print_pipeline import print_mesh
-from slicer.config.config_factory import config_factory
+from slicer.config.config_factory import ConfigFactory
 from slicer.shapes.mp5totree import get_mc_params
 import json
 import numpy as np
@@ -16,7 +16,7 @@ from stl import mesh
 def print_from_mp5():
     mp5_file_name = sys.argv[2]
     conf_file_name = sys.argv[1]
-    config_factory(conf_file_name)
+    ConfigFactory(conf_file_name)
     import slicer.config.config as config
     config.reset()
 

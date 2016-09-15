@@ -1,28 +1,25 @@
+class LineGroup(object):
 
-
-class Line_group():
-
-    def __init__(self,type, isLeaf, width = 0):
+    def __init__(self, type, is_leaf, width=0):
         self.sub_lines = []
         self.type = type
         self.properties = {}
-        self.isLeaf = isLeaf
-        if self.isLeaf:
+        self.is_leaf = is_leaf
+        if self.is_leaf:
             assert (width != 0)
             self.width = width
         else:
-            self.isLeaf = False
-
+            self.is_leaf = False
 
     def add_chain(self, line):
-        assert (self.isLeaf)
+        assert (self.is_leaf)
         self.sub_lines.append(line)
 
     def add_chains(self, lines):
-        assert (self.isLeaf)
+        assert (self.is_leaf)
         self.sub_lines.extend(lines)
 
     def add_group(self, group):
-        assert(self.isLeaf == False)
-        assert (isinstance(group, Line_group))
+        assert(self.is_leaf is False)
+        assert (isinstance(group, LineGroup))
         self.sub_lines.append(group)

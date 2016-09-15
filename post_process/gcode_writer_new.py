@@ -143,7 +143,7 @@ class GcodeGenerator(TreeTask):
             config.holeSpeed = config.first_layer_holeSpeed
             config.supportSpeed = config.first_layer_supportSpeed
             config.raftSpeed = config.first_layer_raftSpeed
-            config.layerThickness = config.first_layer_thickness
+            config.LAYER_THICKNESS = config.first_layer_thickness
             config.interiorFanSpeed = 0 # for sticking in the line
 
         elif self.layer_index == 1:
@@ -154,7 +154,7 @@ class GcodeGenerator(TreeTask):
         # allow change of layerThickness for each layer
         if self.layerthickness_list:
             # open happen if it is adaptive slicing
-            config.layerThickness = self.layerthickness_list[self.layer_index]
+            config.LAYER_THICKNESS = self.layerthickness_list[self.layer_index]
         else:
             pass
 
@@ -164,7 +164,7 @@ class GcodeGenerator(TreeTask):
             # open happen if it is adaptive slicing
             z_change = self.layerthickness_list[self.layer_index]
         else:
-            z_change = config.layerThickness
+            z_change = config.LAYER_THICKNESS
 
         import copy
         # only support 1 decimal place now
@@ -175,7 +175,7 @@ class GcodeGenerator(TreeTask):
         # delete next line, for debug only
         if self.layer_index not in [0, 1]:
             assert np.around(self.Z - old_height, decimals=2) == \
-                config.layerThickness
+                config.LAYER_THICKNESS
             pass
 
         self.gcode_recorder.append_change_z(self.Z)
@@ -203,7 +203,7 @@ class GcodeGenerator(TreeTask):
         config.interiorFanSpeed = 1
         config.extrusion_multiplier = 1.2
 
-        self.gcode_recorder.append_change_z(config.layerThickness + 0.2)
+        self.gcode_recorder.append_change_z(config.LAYER_THICKNESS + 0.2)
 
         config.reset()
 

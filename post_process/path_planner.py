@@ -9,7 +9,7 @@ class MinDistTuple(object):
         self.end_point = end_point
 
 def arrange_path(line_group):
-    assert isinstance(line_group, Line_group)
+    assert isinstance(line_group, LineGroup)
     lines = line_group.sub_lines
 
     start_points_list = [None]*len(lines)

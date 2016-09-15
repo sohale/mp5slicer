@@ -2,14 +2,14 @@ import numpy as np
 import copy
 
 
-class Coords():
+class Coords(object):
     def __init__(self, x, y, z):
         self.x = x
         self.y = y
         self.z = z
 
 
-class Bbox():
+class Bbox(object):
     def __init__(self, min, max):
         self.min = min
         self.max = max

@@ -14,7 +14,7 @@ class TreePostProcessor(object):
                 self.__gotroughgroup(self.print_tree[layer_index])
 
     def __gotroughgroup(self, group):
-        if group.isLeaf:
+        if group.is_leaf:
             self.__switch_leaf(group)
         else:
             self.__switch_node(group)

@@ -7,7 +7,7 @@ sys.path.append(os.path.split(os.path.dirname(os.path.abspath(inspect.getfile(in
 import numpy as np
 import slicer.config.config as config
 from slicer.print_tree.Polygon_stack import *
-from slicer.print_tree.Line_stack import Support_Line_Stack
+from slicer.print_tree.Line_stack import SupportLineStack
 from itertools import groupby
 from collections import namedtuple
 from slicer.commons.utils import scale_point_to_clipper, scale_point_from_clipper
@@ -20,25 +20,23 @@ def ray_triangle_intersection(ray_near, triangle):
     Taken from Printrun
     Moller-Trumbore intersection algorithm in pure python
     Based on http://en.wikipedia.org/wiki/M%C3%B6ller%E2%80%93Trumbore_intersection_algorithm
-    
     ray_dir is set as [[0],[0],[-1]] for optimizing running speed
     ray_near should be the origin of this ray.
     """
-    
     v1, v2, v3 = triangle # vertices are in 3d
 
-    ray_dir = np.asarray([0,0,-1]) # column vector to row vector
+    ray_dir = np.asarray([0, 0, -1])  # column vector to row vector
     
     eps = 0.000001
     edge1 = v2 - v1
     edge2 = v3 - v1
-    pvec = [edge2[1],-edge2[0],0] # pvec = np.cross(ray_dir, edge2)
-    det = edge1[0]*pvec[0]+ edge1[1]*pvec[1] # det = edge1.dot(pvec)
+    pvec = [edge2[1], -edge2[0], 0]  # pvec = np.cross(ray_dir, edge2)
+    det = edge1[0]*pvec[0] + edge1[1]*pvec[1]  # det = edge1.dot(pvec)
     if abs(det) < eps:
         return False, None
     inv_det = 1. / det
     tvec = ray_near - v1
-    u = (tvec[0]*pvec[0]+tvec[1]*pvec[1]) * inv_det # u = tvec.dot(pvec) * inv_det
+    u = (tvec[0]*pvec[0]+tvec[1]*pvec[1]) * inv_det  # u = tvec.dot(pvec) * inv_det
     if u < 0. or u > 1.:
         return False, None
     qvec = np.cross(tvec, edge1)
@@ -100,17 +98,18 @@ def ray_trace_mesh(ray, mesh):
         triangle = mesh[triangle_index]
         does_intersect, intersect_z_value = ray_triangle_intersection(ray, triangle)
         if does_intersect:
-            return intersect_z_value, triangle_index # should only be one z value # index is for support only
+            # should only be one z value # index is for support only
+            return intersect_z_value, triangle_index
         else:
             pass
 
 def get_center(mesh_triangles):
     return (mesh_triangles[:,0] + mesh_triangles[:,1] + mesh_triangles[:,2])/3
 
-class Last_point:
-    def __init__(self,point):
-        self.point = point #[x, y]
-    def return_point_as_new_line(self): # pyclipper formatting
+class Last_point(object):
+    def __init__(self, point):
+        self.point = point  # [x, y]
+    def return_point_as_new_line(self):  # pyclipper formatting
         return [self.point]
     @staticmethod
     def offset_value():
@@ -118,7 +117,7 @@ class Last_point:
         # return 0.1
 
 
-class Support_Vertical_lines:
+class Support_Vertical_lines(object):
     def __init__(self):
         '''
         group is for grouping connected supported require area,
@@ -156,10 +155,10 @@ class Support_Vertical_lines:
     #         while element_counter < len(each_svl_data_group):
     #             each_svl_data = each_svl_data_group[element_counter]
         
-    #             if each_svl_data.z_low <= 2*config.layerThickness:
+    #             if each_svl_data.z_low <= 2*config.LAYER_THICHNESS:
     #                 element_counter += 1
     #             else:
-    #                 if each_svl_data.z_high - each_svl_data.z_low <= 2*config.layerThickness:
+    #                 if each_svl_data.z_high - each_svl_data.z_low <= 2*config.LAYER_THICHNESS:
     #                     print("deleted one")
     #                     print(each_svl_data)
     #                     del each_svl_data_group[element_counter]  
@@ -217,7 +216,7 @@ class Support_Vertical_lines:
             else:
                 return False
         
-        def return_intersected_svl_data_each_group(each_group): # change name
+        def return_intersected_svl_data_each_group(each_group):  # change name
             intersected_svl_data = []
             for svl_data in each_group:
                 if vertical_line_intersect_horizontal_plane(svl_data.z_low,
@@ -230,28 +229,28 @@ class Support_Vertical_lines:
 
     def return_polylines(self, sampled_point, plane_height):
 
-        pl = Support_Line_Stack()
+        pl = SupportLineStack()
         for each_group in sampled_point:
             pl.new_line()
             for svl_data in each_group:
                 this_point_ucscaled = svl_data.return_x_y_2d_point()
                 this_point_scaled = scale_point_to_clipper(this_point_ucscaled)
 
-                if svl_data.last_z_height == plane_height: 
+                if svl_data.last_z_height == plane_height:
                     # this point is last point
                     if pl.last_line_is_empty():
                         pass
                     else:
                         pl.new_line()
-                    pl.add_point_in_last_line(Last_point(this_point_scaled))
+                    pl.add_point_in_last_line(Last_pointLast_point(this_point_scaled))
                     pl.new_line()
                     continue
 
                 if not this_point_ucscaled == each_group[0]: # if not last point and not first point                    
                     if not pl.last_line_is_empty():
-                        last_point_unscaled = scale_point_from_clipper(pl.point_at_last_line())
+                        last_pointlast_point_unscaled = scale_point_from_clipper(pl.point_at_last_line())
 
-                        if calulate_distance(last_point_unscaled, this_point_ucscaled) <= config.link_threshold: # new link line
+                        if calulate_distance(last_pointlast_point_unscaled, this_point_ucscaled) <= config.link_threshold: # new link line
                             pl.add_point_in_last_line(this_point_scaled)
                         else:
                             pl.new_line()
@@ -269,12 +268,12 @@ class Support_Vertical_lines:
         sampled_point = self.index_list_intersect_with_plane(plane_height)
         ls = self.return_polylines(sampled_point, plane_height)
 
-        pyclipper_formatting = Polygon_stack([])
+        pyclipper_formatting = PolygonStack([])
 
         # offset points
         # pyclipper_formatting.add_polygon_stack(ls.offset_point(config.line_width))
          # remove the contacting layer, i.e. one empty layer between support and object
-        pyclipper_formatting.add_polygon_stack(ls.offset_last_point())
+        pyclipper_formatting.add_polygon_stack(ls.offset_last_pointlast_point())
 
         if first_layer:
             pyclipper_formatting.add_polygon_stack(ls.offset_line(config.line_width))
@@ -295,7 +294,7 @@ class Support_Vertical_lines:
         self.get_last_layer()
         # self.clean()
 
-    class Support_Vertical_Line_Data:
+    class Support_Vertical_Line_Data(object):
         def __init__(self, x, y, z_high):
             self.x = x
             self.y = y
@@ -561,7 +560,7 @@ class Support:
         BBox = self.mesh.bounding_box()
         slice_height_from = BBox.zmin
         slice_height_to = BBox.zmax
-        slice_step = config.layerThickness
+        slice_step = config.LAYER_THICHNESS
 
         slice_height_from += 0.198768976
         slice_height_to += 0.198768976
@@ -591,7 +590,7 @@ class Support:
         BBox = self.mesh.bounding_box()
         slice_height_from = BBox.zmin
         slice_height_to = BBox.zmax
-        slice_step = config.layerThickness
+        slice_step = config.LAYER_THICHNESS
 
         slice_height_from += 0.198768976
         slice_height_to += 0.198768976

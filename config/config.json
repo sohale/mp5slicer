@@ -1,5 +1,5 @@
 {
-  "layerThickness" : 0.2,
+  "LAYER_THICKNESS" : 0.2,
   "line_width" : 0.4,
   "extruder_temperature" : 210,
   "inAirSpeed" : 7000,

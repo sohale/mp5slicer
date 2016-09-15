@@ -6,18 +6,19 @@ from slicer.print_tree.Parts import Infill, Skin
 from slicer.print_tree.Polygon_stack import *
 from slicer.print_tree.Polynode import *
 from collections import namedtuple
-Island_bbox = namedtuple('Island_bbox', 'xmax xmin ymax ymin') 
+Island_bounding_box = namedtuple('Island_bounding_box', 'xmax xmin ymax ymin')
 
-class Island:
-    def __init__(self,print_tree, polynode, layers,layer_index, BBox, layer ):
+
+class Island(object):
+    def __init__(self, print_tree, polynode, layers, layer_index, bounding_box, layer):
         self.layer = layer
         self.print_tree = print_tree
         self.outline = None
         self.skins = None
         self.infill = None
         self.layer_index = layer_index
-        self.layers = layers 
-        self.BBox = BBox # bounding box for mesh
+        self.layers = layers
+        self.bounding_box = bounding_box  # bounding box for mesh
         self.polygons = []
         try:
             self.polygons.append(polynode.Contour)
@@ -25,9 +26,12 @@ class Island:
         except:
             raise RuntimeError
         try:
-            self.island_bbox = Polygon_stack(polynode.Contour).bounding_box()
+            self.island_bounding_box = PolygonStack(polynode.Contour).bounding_box()
         except pyclipper.ClipperException:
-            self.island_bbox = Island_bbox(BBox.xmax, BBox.xmin, BBox.ymax, BBox.ymin)
+            self.island_bounding_box = Island_bounding_box(bounding_box.xmax,
+                                                           bounding_box.xmin,
+                                                           bounding_box.ymax,
+                                                           bounding_box.ymin)
 
         if len(polynode.Childs) != 0:
             self.polygons += [poly.Contour for poly in polynode.Childs]
@@ -52,51 +56,64 @@ class Island:
 
     def process_infill(self):
 
-
         boundaries = self.outline.get_innerbounds()
-        self.infill = Infill(boundaries,self.skins ,self.layers, self.layer_index,self.BBox)
+        self.infill = Infill(boundaries,
+                             self.skins,
+                             self.layers,
+                             self.layer_index,
+                             self.bounding_box)
 
-    def get_innershells(self):
-
-        innershells = self.outline.get_innershells()
+    def get_inner_shells(self):
+        innershells = self.outline.get_inner_shells()
         return innershells
 
     def get_innerbounds(self):
-
         innerbounds = self.outline.get_innerbounds()
         return innerbounds
 
     def get_outterbounds(self):
-
         outterbounds = self.outline.get_outterbounds()
         return outterbounds
 
 
     # @profile
     def prepare_skins(self):
-
-        # if self.layer_index != 0 and self.layer_index != len(self.layers)-2 and self.layer_index != len(self.layers)-1:
-        if (self.layer_index +1 < len(self.layers)):
+        if self.layer_index + 1 < len(self.layers):
             up_islands = self.print_tree[self.layer_index+1].islands
         else:
             up_islands = []
-            up_islands.append(Island(self.print_tree,Polynode([]),self.layers,self.layer_index+1,self.BBox,self.layer))
+            up_islands.append(
+                Island(self.print_tree,
+                       Polynode([]),
+                       self.layers,
+                       self.layer_index+1,
+                       self.bounding_box,
+                       self.layer))
 
-        if (self.layer_index -1 > 0):
+
+        if self.layer_index - 1 > 0:
             down_islands = self.print_tree[self.layer_index-1].islands
         else:
-            down_islands  = []
-            down_islands.append((Island(self.print_tree,Polynode([]),self.layers,self.layer_index-1,self.BBox,self.layer)))
+            down_islands = []
+            down_islands.append(
+                Island(self.print_tree,
+                       Polynode([]),
+                       self.layers,
+                       self.layer_index-1,
+                       self.bounding_box,
+                       self.layer))
 
-        up_shells = Polygon_stack()
+        up_shells = PolygonStack()
         for island in up_islands:
-            if does_bounding_box_intersect(self.island_bbox, island.island_bbox):
-                up_shells.add_polygon_stack(island.get_innershells())
+            if does_bounding_box_intersect(self.island_bounding_box,
+                                           island.island_bounding_box):
+                up_shells.add_polygon_stack(island.get_inner_shells())
 
-        down_shells = Polygon_stack()
+        down_shells = PolygonStack()
         for island in down_islands:
-            if does_bounding_box_intersect(self.island_bbox, island.island_bbox):
-                down_shells.add_polygon_stack(island.get_innershells())
+            if does_bounding_box_intersect(self.island_bounding_box,
+                                           island.island_bounding_box):
+                down_shells.add_polygon_stack(island.get_inner_shells())
 
         this_shells = self.get_innerbounds()
 
@@ -104,19 +121,19 @@ class Island:
 
         self.upskins = this_shells.difference_with(up_shells)
 
-
-        # self.skins = Skin(downskins, upskins, self.layers, self.layer_index,self.BBox)
-
-
-
     # @profile
     def process_skins(self):
 
-        # if self.layer_index != 0 and self.layer_index != len(self.layers)-2 and self.layer_index != len(self.layers)-1:
-        top_layers_indexes_to_agregate = range(self.layer_index , min(self.layer_index + config.upSkinsCount, len(self.layers)))
-        bottom_layers_indexes_to_agregate = range(max(self.layer_index - config.downSkinsCount, 0),self.layer_index +1)
-        upskins = Polygon_stack()
-        downskins = Polygon_stack()
+        top_layers_indexes_to_agregate = \
+            range(self.layer_index,
+                  min(self.layer_index + config.upSkinsCount, len(self.layers)))
+
+        bottom_layers_indexes_to_agregate = \
+            range(max(self.layer_index - config.downSkinsCount, 0),
+                  self.layer_index+1)
+
+        upskins = PolygonStack()
+        downskins = PolygonStack()
         perimeter = self.outline.get_innerbounds()
 
         # for layer_index in top_layers_indexes_to_agregate:
@@ -129,20 +146,22 @@ class Island:
 
         for layer_index in top_layers_indexes_to_agregate:
             # layer = self.print_tree[layer_index]
-            other_skins = Polygon_stack()
+            other_skins = PolygonStack()
             for island in self.print_tree[layer_index].islands:
                 if not island.upskins.is_empty() and \
-                   does_bounding_box_intersect(island.island_bbox, self.island_bbox):
+                   does_bounding_box_intersect(island.island_bounding_box,
+                                               self.island_bounding_box):
                     other_skins.add_polygon_stack(island.upskins)
             upskins = upskins.union_with(other_skins)
 
 
         for layer_index in reversed(bottom_layers_indexes_to_agregate):
             # layer = self.print_tree[layer_index]
-            other_skins = Polygon_stack()
+            other_skins = PolygonStack()
             for island in self.print_tree[layer_index].islands:
                 if not island.downskins.is_empty() and \
-                   does_bounding_box_intersect(island.island_bbox, self.island_bbox):
+                   does_bounding_box_intersect(island.island_bounding_box,
+                                               self.island_bounding_box):
                     other_skins.add_polygon_stack(island.downskins)
             downskins = downskins.union_with(other_skins)
 
@@ -153,43 +172,38 @@ class Island:
         if not self.downskins.is_empty():
             from math import acos
             for skin in downskins.polygons:
-                skin_ps = Polygon_stack(skin)
+                skin_ps = PolygonStack(skin)
                 if self.layer_index != 0:
                     pc.Clear()
                     pc.AddPath(skin, pyclipper.PT_SUBJECT)
-                    skin_bbox = pc.GetBounds()
-                    anchors = skin_ps.intersect_with(self.print_tree[self.layer_index-1].get_restricted_outline(skin_bbox))
+                    skin_bounding_box = pc.GetBounds()
+                    anchors = skin_ps.intersect_with(self.print_tree[self.layer_index-1].get_restricted_outline(skin_bounding_box))
                     if len(anchors.polygons) == 2:
                         for anchor in anchors.polygons:
                             pc.Clear()
                             pc.AddPath(anchor, pyclipper.PT_SUBJECT)
-                            bbox = pc.GetBounds()
-                            middle_points.append(get_center(bbox))
+                            bounding_box = pc.GetBounds()
+                            middle_points.append(get_center(bounding_box))
                         dx = middle_points[1][0] - middle_points[0][0]
-                        d= distance(middle_points[0], middle_points[1])
+                        d = distance(middle_points[0], middle_points[1])
                         if d > 0:
                             orientation = acos(dx/d)
 
-        self.skins = Skin(downskins, upskins, self.layers, self.layer_index, self.island_bbox, orientation)
-        self.skins.process(Polygon_stack(), perimeter)
+        self.skins = Skin(downskins,
+                          upskins,
+                          self.layers,
+                          self.layer_index,
+                          self.island_bounding_box,
+                          orientation)
 
-
-
-
-
+        self.skins.process(PolygonStack(), perimeter)
 
     def g_print(self):
-        printable_parts = Line_group("island", False)
+        printable_parts = LineGroup("island", False)
         printable_parts.add_group(self.outline.g_print())
 
-        if self.skins != None:
+        if self.skins is not None:
             printable_parts.add_group(self.skins.g_print())
 
         printable_parts.add_group(self.infill.g_print())
-        return  printable_parts
-
-
-
-
-
-
+        return printable_parts

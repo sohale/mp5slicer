@@ -6,7 +6,7 @@ import json
 sys.path.append(os.path.split(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))))[0])
 from slicer.shapes.mp5tostl import puppy_magic
 from slicer.Print_pipeline import print_mesh
-from slicer.config.config_factory import config_factory
+from slicer.config.config_factory import ConfigFactory
 
 
 
@@ -14,7 +14,7 @@ def print_from_mp5():
 
     mp5_file_name = sys.argv[2]
     conf_file_name = sys.argv[1]
-    config_factory(conf_file_name)
+    ConfigFactory(conf_file_name)
     import slicer.config.config as config
     config.reset()
 

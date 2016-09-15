@@ -2,7 +2,7 @@ import json
 import math
 
 
-class config_factory:
+class ConfigFactory(object):
 
     def __init__(self, json_conf):
         json_file = open(json_conf)
@@ -18,6 +18,6 @@ class config_factory:
                 ((config.filamentDiameter/2.0)**2) * math.pi)  # 6.37939
 
 
-class Printer_config():
+class PrinterConfig():
     def __init__(self):
         pass

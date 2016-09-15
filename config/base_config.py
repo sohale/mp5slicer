@@ -1,9 +1,10 @@
 import numpy as np
 
-layerThickness = 0.2
-nozzle_size = 0.4 # for calculation extrusion
-line_width = 0.4 # for caluculating the offset for polygons
-extruder_temperature =  210
+# layerThickness = 0.2
+LAYER_THICKNESS = 0.2
+nozzle_size = 0.4  # for calculation extrusion
+line_width = 0.4  # for caluculating the offset for polygons
+extruder_temperature = 210
 bed_temperature = 70
 retractionLength = 4.5
 filamentDiameter = 2.85
@@ -54,7 +55,7 @@ small_area = 5
 
 platform_bound = "brim"
 platform_bound_count = 3
-raft = False
+raft = False # raft very slow
 raftLayerThickness = 0.15
 extrusion_multiplier = 1.1
 initial_extrusion = 0.2
