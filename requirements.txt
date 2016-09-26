@@ -1,0 +1,3 @@
+pyclipper
+redis
+requests
