@@ -10,7 +10,6 @@ import subprocess
 import sys
 
 sys.path.append(os.getcwd() + os.sep + os.pardir)
-from wedesignAPI.wedesignAPI import settings
 
 REDIS_HOST = 'redis'
 REDIS_PORT = 6379
@@ -18,7 +17,7 @@ REDIS_DB = 1
 REDIS_SLICE_JOBS_KEY = 'slice_jobs'
 REDIS_SLICE_RUNNING_JOBS_KEY = 'slice_running_jobs'
 
-SLICES_DIR = settings.SLICES_ROOT
+SLICES_DIR = "/temp/slices/"
 
 
 def init_logging():
