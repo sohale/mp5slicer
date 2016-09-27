@@ -8,7 +8,7 @@ RUN apt-get update
 RUN apt-get install python3 -y
 RUN apt-get -y install python3-pip
 RUN pip3 install --upgrade pip
-ADD ./requirements.txt /usr/src/install/
+ADD ./slicer/requirements.txt /usr/src/install/
 RUN pip3 install -r /usr/src/install/requirements.txt
 RUN apt-get install python3-mysql.connector
 
@@ -18,7 +18,7 @@ RUN apt-get install libboost-all-dev -y
 
 RUN apt-get install libeigen3-dev -y
 
-RUN python ../solidmodeler/setupPyInterface.py install
+RUN python ./solidmodeler/setupPyInterface.py install
 
 
 
