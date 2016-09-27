@@ -95,7 +95,7 @@ def get_mp5_data(project):
     @return: MP5 tree as string.
     """
     auth_headers = get_authentication()
-    requests.get(get_django_projects_route() + str(project) + '/', 
+    requests.get(get_django_projects_route() + str(project) + '/',
                     headers=auth_headers)
 
     connexion = mysql.connector.connect(host='mysql',
@@ -133,17 +133,12 @@ def slice_mp5(mp5_data, output_filename, error_filename):
     output_file = open(os.path.join(SLICES_DIR, output_filename), 'w')
 
     logger.info("Running slicing script.")
-    p = subprocess.Popen(['python2',
-                          'mock_print_from_pipe.py',
-                          'config/config.json'],
-                         stdin=subprocess.PIPE,
-                         stdout=output_file,
-                         stderr=subprocess.PIPE)
-
+    p = subprocess.Popen(['python3', 'mock_cpp.py', 'config/config.json'],
+                         stdin=subprocess.PIPE, stdout=output_file, stderr=subprocess.PIPE)
     _, err = p.communicate(bytes(mp5_data, 'utf-8'))
 
     if p.wait() != 0:
-        with open(os.path.join(SLICES_DIR, 
+        with open(os.path.join(SLICES_DIR,
                                error_filename.format(error_filename)),
                   'wb') as f:
             logger.error("Slicing failed, traceback in {}.".format(error_filename))
