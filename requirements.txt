@@ -1,3 +1,4 @@
 pyclipper
 redis
 requests
+numpy

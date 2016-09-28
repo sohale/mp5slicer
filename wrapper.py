@@ -133,7 +133,7 @@ def slice_mp5(mp5_data, output_filename, error_filename):
     output_file = open(os.path.join(SLICES_DIR, output_filename), 'w')
 
     logger.info("Running slicing script.")
-    p = subprocess.Popen(['python3', 'mock_cpp.py', 'config/config.json'],
+    p = subprocess.Popen(['python3', './slicer/mock_cpp.py', 'config/config.json'],
                          stdin=subprocess.PIPE, stdout=output_file, stderr=subprocess.PIPE)
     _, err = p.communicate(bytes(mp5_data, 'utf-8'))
 
