@@ -16,9 +16,17 @@ RUN apt-get install clang-3.8 -y
 
 RUN apt-get install libboost-all-dev -y
 
-RUN apt-get install libeigen3-dev -y
+RUN pip3 install --upgrade setuptools
 
-RUN python ./solidmodeler/setupPyInterface.py install
+RUN apt-get install cmake -y
+RUN apt-get install libc++-dev -y
+
+ADD ./solidmodeler /usr/src/install/solidmodeler/
+
+
+WORKDIR /usr/src/install/solidmodeler/
+RUN python3 /usr/src/install/solidmodeler/setupPyInterface.py install
+
 
 
 
