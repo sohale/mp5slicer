@@ -1,4 +1,4 @@
-FROM ubuntu:trusty
+FROM ubuntu:xenial
 
 RUN mkdir -p /usr/src/app && mkdir -p /usr/src/install
 WORKDIR /usr/src/app
@@ -8,7 +8,7 @@ RUN apt-get install clang-3.8 -y
 
 RUN apt-get install build-essential -y
 RUN apt-get install cmake -y
-RUN apt-get install libc++-dev -y
+#RUN apt-get install libc++-dev -y
 RUN apt-get install wget -y
 RUN mkdir -p /usr/include/boost
 WORKDIR /usr/include/boost
