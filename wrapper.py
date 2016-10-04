@@ -172,7 +172,7 @@ def post_slice(project, user, filename):
                   data={
                       'user': user,
                       'project': project,
-                      'file_path': 'slices/{}'.format(filename)
+                      'file_path': '/temp/slices/{}'.format(filename)
                   })
 
     logger.info("Slice posted.")
