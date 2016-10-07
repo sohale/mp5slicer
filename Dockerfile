@@ -29,7 +29,8 @@ ADD ./solidmodeler /usr/src/install/solidmodeler/
 
 
 WORKDIR /usr/src/install/solidmodeler/lib/
-RUN apt-get install git -y
+RUN apt-get install mercurial -y
+RUN hg clone https://bitbucket.org/eigen/eigen
 WORKDIR /usr/src/install/solidmodeler/
 RUN python3 /usr/src/install/solidmodeler/setupPyInterface.py install
 
