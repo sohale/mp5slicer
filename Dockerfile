@@ -30,7 +30,7 @@ ADD ./solidmodeler /usr/src/install/solidmodeler/
 
 WORKDIR /usr/src/install/solidmodeler/lib/
 RUN apt-get install git -y
-RUN git clone ssh://git@bitbucket.org/eigen/eigen.git --depth 1 --shallow-submodules
+RUN git clone ssh://git@bitbucket.org/eigen/eigen.git --depth 1
 WORKDIR /usr/src/install/solidmodeler/
 RUN python3 /usr/src/install/solidmodeler/setupPyInterface.py install
 
