@@ -52,40 +52,9 @@ def intersection_with_line(z, vertice_0, vertice_1):
         return None
 
 def intersection_with_triangle(z, triangle):
-    # triangle is a 3*3
     assert isinstance(triangle, np.ndarray)
-    # if(np.array_equal(triangle[0],triangle[1])):
-    #     return []
-    # if(np.array_equal(triangle[0],triangle[2])):
-    #     return []
-    # if(np.array_equal(triangle[2],triangle[1])):
-    #     return []
-
 
     vertice_0, vertice_1, vertice_2 = triangle
-
-    # this is dealed with in the intersection by line
-    # if vertice_0[2] == z:
-    #     if vertice_1[2] == z:
-            # not necessary since the triangle are repaired
-            # if  vertice_2[2] != z:
-            #     return [vertice_0,vertice_1]
-            # else:
-            #     return None
-        #     return [vertice_0,vertice_1]
-        # if vertice_2[2] == z:
-        #         return [vertice_0,vertice_2]
-        # not necessary since the triangle are repaired
-        # else:
-            # return None
-    # if vertice_1[2] == z:
-    #     if vertice_2[2] == z:
-            # not necessary since the triangle are repaired
-            # if  vertice_0[2] != z:
-            #     return [vertice_1,vertice_2]
-            # else:
-            #     return None
-            # return [vertice_1,vertice_2]
 
     line = []
 
@@ -109,17 +78,6 @@ def intersection_with_triangle(z, triangle):
     intersection_point_2 = intersection_with_line(z, vertice_0, vertice_2)
     line.append(intersection_point_2)
     return line 
-    # if intersection_point_2 is not None :
-    #     if not np.array_equal(intersection_point_2,intersection_point_0) and not np.array_equal(intersection_point_1,intersection_point_2):
-    #         line.append(intersection_point_2)
-    # if len(line) == 1:
-    #     raise RuntimeError
-    # if len(line) != 2:
-    #     raise RuntimeError
-
-
-    # return line
-
 
 def min_max_z(triangle):
     return [np.min(triangle[:,2]), np.max(triangle[:,2])]

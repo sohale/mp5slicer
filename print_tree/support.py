@@ -14,7 +14,7 @@ from slicer.commons.utils import scale_point_to_clipper, scale_point_from_clippe
 from slicer.commons.utils import distance as calulate_distance
 
 
-
+############################## support by mesh ##############################
 def ray_triangle_intersection(ray_near, triangle):
     """
     Taken from Printrun
@@ -643,6 +643,40 @@ class Support:
                              [svl_data.z_low,svl_data.z_high], 
                              color = c_n)
         plt.show()
+
+############################## end of support by mesh ########################
+
+############################## support by layer ##############################
+def generate_support_from_layer_list(layer_list):
+    for layer_index in reversed(range(len(layer_list))):
+        one_last_layer_index = layer_index - 1
+        if layer_index == 0:
+            break
+        layer_list[one_last_layer_index].support_required_ps = \
+            layer_list[layer_index].process_support()
+
+    if config.ONE_EMPTY_LAYER_BETWEEN_SUPPORT_AND_MODEL:
+        for layer_index in range(len(layer_list)):
+            one_above_layer_index = layer_index + 1
+            if layer_index == len(layer_list) - 1:
+                break
+
+            this_layer_support_required_ps = \
+                layer_list[layer_index].support_required_ps
+
+            one_above_layer_ps = \
+                layer_list[one_above_layer_index].support_required_ps
+
+            last_layer_area = \
+                this_layer_support_required_ps.difference_with(one_above_layer_ps)
+
+            this_layer_support_required_ps = \
+                this_layer_support_required_ps.difference_with(last_layer_area)
+
+            layer_list[layer_index].support_required_ps = \
+                this_layer_support_required_ps
+############################## end of support by layer ########################
+
 
 def main():
     from stl import mesh as np_mesh

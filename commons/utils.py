@@ -1,7 +1,6 @@
 import sys
 from math import sqrt
 
-from slicer.print_tree.clipper_operations import *
 import pyclipper
 
 # rewrite scale to clipper, faster than pyclipper.scale_from_clipper

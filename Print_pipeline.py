@@ -1,4 +1,3 @@
-import slicer.print_tree.support as support
 from slicer.mesh_processing.slice_mesh import slice_mesh
 from slicer.print_tree.generate_print_tree import generate_tree
 from slicer.post_process.refine_print_tree import refine_print_tree
