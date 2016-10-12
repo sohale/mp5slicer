@@ -3,7 +3,9 @@ import numpy as np
 import slicer.config.printer_config as printer_config
 from slicer.commons.utils import distance as calulate_distance
 import sys
-
+import os
+import inspect
+sys.path.append(os.path.split(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))))[0])
 
 class G(object):
     '''Vectorised calculation for handling G0, G1 extrusion calculation'''
