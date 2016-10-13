@@ -24,7 +24,8 @@ def get_fonuky(node, params=None):
         "Union": union,
         "Intersection": intersection,
         "itorus": torus,
-
+        "implicit_double_mushroom": implicit_double_mushroom,
+        "tetrahedron": tetrahedron
     }
     if params is not None:
         bbox = switch[type](node, params)
@@ -102,6 +103,18 @@ def cone(node):
     return bbox
 
 def cylinder(node):
+    matrix = make_matrix4(node["matrix"])
+    bbox = get_bounding_box_for_single_shape_matrix(matrix)
+
+    return bbox
+
+def tetrahedron(node):
+    matrix = make_matrix4(node["matrix"])
+    bbox = get_bounding_box_for_single_shape_matrix(matrix)
+
+    return bbox
+
+def implicit_double_mushroom(node):
     matrix = make_matrix4(node["matrix"])
     bbox = get_bounding_box_for_single_shape_matrix(matrix)
 

@@ -51,7 +51,7 @@ def init_logging():
 
 def get_django_route():
     """Returns the global django route."""
-    return 'http://{}'.format("dockerhost")
+    return 'http://{}'.format('dockerhost')
 
 
 def get_django_slices_route():
@@ -133,7 +133,7 @@ def slice_mp5(mp5_data, output_filename, error_filename):
     output_file = open(os.path.join(SLICES_DIR, output_filename), 'w')
 
     logger.info("Running slicing script.")
-    p = subprocess.Popen(['python3', './slicer/mock_cpp.py', 'slicer/config/config.json'],
+    p = subprocess.Popen(['python3', './slicer/print_from_pipe.py'],
                          stdin=subprocess.PIPE, stdout=output_file, stderr=subprocess.PIPE)
     _, err = p.communicate(bytes(mp5_data, 'utf-8'))
 
@@ -186,9 +186,9 @@ def process_job(job, redis_client):
     """
     logger = logging.getLogger('{}.process_job'.format(__file__))
 
+
     mp5_data = get_mp5_data(job['project'])
     filename = 'result_{}_{}.gcode'.format(job['project'], job['user'])
-
     try:
         slice_mp5(mp5_data, filename, 'error_{}_{}.log'.format(job['project'],
                                                                job['user']))
@@ -197,7 +197,6 @@ def process_job(job, redis_client):
     else:
         post_slice(job['project'], job['user'], filename)
     finally:
-        print(json.dumps(job))
         redis_client.lrem(REDIS_SLICE_RUNNING_JOBS_KEY, 0, json.dumps(job))
 
 
@@ -208,11 +207,10 @@ def main():
     logger.info("Initializing worker.")
 
     django_slices_route = get_django_slices_route()
-    print(requests.get(django_slices_route + '1/').json())
+    # print(requests.get(django_slices_route + '1/').json())
     redis_client = redis.StrictRedis(host=REDIS_HOST,
                                      port=REDIS_PORT,
                                      db=REDIS_DB)
-
     running = True
 
     def stop_loop(*args):
@@ -225,9 +223,10 @@ def main():
     while running:
         logger.info("Retrieving a job from Redis...")
 
+        # cannot find anything from the redis database
         job = json.loads(redis_client.brpoplpush(REDIS_SLICE_JOBS_KEY,
                                                  REDIS_SLICE_RUNNING_JOBS_KEY,
-                                                 0)
+                                                 timeout=0) # always looking for job
                          .decode(encoding='utf-8'))
 
         logger.info("Job retrieved: {}".format(job))
