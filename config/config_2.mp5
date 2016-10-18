@@ -23,7 +23,7 @@
   "RAFT" : false,
   "EXTRUSION_MULTIPLIER" : 1.1,
   "BED_SUPPORT_STRENGTHEN_NUMBER" : 3,
-  "TO_FILE" : true,
+  "TO_FILE" : false,
   "PLATFORM_BOUND" : "skirts",
   "PLATFORM_BOUND_COUNT" : 10,
   "TEST_PARAMETER" : 2
