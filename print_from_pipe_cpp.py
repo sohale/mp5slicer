@@ -19,9 +19,9 @@ def print_from_mp5():
 
     mp5 = json.loads(mp5_as_json)
 
-    config_select = {0:"slicer/config/config.mp5",
-                     1:"slicer/config/config_0.mp5",
-                     2:"slicer/config/config_1.mp5"}
+    config_select = {0:"slicer/config/config_0.mp5",
+                     1:"slicer/config/config_1.mp5",
+                     2:"slicer/config/config_2.mp5"}
 
     dict_conf_file = config_select[mp5['printerSettings']['config_select']]
 
