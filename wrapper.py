@@ -18,7 +18,7 @@ REDIS_SLICE_JOBS_KEY = 'slice_jobs'
 # REDIS_SLICE_JOBS_KEY = 'slice_jobs_test'
 REDIS_SLICE_RUNNING_JOBS_KEY = 'slice_running_jobs'
 
-SLICES_DIR = "./temp/slices/"
+SLICES_DIR = "/temp/slices/"
 # SLICES_DIR = "slicer/temp/slices/"
 
 
