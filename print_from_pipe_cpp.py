@@ -14,20 +14,34 @@ from stl import mesh
 
 
 def print_from_mp5():
-    conf_file_name = sys.argv[1]
-    ConfigFactory(conf_file_name)
+
+    mp5_as_json = "".join(sys.stdin.readlines())
+
+    mp5 = json.loads(mp5_as_json)
+
+    config_select = {0:"slicer/config/config.mp5",
+                     1:"slicer/config/config_0.mp5",
+                     2:"slicer/config/config_1.mp5"}
+
+    dict_conf_file = config_select[mp5['printerSettings']['config_select']]
+
+    with open(dict_conf_file) as data_file:    
+        dict_conf = json.load(data_file)
+
+    if 'printerSettings' in mp5: 
+        ConfigFactory(dict_conf=dict_conf)
+        raise NameError(dict_conf_file)
+    else:
+        ConfigFactory()
     import slicer.config.config as config
     config.reset()
 
     stls = []
-    mp5_as_json = "".join(sys.stdin.readlines())
-    mp5 = json.loads(mp5_as_json)
 
     for son_position in range(len(mp5["root"]["children"])):
         mc = get_mc_params(mp5, son_position)
         mc_params = to_json_mc_params(mc)
         mp5_string = json.dumps(mp5["root"]["children"][son_position])
-
 
         pymplicit.build_geometry(mp5_string, mc_params)
         verts = pymplicit.get_verts()
@@ -37,9 +51,11 @@ def print_from_mp5():
         stl = m2stl_mesh(verts, faces)
         stls.append(stl.data)
 
-    combined_stl = mesh.Mesh(np.concatenate(stls))
+    stl = mesh.Mesh(np.concatenate(stls))
 
-    print_mesh(combined_stl, "mp5")
+    # stl = puppy_magic(mp5)
+    # stl.save("mp5.stl")
+    print_mesh(stl, "mp5")
 
 
 def m2stl_mesh(verts, faces):

@@ -130,10 +130,12 @@ def slice_mp5(mp5_data, output_filename, error_filename):
         logger.warning("Tree is empty.")
         return
 
+
     output_file = open(os.path.join(SLICES_DIR, output_filename), 'w')
 
     logger.info("Running slicing script.")
-    p = subprocess.Popen(['python3', './slicer/print_from_pipe.py'],
+
+    p = subprocess.Popen(['python3', './slicer/print_from_pipe_cpp.py'],
                          stdin=subprocess.PIPE, stdout=output_file, stderr=subprocess.PIPE)
     _, err = p.communicate(bytes(mp5_data, 'utf-8'))
 
@@ -226,11 +228,10 @@ def main():
         # cannot find anything from the redis database
         job = json.loads(redis_client.brpoplpush(REDIS_SLICE_JOBS_KEY,
                                                  REDIS_SLICE_RUNNING_JOBS_KEY,
-                                                 timeout=0) # always looking for job
-                         .decode(encoding='utf-8'))
+                                                 timeout=0).decode(encoding='utf-8'))
+
 
         logger.info("Job retrieved: {}".format(job))
         process_job(job, redis_client)
-
 if __name__ == "__main__":
     main()

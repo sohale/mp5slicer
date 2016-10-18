@@ -14,14 +14,28 @@ from stl import mesh
 
 
 def print_from_mp5():
-    mp5_file_name = sys.argv[2]
-    conf_file_name = sys.argv[1]
-    ConfigFactory(conf_file_name)
+    mp5_as_json = "".join(sys.stdin.readlines())
+
+    mp5 = json.loads(mp5_as_json)
+
+    config_select = {0:"slicer/config/config.json",
+                     1:"slicer/config/config_0.json",
+                     2:"slicer/config/config_1.json"}
+
+    dict_conf_file = config_select[mp5['printerSettings']['config_select']]
+
+    with open(dict_conf_file) as data_file:
+        dict_conf = json.load(data_file)
+
+    if 'printerSettings' in mp5:
+        ConfigFactory(dict_conf=dict_conf)
+        raise NameError(dict_conf_file)
+    else:
+        ConfigFactory()
     import slicer.config.config as config
     config.reset()
 
     stls = []
-    mp5 = json.load(open(mp5_file_name))
     for son_position in range(len(mp5["root"]["children"])):
         mc = get_mc_params(mp5, son_position)
         mc_params = to_json_mc_params(mc)

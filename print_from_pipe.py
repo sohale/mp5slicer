@@ -22,8 +22,18 @@ def print_from_pipe():
 
     mp5 = json.loads(mp5_as_json)
 
-    if 'printerSettings' in mp5:
-        ConfigFactory(dict_conf=mp5['printerSettings'])
+    config_select = {0:"slicer/config/config.json",
+                     1:"slicer/config/config_0.json",
+                     2:"slicer/config/config_1.json"}
+
+    dict_conf_file = config_select[mp5['printerSettings']['config_select']]
+
+    with open(dict_conf_file) as data_file:    
+        dict_conf = json.load(data_file)
+
+    if 'printerSettings' in mp5: 
+        ConfigFactory(dict_conf=dict_conf)
+        raise NameError(dict_conf_file)
     else:
         ConfigFactory()
     import slicer.config.config as config

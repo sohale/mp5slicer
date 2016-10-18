@@ -10,6 +10,7 @@ def print_from_file():
     args = args[1:]
     stl_file_name = args[0]
     conf_file_name = args[1]
+
     ConfigFactory(conf_file_name)
     import slicer.config.config as config
     config.reset()
@@ -17,10 +18,25 @@ def print_from_file():
     mesh = get_stl_from_file(stl_file_name)
     print_mesh(mesh, stl_file_name)
 
+def print_from_file_next_generation():
+    args = sys.argv
+    args = args[1:]
+    stl_file_name = args[0]
+    user_config_mp5 = args[1]
+    printer_config_mp5 = args[2]
+    filament_config_mp5 = args[3]
+
+    ConfigFactory(user_config_mp5, printer_config_mp5, filament_config_mp5)
+    
+    import slicer.config.config as config
+    config.reset()
+
+    mesh = get_stl_from_file(stl_file_name)
+    print_mesh(mesh, stl_file_name)
 
 def get_stl_from_file(stl_file_name):
     from stl import mesh
     return mesh.Mesh.from_file(stl_file_name)
 
 if __name__ == '__main__':
-    print_from_file()
+    print_from_file_next_generation()
