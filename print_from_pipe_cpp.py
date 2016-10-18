@@ -30,7 +30,6 @@ def print_from_mp5():
 
     if 'printerSettings' in mp5: 
         ConfigFactory(dict_conf=dict_conf)
-        raise NameError(dict_conf_file)
     else:
         ConfigFactory()
     import slicer.config.config as config
