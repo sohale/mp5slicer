@@ -15,9 +15,11 @@ REDIS_HOST = 'redis'
 REDIS_PORT = 6379
 REDIS_DB = 1
 REDIS_SLICE_JOBS_KEY = 'slice_jobs'
+# REDIS_SLICE_JOBS_KEY = 'slice_jobs_test'
 REDIS_SLICE_RUNNING_JOBS_KEY = 'slice_running_jobs'
 
-SLICES_DIR = "/temp/slices/"
+SLICES_DIR = "./temp/slices/"
+# SLICES_DIR = "slicer/temp/slices/"
 
 
 def init_logging():
@@ -52,7 +54,7 @@ def init_logging():
 def get_django_route():
     """Returns the global django route."""
     return 'http://{}'.format('dockerhost')
-
+    # return 'http://{}'.format('127.0.0.1:8000')
 
 def get_django_slices_route():
     """Returns the django slices api route."""
@@ -108,7 +110,7 @@ def get_mp5_data(project):
     query = ("SELECT tree FROM API_project WHERE id = %s")
     cursor.execute(query, (project,))
 
-    mp5_data = '{{"root":{}}}'.format(cursor.fetchone()[0])
+    mp5_data = cursor.fetchone()[0]
 
     cursor.close()
     connexion.close()
@@ -233,5 +235,6 @@ def main():
 
         logger.info("Job retrieved: {}".format(job))
         process_job(job, redis_client)
+        
 if __name__ == "__main__":
     main()
