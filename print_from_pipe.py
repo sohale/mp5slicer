@@ -35,12 +35,11 @@ def print_from_pipe():
     
     if 'printerSettings' in mp5: 
         ConfigFactory(dict_conf=dict_conf)
-        raise NameError(dict_conf_file)
     else:
         ConfigFactory()
     import slicer.config.config as config
     config.reset()
-    config.TO_FILE = False
+
     stls = []
 
     for son_position in range(len(mp5["root"]["children"])):
