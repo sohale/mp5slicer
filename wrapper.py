@@ -199,7 +199,7 @@ def process_job(job, redis_client):
         slice_mp5(mp5_data, result_filename, error_filename)
     except SliceError:
         logger.error("Error during the slicing.")
-        redis_client.lpush(REDIS_SLICE_ERROR, 0, json.dumps(job))
+        redis_client.lpush(REDIS_SLICE_ERROR, json.dumps(job))
     else:
         post_slice(job['project'], job['user'], result_filename)
     finally:
