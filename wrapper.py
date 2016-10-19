@@ -230,9 +230,11 @@ def main():
         logger.info("Retrieving a job from Redis...")
 
         # cannot find anything from the redis database
-        job = json.loads(redis_client.brpoplpush(REDIS_SLICE_JOBS_KEY,
+        job = {}
+        job_string = redis_client.brpoplpush(REDIS_SLICE_JOBS_KEY,
                                                  REDIS_SLICE_RUNNING_JOBS_KEY,
-                                                 timeout=0).decode(encoding='utf-8'))
+                                                 timeout=0).decode(encoding='utf-8').split(":")
+        job["user"], job["project"] = job_string[0], job_string[1]
 
 
         logger.info("Job retrieved: {}".format(job))
