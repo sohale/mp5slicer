@@ -13,6 +13,8 @@ def build_geometry(mp5):
         mp5_string = json.dumps(mp5["root"]["children"][son_position])
 
 
+
+
         pymplicit.build_geometry(mp5_string, mc_params)
         verts = pymplicit.get_verts()
         faces = pymplicit.get_faces()

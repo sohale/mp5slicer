@@ -192,15 +192,16 @@ def process_job(job, redis_client):
 
 
     mp5_data = get_mp5_data(job['project'])
-    filename = 'result_{}_{}.gcode'.format(job['project'], job['user'])
+    result_filename = 'result_{}_{}.gcode'.format(job['project'], job['user'])
+    error_filename = 'error_{}_{}.log'.format(job['project'], job['user'])
     try:
-        slice_mp5(mp5_data, filename, 'error_{}_{}.log'.format(job['project'],
-                                                               job['user']))
+        slice_mp5(mp5_data, result_filename, error_filename)
     except SliceError:
         logger.error("Error during the slicing.")
     else:
-        post_slice(job['project'], job['user'], filename)
+        post_slice(job['project'], job['user'], result_filename)
     finally:
+        print(json.dumps(job))
         redis_client.lrem(REDIS_SLICE_RUNNING_JOBS_KEY, 0, json.dumps(job))
 
 
