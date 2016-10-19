@@ -28,6 +28,8 @@ def print_from_mp5():
 
     with open(dict_conf_file) as data_file:    
         dict_conf = json.load(data_file)
+    # hack to force config to_file in print_from_file_cpp to true
+    dict_conf['TO_FILE'] = False
 
     if 'printerSettings' in mp5: 
         ConfigFactory(dict_conf=dict_conf)

@@ -30,7 +30,9 @@ def print_from_pipe():
 
     with open(dict_conf_file) as data_file:    
         dict_conf = json.load(data_file)
-
+    # hack to force config to_file in print_from_file_cpp to true
+    dict_conf['TO_FILE'] = False
+    
     if 'printerSettings' in mp5: 
         ConfigFactory(dict_conf=dict_conf)
         raise NameError(dict_conf_file)
@@ -38,7 +40,7 @@ def print_from_pipe():
         ConfigFactory()
     import slicer.config.config as config
     config.reset()
-
+    config.TO_FILE = False
     stls = []
 
     for son_position in range(len(mp5["root"]["children"])):

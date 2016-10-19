@@ -16,19 +16,22 @@ def print_from_mp5():
 
     mp5 = json.loads(mp5_as_json)
 
-    config_select = {0:"slicer/config/config.json",
-                     1:"slicer/config/config_0.json",
-                     2:"slicer/config/config_1.json"}
+    config_select = {0:"slicer/config/config.mp5",
+                     1:"slicer/config/config_0.mp5",
+                     2:"slicer/config/config_1.mp5"}
 
     dict_conf_file = config_select[mp5['printerSettings']['config_select']]
 
     with open(dict_conf_file) as data_file:
         dict_conf = json.load(data_file)
+    # hack to force config to_file in print_from_file_cpp to true
+    dict_conf['TO_FILE'] = True
 
     if 'printerSettings' in mp5:
         ConfigFactory(dict_conf=dict_conf)
     else:
         ConfigFactory()
+
     import slicer.config.config as config
     config.reset()
 
