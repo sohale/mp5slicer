@@ -17,6 +17,7 @@ REDIS_DB = 1
 REDIS_SLICE_JOBS_KEY = 'slice_jobs'
 # REDIS_SLICE_JOBS_KEY = 'slice_jobs_test'
 REDIS_SLICE_RUNNING_JOBS_KEY = 'slice_running_jobs'
+REDIS_SLICE_ERROR = 'slice_error'
 
 SLICES_DIR = "/temp/slices/"
 # SLICES_DIR = "slicer/temp/slices/"
@@ -198,10 +199,10 @@ def process_job(job, redis_client):
         slice_mp5(mp5_data, result_filename, error_filename)
     except SliceError:
         logger.error("Error during the slicing.")
+        redis_client.lpush(REDIS_SLICE_ERROR, 0, json.dumps(job))
     else:
         post_slice(job['project'], job['user'], result_filename)
     finally:
-        print(json.dumps(job))
         redis_client.lrem(REDIS_SLICE_RUNNING_JOBS_KEY, 0, json.dumps(job))
 
 

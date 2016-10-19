@@ -20,7 +20,7 @@ class ConfigFactory(object):
             if hasattr(config, arg):
                 setattr(config, arg, arg_dictionnary[arg])
             else:
-                raise AttributeError('setting a undefined attr {} is not allowed'.format(arg))
+                raise AttributeError('setting a undefined attr {} is not allowed ; {} is not in base_config'.format(arg,arg))
 
         setattr(config,
                 'crossArea',
