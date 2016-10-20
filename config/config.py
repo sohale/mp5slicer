@@ -1,6 +1,8 @@
 import sys
 import slicer.config.base_config as base_config
 
+class ConfigurationError(Exception):
+    pass
 
 def reset():
     this_config = sys.modules["slicer.config.config"]
