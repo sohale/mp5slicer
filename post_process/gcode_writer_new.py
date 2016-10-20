@@ -140,6 +140,7 @@ class GcodeGenerator(TreeTask):
             config.INFILL_SPEED = config.FIRST_LAYER_INFILL_SPEED
             config.SKIN_SPEED = config.FIRST_LAYER_SKIN_SPEED
             config.BOUNDARY_SPEED = config.FIRST_LAYER_BOUNDARY_SPEED
+            config.INNER_BOUNDARY_SPEED = config.FIRST_LAYER_INNER_BOUNDARY_SPEED
             config.HOLE_SPEED = config.FIRST_LAYER_HOLE_SPEED
             config.SUPPORT_SPEED = config.FIRST_LAYER_SUPPORT_SPEED
             config.RAFT_SPEED = config.FIRST_LAYER_RAFT_SPEED
