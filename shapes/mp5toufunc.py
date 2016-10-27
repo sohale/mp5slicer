@@ -1,6 +1,6 @@
 import numpy as np
-from solidmodeler.clean_code.basic_functions import make_vector4
-from solidmodeler.clean_code import vector3
+from implisolid.clean_code.basic_functions import make_vector4
+from implisolid.clean_code import vector3
 
 
 def get_root_node(tree):

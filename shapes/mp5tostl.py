@@ -2,8 +2,8 @@ import json
 
 from mp5toufunc import get_fonuky, get_root_node
 
-from solidmodeler.clean_code.ohtake_belyaev_demo_subdivision_projection_qem import *
-from solidmodeler.clean_code.stl_tests import make_mc_values_grid
+from implisolid.clean_code.ohtake_belyaev_demo_subdivision_projection_qem import *
+from implisolid.clean_code.stl_tests import make_mc_values_grid
 from stl import mesh
 
 mesh_correction = False

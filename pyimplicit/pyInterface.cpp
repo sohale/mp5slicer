@@ -1,7 +1,7 @@
 
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
-#include "../../solidmodeler/js_iteration_1/mcc2.cpp"
+#include "../../implisolid/js_iteration_1/mcc2.cpp"
 #include <string>
 #include <array>
 #include <iostream>
@@ -52,7 +52,7 @@ py::array_t<int>  getFaces(){
     std::cout.rdbuf(backup);        // restore cout's original streambuf
     filestr.close();
 
-    return py::array(py::buffer_info(faces, 
+    return py::array(py::buffer_info(faces,
                    sizeof(vertexindex_type),
                    py::format_descriptor<vertexindex_type>::value,
                    2,

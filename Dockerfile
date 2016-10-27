@@ -23,16 +23,16 @@ RUN pip3 install -r /usr/src/install/requirements.txt
 RUN apt-get install python3-mysql.connector
 RUN pip3 install --upgrade setuptools
 
-ADD ./solidmodeler /usr/src/install/solidmodeler/
+ADD ./implisolid /usr/src/install/implisolid/
 
 
 
 
-WORKDIR /usr/src/install/solidmodeler/lib/
+WORKDIR /usr/src/install/implisolid/lib/
 RUN apt-get install mercurial -y
 RUN hg clone https://bitbucket.org/eigen/eigen
-WORKDIR /usr/src/install/solidmodeler/
-RUN python3 /usr/src/install/solidmodeler/setupPyInterface.py install
+WORKDIR /usr/src/install/implisolid/
+RUN python3 /usr/src/install/implisolid/setupPyInterface.py install
 
 
 
