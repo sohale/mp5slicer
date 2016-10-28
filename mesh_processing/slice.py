@@ -1,5 +1,5 @@
 import numpy as np
-# from slicer.slicerCyth  import *
+# from mp5slicer.slicerCyth  import *
 
 # slower
 # def intersection_with_line(z, vertice_0, vertice_1):

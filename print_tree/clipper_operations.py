@@ -4,7 +4,7 @@ import os
 import sys
 from collections import namedtuple
 sys.path.append(os.path.split(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))))[0])
-from slicer.commons.utils import scale_value_to_clipper, \
+from mp5slicer.commons.utils import scale_value_to_clipper, \
                                  scale_value_from_clipper
 
 

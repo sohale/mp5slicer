@@ -1,7 +1,7 @@
 import sys
 from .gcode_writer import GCodeEnvironment
-import slicer.config.config as config
-import slicer.config.printer_config as printer_config
+import mp5slicer.config.config as config
+import mp5slicer.config.printer_config as printer_config
 
 
 class G_buffer(object):

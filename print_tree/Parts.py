@@ -4,13 +4,13 @@ import sys
 
 sys.path.append(os.path.split(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))))[0])
 
-from slicer.print_tree.infill_paterns import *
-from slicer.print_tree.Line_stack import *
+from mp5slicer.print_tree.infill_paterns import *
+from mp5slicer.print_tree.Line_stack import *
 
-from slicer.print_tree.Line_group import *
-import slicer.config.config as config
+from mp5slicer.print_tree.Line_group import *
+import mp5slicer.config.config as config
 
-from slicer.commons.utils import scale_list_to_clipper, \
+from mp5slicer.commons.utils import scale_list_to_clipper, \
                                  scale_value_from_clipper, \
                                  scale_list_from_clipper
 

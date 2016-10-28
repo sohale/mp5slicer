@@ -5,7 +5,7 @@ import numpy as np
 
 sys.path.append(os.path.split(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))))[0])
 
-from slicer.mesh_processing.rotation import rotate as rotation
+from mp5slicer.mesh_processing.rotation import rotate as rotation
 
 
 class Mesh(object):

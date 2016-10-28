@@ -1,5 +1,5 @@
 import sys
-import slicer.config.base_config as base_config
+import mp5slicer.config.base_config as base_config
 
 if sys.version_info.major == 3 and sys.version_info.minor >= 5:
 	# TODO : a new file for the types
@@ -13,7 +13,7 @@ class ConfigurationError(Exception):
     pass
 
 def reset():
-    this_config = sys.modules["slicer.config.config"]
+    this_config = sys.modules["mp5slicer.config.config"]
     attributes = dir(base_config)
     for atr in attributes:
         setattr(this_config, atr, getattr(base_config, atr))

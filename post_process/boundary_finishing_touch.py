@@ -1,7 +1,7 @@
-from slicer.post_process.Tree_task import TreeTask
-from slicer.post_process.print_quality_optimizer import shorten_last_line,\
+from mp5slicer.post_process.Tree_task import TreeTask
+from mp5slicer.post_process.print_quality_optimizer import shorten_last_line,\
     reorder_lines_close_to_point, retract_at_point_inside_boundary
-import slicer.config.config as config
+import mp5slicer.config.config as config
 
 
 class BoundaryFinish(TreeTask):

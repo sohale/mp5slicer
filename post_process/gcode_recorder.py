@@ -1,7 +1,7 @@
-import slicer.config.config as config
+import mp5slicer.config.config as config
 import numpy as np
-import slicer.config.printer_config as printer_config
-from slicer.commons.utils import distance as calulate_distance
+import mp5slicer.config.printer_config as printer_config
+from mp5slicer.commons.utils import distance as calulate_distance
 import sys
 import os
 import inspect
@@ -219,18 +219,18 @@ class GcodeRecorder(object):
     def startcode(self):
 
         if printer_config.model == "r2x":
-            start_code_name = "slicer/gcode_writer/r2xstart"
+            start_code_name = "mp5slicer/gcode_writer/r2xstart"
             start_string = "M104 S{} T1 (set extruder temperature)\n".format(
                 config.EXTRUDER_TEMPERATURE)
 
         elif printer_config.model == "um2":
-            start_code_name = "slicer/gcode_writer/um2_startcode"
+            start_code_name = "mp5slicer/gcode_writer/um2_startcode"
             start_string = "M140 S{}\nM109 S{}\n".format(
                 config.BED_TEMPERATURE,
                 config.EXTRUDER_TEMPERATURE)
 
         elif printer_config.model == "umo":
-            start_code_name = "slicer/gcode_writer/startcode"
+            start_code_name = "mp5slicer/gcode_writer/startcode"
             start_string = "M109 S{}\n".format(config.EXTRUDER_TEMPERATURE)
         else:
             raise NotImplementedError("only support r2x, um2, umo")
@@ -244,11 +244,11 @@ class GcodeRecorder(object):
     @property
     def endcode(self):
         if printer_config.model == "r2x":
-            end_code_name = "slicer/gcode_writer/r2xend"
+            end_code_name = "mp5slicer/gcode_writer/r2xend"
         elif printer_config.model == "um2":
-            end_code_name = "slicer/gcode_writer/um2_endcode"
+            end_code_name = "mp5slicer/gcode_writer/um2_endcode"
         elif printer_config.model == "umo":
-            end_code_name = "slicer/gcode_writer/endcode"
+            end_code_name = "mp5slicer/gcode_writer/endcode"
         else:
             raise NotImplementedError("Supports for Printer models r2x, um2, umo")
 

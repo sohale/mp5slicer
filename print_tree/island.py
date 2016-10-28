@@ -1,10 +1,10 @@
-import slicer.config.config as config
-from slicer.commons.utils import distance, get_center, visualise_polygon_list, does_bounding_box_intersect, scale_value_to_clipper
-from slicer.print_tree.Elements import Outline
-from slicer.print_tree.Line_group import *
-from slicer.print_tree.Parts import Infill, Skin
-from slicer.print_tree.Polygon_stack import *
-from slicer.print_tree.Polynode import *
+import mp5slicer.config.config as config
+from mp5slicer.commons.utils import distance, get_center, visualise_polygon_list, does_bounding_box_intersect, scale_value_to_clipper
+from mp5slicer.print_tree.Elements import Outline
+from mp5slicer.print_tree.Line_group import *
+from mp5slicer.print_tree.Parts import Infill, Skin
+from mp5slicer.print_tree.Polygon_stack import *
+from mp5slicer.print_tree.Polynode import *
 from collections import namedtuple
 Island_bounding_box = namedtuple('Island_bounding_box', 'xmax xmin ymax ymin')
 

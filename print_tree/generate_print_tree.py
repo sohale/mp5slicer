@@ -1,6 +1,6 @@
-from slicer.print_tree.layer import Layer
-from slicer.print_tree.raft_layer import RaftLayer
-import slicer.config.config as config
+from mp5slicer.print_tree.layer import Layer
+from mp5slicer.print_tree.raft_layer import RaftLayer
+import mp5slicer.config.config as config
 
 def generate_tree(polygon_layers, bounding_box):
 
@@ -23,7 +23,7 @@ def generate_tree(polygon_layers, bounding_box):
     # change the following logic to somewhere else
     if config.USE_SUPPORT:
         # this function change layer in layer list in place
-        from slicer.print_tree.support import generate_support_from_layer_list
+        from mp5slicer.print_tree.support import generate_support_from_layer_list
         generate_support_from_layer_list(layer_list)
 
     if config.RAFT is True:

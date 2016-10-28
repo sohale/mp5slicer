@@ -1,9 +1,9 @@
 import inspect
 import os
 import sys
-from slicer.commons.utils import scale_line_from_clipper, scale_list_from_clipper
+from mp5slicer.commons.utils import scale_line_from_clipper, scale_list_from_clipper
 sys.path.append(os.path.split(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))))[0])
-from slicer.print_tree.Polygon_stack import *
+from mp5slicer.print_tree.Polygon_stack import *
 import pyclipper
 
 
@@ -162,7 +162,7 @@ class LineStack(object):
 class SupportLineStack(LineStack):
 
     def offset_point(self, offset_value):
-        import slicer.print_tree.support as support
+        import mp5slicer.print_tree.support as support
         points = []
         for each_line in self.lines:
 
@@ -176,7 +176,7 @@ class SupportLineStack(LineStack):
         return PolygonStack(sol)
 
     def offset_last_point(self):
-        import slicer.print_tree.support as support
+        import mp5slicer.print_tree.support as support
         points = []
         for each_line in self.lines:
 

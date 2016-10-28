@@ -1,8 +1,8 @@
-import slicer.config.config as config
-from slicer.print_tree.Line_group import *
-from slicer.print_tree.Polygon_stack import *
-from slicer.print_tree.SingleLine import SingleLine
-from slicer.commons.utils import scale_line_from_clipper
+import mp5slicer.config.config as config
+from mp5slicer.print_tree.Line_group import *
+from mp5slicer.print_tree.Polygon_stack import *
+from mp5slicer.print_tree.SingleLine import SingleLine
+from mp5slicer.commons.utils import scale_line_from_clipper
 
 
 class Outline(object):

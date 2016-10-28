@@ -1,7 +1,7 @@
-from slicer.post_process.Tree_task import TreeTask
-import slicer.config.config as config
-from slicer.post_process.gcode_recorder import GcodeRecorder
-from slicer.commons.utils import distance as calulate_distance
+from mp5slicer.post_process.Tree_task import TreeTask
+import mp5slicer.config.config as config
+from mp5slicer.post_process.gcode_recorder import GcodeRecorder
+from mp5slicer.commons.utils import distance as calulate_distance
 import numpy as np
 
 class GcodeGenerator(TreeTask):

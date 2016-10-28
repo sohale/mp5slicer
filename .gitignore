@@ -1,0 +1,13 @@
+!slicer/stl/elephant.stl
+!slicer/stl/XY_resonance_test.stl
+!slicer/stl/tealight_dbl_layer.stl
+!slicer/stl/negative_space_tolerance_test.stl
+!slicer/stl/fine_positive_features.stl
+!slicer/gcode_writer/startcode.gcode
+!slicer/gcode_writer/endcode.gcode
+
+slicer/config/config.json
+slicer/run.command
+slicer/logs
+
+slicer/overhang_test_stl

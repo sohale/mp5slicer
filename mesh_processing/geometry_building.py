@@ -1,4 +1,4 @@
-from slicer.shapes.mp5totree import get_mc_params
+from mp5slicer.shapes.mp5totree import get_mc_params
 import json
 import numpy as np
 import pymplicit

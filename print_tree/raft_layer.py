@@ -1,8 +1,8 @@
-import slicer.config.config as config
-from slicer.post_process.path_planner import *
-from slicer.print_tree.Line_stack import *
-from slicer.print_tree.infill_paterns import *
-from slicer.commons.utils import scale_line_to_clipper
+import mp5slicer.config.config as config
+from mp5slicer.post_process.path_planner import *
+from mp5slicer.print_tree.Line_stack import *
+from mp5slicer.print_tree.infill_paterns import *
+from mp5slicer.commons.utils import scale_line_to_clipper
 
 class RaftLayer(object):
 

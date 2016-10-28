@@ -18,7 +18,7 @@ RUN wget -q -S -O - 'http://downloads.sourceforge.net/project/boost/boost/1.61.0
 RUN apt-get install python3 -y
 RUN apt-get -y install python3-pip
 RUN pip3 install --upgrade pip
-ADD ./slicer/requirements.txt /usr/src/install/
+ADD ./mp5slicer/requirements.txt /usr/src/install/
 RUN pip3 install -r /usr/src/install/requirements.txt
 RUN apt-get install python3-mysql.connector
 RUN pip3 install --upgrade setuptools
@@ -37,7 +37,7 @@ RUN python3 /usr/src/install/implisolid/setupPyInterface.py install
 
 
 
-ADD ./slicer/ /usr/src/app/slicer/
+ADD ./mp5slicer/ /usr/src/app/mp5slicer/
 WORKDIR /usr/src/app
 
-CMD ["python3", "./slicer/wrapper.py"]
+CMD ["python3", "./mp5slicer/wrapper.py"]

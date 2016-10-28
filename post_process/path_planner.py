@@ -1,6 +1,6 @@
 # import bintrees
-from slicer.print_tree.Line_group import *
-from slicer.commons.utils import distance as calulate_distance
+from mp5slicer.print_tree.Line_group import *
+from mp5slicer.commons.utils import distance as calulate_distance
 
 class MinDistTuple(object):
     def __init__(self, distance, index, end_point):

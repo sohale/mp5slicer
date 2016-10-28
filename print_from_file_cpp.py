@@ -4,10 +4,10 @@ import sys
 
 sys.path.append(os.path.split(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))))[0])
 
-from slicer.Print_pipeline import print_mesh
-from slicer.config.config_factory import ConfigFactory
+from mp5slicer.Print_pipeline import print_mesh
+from mp5slicer.config.config_factory import ConfigFactory
 import json
-from slicer.mesh_processing.geometry_building import build_geometry
+from mp5slicer.mesh_processing.geometry_building import build_geometry
 
 
 
@@ -16,9 +16,9 @@ def print_from_mp5():
 
     mp5 = json.loads(mp5_as_json)
 
-    config_select = {0:"slicer/config/config.mp5",
-                     1:"slicer/config/config_0.mp5",
-                     2:"slicer/config/config_1.mp5"}
+    config_select = {0:"mp5slicer/config/config.mp5",
+                     1:"mp5slicer/config/config_0.mp5",
+                     2:"mp5slicer/config/config_1.mp5"}
 
     dict_conf_file = config_select[mp5['printerSettings']['config_select']]
 
@@ -32,7 +32,7 @@ def print_from_mp5():
     else:
         ConfigFactory()
 
-    import slicer.config.config as config
+    import mp5slicer.config.config as config
     config.reset()
 
 

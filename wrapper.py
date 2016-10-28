@@ -20,7 +20,7 @@ REDIS_SLICE_RUNNING_JOBS_KEY = 'slice_running_jobs'
 REDIS_SLICE_ERROR = 'slice_error'
 
 SLICES_DIR = "/temp/slices/"
-# SLICES_DIR = "slicer/temp/slices/"
+# SLICES_DIR = "mp5slicer/temp/slices/"
 
 
 def init_logging():
@@ -138,7 +138,7 @@ def slice_mp5(mp5_data, output_filename, error_filename):
 
     logger.info("Running slicing script.")
 
-    p = subprocess.Popen(['python3', './slicer/print_from_pipe_cpp.py'],
+    p = subprocess.Popen(['python3', './mp5slicer/print_from_pipe_cpp.py'],
                          stdin=subprocess.PIPE, stdout=output_file, stderr=subprocess.PIPE)
     _, err = p.communicate(bytes(mp5_data, 'utf-8'))
 

@@ -1,9 +1,9 @@
 import pyclipper
 from queue import Queue
-from slicer.commons.utils import distance as calulate_distance
+from mp5slicer.commons.utils import distance as calulate_distance
 
-from slicer.post_process.IslandMapEdge import IslandMapEdge
-from slicer.post_process.IslandMapNode import IslandMapNode
+from mp5slicer.post_process.IslandMapEdge import IslandMapEdge
+from mp5slicer.post_process.IslandMapNode import IslandMapNode
 
 
 class IslandMap(object):

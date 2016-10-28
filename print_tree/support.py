@@ -5,13 +5,13 @@ import sys
 sys.path.append(os.path.split(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))))[0])
 
 import numpy as np
-import slicer.config.config as config
-from slicer.print_tree.Polygon_stack import *
-from slicer.print_tree.Line_stack import SupportLineStack
+import mp5slicer.config.config as config
+from mp5slicer.print_tree.Polygon_stack import *
+from mp5slicer.print_tree.Line_stack import SupportLineStack
 from itertools import groupby
 from collections import namedtuple
-from slicer.commons.utils import scale_point_to_clipper, scale_point_from_clipper
-from slicer.commons.utils import distance as calulate_distance
+from mp5slicer.commons.utils import scale_point_to_clipper, scale_point_from_clipper
+from mp5slicer.commons.utils import distance as calulate_distance
 
 
 ############################## support by mesh ##############################
@@ -680,9 +680,9 @@ def generate_support_from_layer_list(layer_list):
 
 def main():
     from stl import mesh as np_mesh
-    from slicer.mesh_processing import mesh_operations
+    from mp5slicer.mesh_processing import mesh_operations
     import datetime
-    # import slicer.config.config as config
+    # import mp5slicer.config.config as config
     config.reset()
     start_time = datetime.datetime.now()
     mesh_name = "reaper.stl"

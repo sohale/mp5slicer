@@ -4,7 +4,7 @@ import inspect
 sys.path.append(os.path.split(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))))[0])
 
 
-from slicer.config.config import ConfigurationError
+from mp5slicer.config.config import ConfigurationError
 import json
 import math
 
@@ -21,7 +21,7 @@ class ConfigFactory(object):
             json_file.close()
             arg_dictionnary = json.loads(json_str)
 
-        import slicer.config.base_config as config
+        import mp5slicer.config.base_config as config
         for arg in arg_dictionnary:
             if hasattr(config, arg):
                 setattr(config, arg, arg_dictionnary[arg])
@@ -127,8 +127,8 @@ class ConfigFactoryNextGeneration(object):
 
     def set_config_attributes(self):
         # set config attributes
-        import slicer.config.base_config as base_config
-        import slicer.config.config as config
+        import mp5slicer.config.base_config as base_config
+        import mp5slicer.config.config as config
 
         for arg in self.merged_config_dict:
             if hasattr(config, arg):
@@ -153,10 +153,10 @@ class PrinterConfig():
 def main():
     ConfigFactoryNextGeneration(['default', 'user', 'printer', 'filament'],
                                 [3, 0, 1, 2],
-                                'slicer/config/base_config_0.mp5',
-                                'slicer/config/test_user_config.mp5',
-                                'slicer/config/test_optimized_printer_config_0.mp5',
-                                'slicer/config/test_optimized_filament_config_0.mp5')
+                                'mp5slicer/config/base_config_0.mp5',
+                                'mp5slicer/config/test_user_config.mp5',
+                                'mp5slicer/config/test_optimized_printer_config_0.mp5',
+                                'mp5slicer/config/test_optimized_filament_config_0.mp5')
 
     # print(get_config_priority(['default', 'user', 'printer', 'filament'], [3, 0, 1, 2]))
 

@@ -1,11 +1,11 @@
-import slicer.config.config as config
-from slicer.commons.utils import overlap, does_bounding_box_intersect, scale_value_to_clipper
-from slicer.print_tree.Line_group import *
-from slicer.print_tree.Line_stack import *
-from slicer.print_tree.island import Island
+import mp5slicer.config.config as config
+from mp5slicer.commons.utils import overlap, does_bounding_box_intersect, scale_value_to_clipper
+from mp5slicer.print_tree.Line_group import *
+from mp5slicer.print_tree.Line_stack import *
+from mp5slicer.print_tree.island import Island
 import numpy as np
-from slicer.commons.utils import scale_list_to_clipper, scale_line_to_clipper
-from slicer.print_tree.infill_paterns import linear_infill2
+from mp5slicer.commons.utils import scale_list_to_clipper, scale_line_to_clipper
+from mp5slicer.print_tree.infill_paterns import linear_infill2
 
 class Layer(object):
 

@@ -5,14 +5,14 @@ import sys
 
 sys.path.append(os.path.split(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))))[0])
 
-from slicer.config.config_factory import ConfigFactory
-from slicer.Print_pipeline import print_mesh
-from slicer.shapes.mp5totree import get_mc_params
+from mp5slicer.config.config_factory import ConfigFactory
+from mp5slicer.Print_pipeline import print_mesh
+from mp5slicer.shapes.mp5totree import get_mc_params
 import pymplicit
 from stl import mesh
 import numpy as np
-from slicer.mock_cpp import to_json_mc_params, m2stl_mesh
-# from slicer.shapes.mp5tostl import puppy_magic
+from mp5slicer.mock_cpp import to_json_mc_params, m2stl_mesh
+# from mp5slicer.shapes.mp5tostl import puppy_magic
 
 
 def print_from_pipe():
@@ -22,9 +22,9 @@ def print_from_pipe():
 
     mp5 = json.loads(mp5_as_json)
 
-    config_select = {0:"slicer/config/config.json",
-                     1:"slicer/config/config_0.json",
-                     2:"slicer/config/config_1.json"}
+    config_select = {0:"mp5slicer/config/config.json",
+                     1:"mp5slicer/config/config_0.json",
+                     2:"mp5slicer/config/config_1.json"}
 
     dict_conf_file = config_select[mp5['printerSettings']['config_select']]
 
@@ -37,7 +37,7 @@ def print_from_pipe():
         ConfigFactory(dict_conf=dict_conf)
     else:
         ConfigFactory()
-    import slicer.config.config as config
+    import mp5slicer.config.config as config
     config.reset()
 
     stls = []

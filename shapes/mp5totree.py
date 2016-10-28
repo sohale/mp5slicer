@@ -1,4 +1,4 @@
-from slicer.shapes.Boundingbox import *
+from mp5slicer.shapes.Boundingbox import *
 
 def get_mc_params(mp5source, son_position):
 

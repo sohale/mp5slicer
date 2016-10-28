@@ -1,5 +1,5 @@
-from slicer.mesh_processing.mesh_operations import Mesh as MPmesh
-from slicer.mesh_processing.slice import adaptive_slicing, \
+from mp5slicer.mesh_processing.mesh_operations import Mesh as MPmesh
+from mp5slicer.mesh_processing.slice import adaptive_slicing, \
     slicer_from_mesh_as_dict
 from slicer.commons.utils import polygonize_layers_from_trimed_dict, \
     scale_list_to_clipper

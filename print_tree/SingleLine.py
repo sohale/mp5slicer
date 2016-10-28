@@ -1,4 +1,4 @@
-from slicer.print_tree.Polygon_stack import *
+from mp5slicer.print_tree.Polygon_stack import *
 
 
 class SingleLine(object):

@@ -1,6 +1,6 @@
-from slicer.print_tree.Island_stack import *
-from slicer.print_tree.clipper_operations import *
-from slicer.commons.utils import scale_list_from_clipper, \
+from mp5slicer.print_tree.Island_stack import *
+from mp5slicer.print_tree.clipper_operations import *
+from mp5slicer.commons.utils import scale_list_from_clipper, \
                                  scale_point_from_clipper, \
                                  scale_value_from_clipper, \
                                  scale_line_from_clipper

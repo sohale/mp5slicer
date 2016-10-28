@@ -1,7 +1,7 @@
-from slicer.post_process.Tree_post_processor import TreePostProcessor
-from slicer.post_process.simple_routing import SimpleRouter
-from slicer.post_process.boundary_finishing_touch import BoundaryFinish
-from slicer.post_process.gcode_writer_new import GcodeGenerator
+from mp5slicer.post_process.Tree_post_processor import TreePostProcessor
+from mp5slicer.post_process.simple_routing import SimpleRouter
+from mp5slicer.post_process.boundary_finishing_touch import BoundaryFinish
+from mp5slicer.post_process.gcode_writer_new import GcodeGenerator
 
 
 def refine_print_tree(print_tree, stl_file_name):

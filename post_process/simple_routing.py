@@ -1,5 +1,5 @@
-from slicer.post_process.path_planner import arrange_path
-from slicer.post_process.Tree_task import TreeTask
+from mp5slicer.post_process.path_planner import arrange_path
+from mp5slicer.post_process.Tree_task import TreeTask
 
 
 class SimpleRouter(TreeTask):

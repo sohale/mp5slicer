@@ -2,7 +2,7 @@ import math
 
 import numpy
 
-from slicer.commons.utils import distance
+from mp5slicer.commons.utils import distance
 
 
 def linear_infill(spacing, x_or_y, bounding_box):

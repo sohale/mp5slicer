@@ -1,6 +1,6 @@
-import slicer.config.config as config
+import mp5slicer.config.config as config
 import numpy as np
-from slicer.commons.utils import distance as calulate_distance
+from mp5slicer.commons.utils import distance as calulate_distance
 
 
 def shorten_last_line(line_group, shorten_length):

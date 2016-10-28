@@ -1,8 +1,8 @@
 import math
 
-import slicer.config.config as config
-import slicer.config.printer_config as printer_config
-from slicer.commons.utils import distance as calulate_distance
+import mp5slicer.config.config as config
+import mp5slicer.config.printer_config as printer_config
+from mp5slicer.commons.utils import distance as calulate_distance
 
 ############################ GCodeEnvironment Taken from old slicer without any changes ###########################
 
