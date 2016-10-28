@@ -25,10 +25,7 @@ RUN pip3 install --upgrade setuptools
 
 ADD ./implisolid /usr/src/install/implisolid/
 
-
-
-
-WORKDIR /usr/src/install/implisolid/lib/
+WORKDIR /usr/include/
 RUN apt-get install mercurial -y
 RUN hg clone https://bitbucket.org/eigen/eigen
 WORKDIR /usr/src/install/implisolid/pyInterface/
