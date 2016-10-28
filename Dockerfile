@@ -31,7 +31,7 @@ ADD ./implisolid /usr/src/install/implisolid/
 WORKDIR /usr/src/install/implisolid/lib/
 RUN apt-get install mercurial -y
 RUN hg clone https://bitbucket.org/eigen/eigen
-WORKDIR /usr/src/install/implisolid/
+WORKDIR /usr/src/install/implisolid/pyInterface/
 RUN python3 /usr/src/install/implisolid/pyInterface/setupPyInterface.py install
 
 
