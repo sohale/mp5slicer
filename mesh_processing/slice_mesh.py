@@ -6,15 +6,15 @@ from slicer.commons.utils import polygonize_layers_from_trimed_dict, \
 
 
 def move_to_center(mesh):
-    import slicer.config.printer_config as printer_config
+    import slicer.config.config as config
     bounding_box = mesh.bounding_box()
     platform_center = {}
-    if printer_config.origin == "center":
+    if config.ORIGIN == "center":
         platform_center["x"] = 0
         platform_center["y"] = 0
     else:
-        platform_center["x"] = printer_config.build_platformX / 2
-        platform_center["y"] = printer_config.build_platformY / 2
+        platform_center["x"] = config.BUILD_PLATFORMX / 2
+        platform_center["y"] = config.BUILD_PLATFORMX / 2
     objet_center = {}
     objet_center["x"] = (bounding_box.xmax - bounding_box.xmin)/2
     objet_center["y"] = (bounding_box.ymax - bounding_box.ymin)/2

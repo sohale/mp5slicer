@@ -127,15 +127,22 @@ class ConfigFactoryNextGeneration(object):
 
     def set_config_attributes(self):
         # set config attributes
-        import slicer.config.base_config as config
+        import slicer.config.base_config as base_config
+        import slicer.config.config as config
+
         for arg in self.merged_config_dict:
-            setattr(config, arg, self.merged_config_dict[arg])
+            if hasattr(config, arg):
+                setattr(base_config, arg, self.merged_config_dict[arg])
+            else:
+                raise ConfigurationError('Try to set a unknown configuration {}.'.format(arg))
+
 
         # move this to somewhere else
-        setattr(config,
+        setattr(base_config,
                 'crossArea',
-                ((config.FILAMENT_DIAMETER/2.0)**2) * math.pi)  # 6.37939
+                ((base_config.FILAMENT_DIAMETER/2.0)**2) * math.pi)  # 6.37939
 
+        pass
 
 class PrinterConfig():
     def __init__(self):
@@ -155,7 +162,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-
-
-
