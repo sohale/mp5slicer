@@ -8,6 +8,18 @@ from mp5slicer.config.config import ConfigurationError
 import json
 import math
 
+
+printer_files_dict = {0: "mp5slicer/config/config_0.mp5",
+           1: "mp5slicer/config/config_1.mp5",
+           2: "mp5slicer/config/config_2.mp5"}
+filament_files_dict = {0: "mp5slicer/config/filament.mp5",
+            1: "mp5slicer/config/filament_0.mp5",
+            2: "mp5slicer/config/filament_1.mp5"}
+default_files_dict = {0: "mp5slicer/config/default.mp5",
+           1: "mp5slicer/config/default_0.mp5",
+           2: "mp5slicer/config/default_1.mp5"}
+
+
 class ConfigFactory(object):
 
     def __init__(self, json_conf=None, dict_conf=None):
@@ -21,7 +33,7 @@ class ConfigFactory(object):
             json_file.close()
             arg_dictionnary = json.loads(json_str)
 
-        import mp5slicer.config.base_config as config
+        import slicer.config.base_config as config
         for arg in arg_dictionnary:
             if hasattr(config, arg):
                 setattr(config, arg, arg_dictionnary[arg])
@@ -35,10 +47,10 @@ class ConfigFactory(object):
 
 class ConfigFactoryNextGeneration(object):
 
-    def __init__(self, config_names, config_priority, *configs_paths):
+    def __init__(self, config_names, config_priority, *configs_paths_or_dicts):
         self.config_names = config_names
         self.config_priority = config_priority
-        self.config_paths = configs_paths
+        self.config_paths_or_dicts = configs_paths_or_dicts
         self.config_priority_list = self.get_config_priority()
         self.merged_config_dict = self.merge_config_dict()
 
@@ -110,10 +122,16 @@ class ConfigFactoryNextGeneration(object):
         config_dicts = {}
 
         counter = 0
-        for each_config_path in self.config_paths:
+        for each_config_path_or_dict in self.config_paths_or_dicts:
             current_config_name = self.config_names[counter]
-            with open(each_config_path) as data_file:
-                config_dicts[current_config_name] = json.load(data_file)['printerSettings']
+            if isinstance(each_config_path_or_dict, dict):
+                if 'printerSettings' in each_config_path_or_dict:
+                    config_dicts[current_config_name] = each_config_path_or_dict['printerSettings']
+                else:
+                    config_dicts[current_config_name] = each_config_path_or_dict
+            else:
+                with open(each_config_path_or_dict) as data_file:
+                    config_dicts[current_config_name] = json.load(data_file)['printerSettings']
             counter += 1
 
         merged_config_dict = {}
@@ -144,19 +162,36 @@ class ConfigFactoryNextGeneration(object):
 
         pass
 
-class PrinterConfig():
-    def __init__(self):
-        pass
+def run_ConfigFactory_on_MP5_file(mp5_file):
+    
+    printer_file_path = printer_files_dict[mp5_file['printerSettings']['PRINTER']]
+    filament_file_path = filament_files_dict[mp5_file['printerSettings']['FILAMENT']]
+    default_file_path = default_files_dict[mp5_file['printerSettings']['DEFAULT']]
+
+    printer_setting_dict = mp5_file['printerSettings']
+    cleaned_printer_setting_dict = {
+        i:printer_setting_dict[i] for i in printer_setting_dict if i not in
+        ['PRINTER', 'FILAMENT', 'DEFAULT']
+        }
+
+    ConfigFactoryNextGeneration(['default', 'user', 'printer', 'filament', 'print_from_file'],
+                            [4, 1, 2, 3, 0],
+                            default_file_path,
+                            cleaned_printer_setting_dict,
+                            printer_file_path,
+                            filament_file_path,
+                            {'TO_FILE': True})
 
 
 
-def main():
-    ConfigFactoryNextGeneration(['default', 'user', 'printer', 'filament'],
-                                [3, 0, 1, 2],
-                                'mp5slicer/config/base_config_0.mp5',
-                                'mp5slicer/config/test_user_config.mp5',
-                                'mp5slicer/config/test_optimized_printer_config_0.mp5',
-                                'mp5slicer/config/test_optimized_filament_config_0.mp5')
+
+# def main():
+#     ConfigFactoryNextGeneration(['default', 'user', 'printer', 'filament'],
+#                                 [3, 0, 1, 2],
+#                                 'slicer/config/default.mp5',
+#                                 {'OUTER_BOUNDARY_COAST_AT_END_LENGTH':23},
+#                                 'slicer/config/config_0.mp5',
+#                                 'slicer/config/filament.mp5')
 
     # print(get_config_priority(['default', 'user', 'printer', 'filament'], [3, 0, 1, 2]))
 

@@ -1,12 +1,12 @@
 from mp5slicer.mesh_processing.mesh_operations import Mesh as MPmesh
 from mp5slicer.mesh_processing.slice import adaptive_slicing, \
     slicer_from_mesh_as_dict
-from slicer.commons.utils import polygonize_layers_from_trimed_dict, \
+from mp5slicer.commons.utils import polygonize_layers_from_trimed_dict, \
     scale_list_to_clipper
 
 
 def move_to_center(mesh):
-    import slicer.config.config as config
+    import mp5slicer.config.config as config
     bounding_box = mesh.bounding_box()
     platform_center = {}
     if config.ORIGIN == "center":
@@ -27,7 +27,7 @@ def move_to_center(mesh):
 
 def slice_mesh(stl_mesh):
 
-    import slicer.config.config as config
+    import mp5slicer.config.config as config
 
     this_mesh = MPmesh(stl_mesh.vectors, fix_mesh=True)
 

@@ -7,7 +7,12 @@
 !gcode_writer/endcode.gcode
 
 config/config.json
+*.mp5
 run.command
 logs
 
 overhang_test_stl
+
+config/config_0.mp5
+config/config_1.mp5
+config/config_2.mp5
