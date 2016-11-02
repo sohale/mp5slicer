@@ -158,7 +158,7 @@ class ConfigFactoryNextGeneration(object):
 
         pass
 
-def run_ConfigFactory_on_MP5_file(mp5_file):
+def run_ConfigFactory_on_MP5_file(mp5_file, to_file):
     
     printer_file_path = printer_files_dict[mp5_file['printerSettings']['PRINTER']]
     filament_file_path = filament_files_dict[mp5_file['printerSettings']['FILAMENT']]
@@ -176,7 +176,7 @@ def run_ConfigFactory_on_MP5_file(mp5_file):
                             cleaned_printer_setting_dict,
                             printer_file_path,
                             filament_file_path,
-                            {'TO_FILE': False})
+                            {'TO_FILE': to_file})
 
 
 

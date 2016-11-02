@@ -56,7 +56,7 @@ def print_from_mp5_file():
     with open(mp5_file_path) as data_file:
         mp5_file = json.load(data_file)
 
-    run_ConfigFactory_on_MP5_file(mp5_file)
+    run_ConfigFactory_on_MP5_file(mp5_file, True)
 
 
     import mp5slicer.config.config as config
@@ -74,7 +74,7 @@ def print_from_mp5():
     mp5_as_json = "".join(sys.stdin.readlines())
     mp5 = json.loads(mp5_as_json)
 
-    run_ConfigFactory_on_MP5_file(mp5)
+    run_ConfigFactory_on_MP5_file(mp5, False)
     import mp5slicer.config.config as config
     config.reset()
 
