@@ -23,7 +23,8 @@ def build_geometry(mp5):
         stl = m2stl_mesh(verts, faces)
         stls.append(stl.data)
 
-        return mesh.Mesh(np.concatenate(stls))
+    mesh.Mesh(np.concatenate(stls)).save('test.stl')
+    return mesh.Mesh(np.concatenate(stls))
 
 
 def m2stl_mesh(verts, faces):

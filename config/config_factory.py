@@ -9,15 +9,11 @@ import json
 import math
 
 
-printer_files_dict = {0: "mp5slicer/config/config_0.mp5",
-           1: "mp5slicer/config/config_1.mp5",
-           2: "mp5slicer/config/config_2.mp5"}
-filament_files_dict = {0: "mp5slicer/config/filament.mp5",
-            1: "mp5slicer/config/filament_0.mp5",
-            2: "mp5slicer/config/filament_1.mp5"}
-default_files_dict = {0: "mp5slicer/config/default.mp5",
-           1: "mp5slicer/config/default_0.mp5",
-           2: "mp5slicer/config/default_1.mp5"}
+printer_files_dict = {'Ultimaker Origin': 'mp5slicer/config/config_0.mp5',
+                      'Ultimaker 2': 'mp5slicer/config/config_1.mp5'}
+filament_files_dict = {'PLA': 'mp5slicer/config/filament.mp5',
+                       'ABS': 'mp5slicer/config/filament.mp5'}
+default_files_dict = {0: 'mp5slicer/config/default.mp5'}
 
 
 class ConfigFactory(object):
@@ -180,7 +176,7 @@ def run_ConfigFactory_on_MP5_file(mp5_file):
                             cleaned_printer_setting_dict,
                             printer_file_path,
                             filament_file_path,
-                            {'TO_FILE': True})
+                            {'TO_FILE': False})
 
 
 

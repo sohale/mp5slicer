@@ -62,9 +62,6 @@ def print_from_mp5_file():
     import mp5slicer.config.config as config
     config.reset()
 
-    # combined_mesh = build_geometry(mp5_file)
-    # print_mesh(combined_mesh, "mp5")
-
     combined_mesh = build_geometry(mp5_file)
     print_mesh(combined_mesh, "mp5")
 
@@ -72,5 +69,19 @@ def get_stl_from_file(stl_file_name):
     from stl import mesh
     return mesh.Mesh.from_file(stl_file_name)
 
+def print_from_mp5():
+
+    mp5_as_json = "".join(sys.stdin.readlines())
+    mp5 = json.loads(mp5_as_json)
+
+    run_ConfigFactory_on_MP5_file(mp5)
+    import mp5slicer.config.config as config
+    config.reset()
+
+    combined_mesh = build_geometry(mp5)
+    print_mesh(combined_mesh, "mp5")
+
+
+
 if __name__ == '__main__':
-    print_from_mp5_file()
+    print_from_mp5()
