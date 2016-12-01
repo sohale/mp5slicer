@@ -18,7 +18,7 @@ RUN wget -q -S -O - 'http://downloads.sourceforge.net/project/boost/boost/1.61.0
 RUN apt-get install python3 -y
 RUN apt-get -y install python3-pip
 RUN pip3 install --upgrade pip
-ADD ./mp5slicer/requirements.txt /usr/src/install/
+ADD ./requirements.txt /usr/src/install/
 RUN pip3 install -r /usr/src/install/requirements.txt
 RUN apt-get install python3-mysql.connector
 RUN pip3 install --upgrade setuptools
