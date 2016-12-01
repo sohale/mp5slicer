@@ -23,6 +23,7 @@ RUN pip3 install -r /usr/src/install/requirements.txt
 RUN apt-get install python3-mysql.connector
 RUN pip3 install --upgrade setuptools
 
+
 ADD ./implisolid /usr/src/install/implisolid/
 
 WORKDIR /usr/include/
@@ -34,7 +35,7 @@ RUN python3 /usr/src/install/implisolid/pyInterface/setupPyInterface.py install
 
 
 
-ADD ./mp5slicer/ /usr/src/app/mp5slicer/
+ADD . /usr/src/app/mp5slicer/
 WORKDIR /usr/src/app
 
 CMD ["python3", "./mp5slicer/wrapper.py"]

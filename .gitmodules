@@ -1,0 +1,3 @@
+[submodule "implisolid"]
+	path = implisolid
+	url = git@github.com:sohale/implisolid.git
