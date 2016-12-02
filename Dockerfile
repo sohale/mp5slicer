@@ -33,8 +33,16 @@ RUN hg clone https://bitbucket.org/eigen/eigen
 RUN apt-get install git -y
 RUN git clone https://github.com/pybind/pybind11.git
 
+ADD ~/.ssh/id_rsa /tmp/
+RUN ssh-agent /tmp
+ADD ~/.ssh/known_hosts root/.ssh/known_hosts
+
+
 WORKDIR /usr/src/install
 RUN git clone git@github.com:sohale/implisolid.git
+
+RUN rm /tmp/id_rsa
+
 WORKDIR /usr/src/install/implisolid/pyInterface/
 RUN python3 /usr/src/install/implisolid/pyInterface/setupPyInterface.py install
 
