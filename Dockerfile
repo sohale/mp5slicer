@@ -34,7 +34,7 @@ RUN apt-get install git -y
 RUN git clone https://github.com/pybind/pybind11.git
 
 WORKDIR /usr/src/install
-RUN git clone https://github.com/sohale/mp5-private.git
+RUN git clone git@github.com:sohale/implisolid.git
 WORKDIR /usr/src/install/implisolid/pyInterface/
 RUN python3 /usr/src/install/implisolid/pyInterface/setupPyInterface.py install
 
