@@ -24,13 +24,19 @@ RUN apt-get install python3-mysql.connector
 RUN pip3 install --upgrade setuptools
 
 
-ADD ./implisolid /usr/src/install/implisolid/
+
 
 WORKDIR /usr/include/
 RUN apt-get install mercurial -y
 RUN hg clone https://bitbucket.org/eigen/eigen
+
+RUN apt-get install git -y
+git clone https://github.com/pybind/pybind11.git
+
+ADD ./implisolid /usr/src/install/implisolid/
 WORKDIR /usr/src/install/implisolid/pyInterface/
 RUN python3 /usr/src/install/implisolid/pyInterface/setupPyInterface.py install
+
 
 
 
