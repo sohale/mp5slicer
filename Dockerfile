@@ -33,7 +33,8 @@ RUN hg clone https://bitbucket.org/eigen/eigen
 RUN apt-get install git -y
 RUN git clone https://github.com/pybind/pybind11.git
 
-ADD ./implisolid /usr/src/install/implisolid/
+WORKDIR /usr/src/install
+RUN git clone https://github.com/sohale/mp5-private.git
 WORKDIR /usr/src/install/implisolid/pyInterface/
 RUN python3 /usr/src/install/implisolid/pyInterface/setupPyInterface.py install
 
