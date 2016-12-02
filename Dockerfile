@@ -31,7 +31,7 @@ RUN apt-get install mercurial -y
 RUN hg clone https://bitbucket.org/eigen/eigen
 
 RUN apt-get install git -y
-git clone https://github.com/pybind/pybind11.git
+RUN git clone https://github.com/pybind/pybind11.git
 
 ADD ./implisolid /usr/src/install/implisolid/
 WORKDIR /usr/src/install/implisolid/pyInterface/
