@@ -54,7 +54,7 @@ def init_logging():
 
 def get_django_route():
     """Returns the global django route."""
-    return 'http://{}'.format('dockerhost')
+    return 'http://{}'.format('django')
     # return 'http://{}'.format('127.0.0.1:8000')
 
 def get_django_slices_route():
