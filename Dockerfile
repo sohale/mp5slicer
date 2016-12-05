@@ -38,6 +38,7 @@ RUN git clone https://github.com/pybind/pybind11.git
 #WORKDIR /usr/src/install
 #RUN git clone git@github.com:sohale/implisolid.git
 
+ADD ./implisolid /usr/src/install/implisolid/
 WORKDIR /usr/src/install/implisolid/pyInterface/
 RUN python3 /usr/src/install/implisolid/pyInterface/setupPyInterface.py install
 
