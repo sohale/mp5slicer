@@ -54,8 +54,8 @@ def init_logging():
 
 def get_django_route():
     """Returns the global django route."""
-    return 'http://{}'.format('django')
-    # return 'http://{}'.format('127.0.0.1:8000')
+    return 'http://{}'.format('nginx')
+    #return 'http://{}'.format('127.0.0.1:80')
 
 def get_django_slices_route():
     """Returns the django slices api route."""
@@ -76,6 +76,7 @@ def get_authentication(username='Admin',
     @param password: Password of the user.
     @return: Authorization headers.
     """
+    print(password)
     auth_token = requests.post(get_django_route() + '/o/token/',
                                headers={'Content-Type':
                                     'application/x-www-form-urlencoded'},
@@ -147,6 +148,7 @@ def slice_mp5(mp5_data, output_filename, error_filename):
                                error_filename.format(error_filename)),
                   'wb') as f:
             logger.error("Slicing failed, traceback in {}.".format(error_filename))
+            logger.error(err)
             f.write(err)
 
         output_file.close()

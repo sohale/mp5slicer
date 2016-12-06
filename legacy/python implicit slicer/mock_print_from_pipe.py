@@ -6,7 +6,7 @@ import sys
 sys.path.append(os.path.split(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))))[0])
 
 from mp5slicer.config.config_factory import ConfigFactory
-from mp5slicer.Print_pipeline import print_mesh
+from mp5slicer.legacy.Print_pipeline import print_mesh
 from mp5slicer.shapes.mp5tostl import puppy_magic
 
 
