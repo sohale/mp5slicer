@@ -54,7 +54,7 @@ def init_logging():
 
 def get_django_route():
     """Returns the global django route."""
-    return 'http://{}'.format('nginx')
+    return 'http://{}'.format('django:8080')
     #return 'http://{}'.format('127.0.0.1:80')
 
 def get_django_slices_route():
@@ -76,9 +76,7 @@ def get_authentication(username='Admin',
     @param password: Password of the user.
     @return: Authorization headers.
     """
-    print(password)
-    print(username)
-    print(password)
+
     auth_token = requests.post(get_django_route() + '/o/token/',
                                headers={'Content-Type':
                                     'application/x-www-form-urlencoded'},
