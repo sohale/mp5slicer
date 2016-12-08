@@ -77,6 +77,8 @@ def get_authentication(username='Admin',
     @return: Authorization headers.
     """
     print(password)
+    print(username)
+    print(password)
     auth_token = requests.post(get_django_route() + '/o/token/',
                                headers={'Content-Type':
                                     'application/x-www-form-urlencoded'},
