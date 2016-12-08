@@ -88,7 +88,9 @@ def get_authentication(username='Admin',
                                    'password': password,
                                    'client_id': 'toto'
                                }
-                               ).json()
+                               )
+    print(auth_token)
+    auth_token = auth_token.json()
 
     return {'Authorization': auth_token['token_type'] + ' ' \
                 + auth_token['access_token']}
