@@ -51,6 +51,6 @@ def to_json_mc_params(bbox):
     bb["zmin"] = bbox.min.z.item(0)
     bb["zmax"] = bbox.max.z.item(0)
     ignore_root_matrix = False
-    mc_params = {"resolution": 200, "box": bb, "ignore_root_matrix": ignore_root_matrix}
+    mc_params = {"resolution": 40, "box": bb, "ignore_root_matrix": ignore_root_matrix}
     mc_params = json.dumps(mc_params)
     return mc_params
