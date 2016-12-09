@@ -51,6 +51,6 @@ def to_json_mc_params(bbox):
     bb["zmin"] = bbox.min.z.item(0)
     bb["zmax"] = bbox.max.z.item(0)
     ignore_root_matrix = False
-    mc_params = {"resolution": 40, "box": bb, "ignore_root_matrix": ignore_root_matrix}
+    mc_params = {"resolution": 40, "box": bb, "ignore_root_matrix": ignore_root_matrix,"vresampl":{"iters":1,"c":0.4},"projection":{"enabled":1},"qem":{"enabled":1},"subdiv":{"enabled":0},"overall_repeats":1,"debug":{"enabled_pointsets":0,"post_subdiv_noise":0}}
     mc_params = json.dumps(mc_params)
     return mc_params
