@@ -1,8 +1,8 @@
 # MP5 Slicer
-© 2016. GPL3
-
 A fully functional slicer software for 3D printing using mp5 standard.
-Developed as part of MP5 Project ( [MyMiniFactory Ltd](https://www.myminifactory.com) )
+Developed as part of MP5 Project by [MyMiniFactory Ltd](https://www.myminifactory.com).
+
+© 2016. MyMinifactory Ltd. (GPL3)
 
 ![Some actual objects 3D-printed using the **MP5 Slicer** ~ December 2016](https://repository-images.githubusercontent.com/72203031/dae5c53f-ccea-47a8-acef-d0dcdd1b2e63)
 Figure: Two actual objects 3D-printed using the **MP5 Slicer** (~ Dec. 2016) on Ultimaker 2.
@@ -31,11 +31,7 @@ All those parameters are stored in the [**mp5 file format**](http://sohale.githu
 
 [mp5 Slicer](https://github.com/sohale/mp5slicer) is the third iteration in a line of slicers we developed. The source code for the two ohters is also available.
 
-Contact email:
-<!-- not -->
-`sohale`
-<!-- .. -->
-at `g`.
+Contact email: <!-- not --> `sohale` <!-- .. --> at `g`.
 
 © 2016.
 GPL3 License.
