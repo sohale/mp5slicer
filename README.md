@@ -29,9 +29,10 @@ We experimented with various techniques, adjusting parameters such as speed of m
 
 All those parameters are stored in the [**mp5 file format**](http://sohale.github.io/demos/implisolid-build/demo1/mp5_json_code.html) that we deveoloped for 3D Printing( see a sample [mp5](http://sohale.github.io/demos/implisolid-build/demo1/mp5_json_code.html) file).
 
-[mp5 Slicer](https://github.com/sohale/mp5slicer) is the third iteration in a line of slicers we developed. The source code for the two ohters is also available.
+[MP5 Slicer](https://github.com/sohale/mp5slicer) is the third iteration in a line of slicers we developed.
+The source code for the two ohters is also available.
 
-Contact email: <!-- not --> `sohale` <!-- .. --> at `g`.
+Contact: <!-- not --> `sohale` <!-- .. --> at `g`. (Sohail Siadatnejad)
 
 © 2016.
 GPL3 License.
