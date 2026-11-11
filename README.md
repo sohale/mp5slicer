@@ -1,6 +1,10 @@
+Fully functional **Direct Slicing** released in 2016.
+
 # MP5 Slicer
+
 A fully functional slicer software for 3D printing using mp5 standard.
-Developed as part of MP5 Project by [MyMiniFactory Ltd](https://www.myminifactory.com).
+Developed as part of MP5 Project by Sohail Siadatnejad
+and [MyMiniFactory Ltd](https://www.myminifactory.com).
 
 © 2016. MyMinifactory Ltd. (GPL3)
 
